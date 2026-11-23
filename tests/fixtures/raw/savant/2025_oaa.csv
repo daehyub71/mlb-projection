@@ -1,0 +1,4 @@
+﻿"last_name, first_name","player_id","display_team_name","year","primary_pos_formatted","fielding_runs_prevented","outs_above_average","outs_above_average_infront","outs_above_average_lateral_toward3bline","outs_above_average_lateral_toward1bline","outs_above_average_behind","outs_above_average_rhh","outs_above_average_lhh","actual_success_rate_formatted","adj_estimated_success_rate_formatted","diff_success_rate_formatted"
+"Devers, Rafael","646240","Giants","","1B","0",-1,1,-1,-1,1,1,-2,"67%","68%","-1%"
+"Hernández, Enrique","571771","Dodgers","","3B","4",5,2,0,2,1,2,3,"78%","75%","3%"
+"Merrill, Jackson","701538","Padres","","CF","2",3,-1,3,0,1,0,2,"91%","90%","1%"

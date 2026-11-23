@@ -1,0 +1,57 @@
+{
+ "meta": {
+  "schema_version": "1",
+  "generated_at": "2026-11-24T00:00:00Z",
+  "raw_collected_at": "2026-11-23T12:00:00Z",
+  "params_version": "v1",
+  "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "target_season": 2027,
+  "input_seasons": [
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "sources": [
+   {
+    "name": "MLB Stats API",
+    "url": "https://statsapi.mlb.com"
+   },
+   {
+    "name": "Baseball Savant",
+    "url": "https://baseballsavant.mlb.com"
+   }
+  ],
+  "disclaimer": "재미로 보는 예측입니다."
+ },
+ "final_test": null,
+ "rows": [
+  {
+   "target_season": 2025,
+   "role": "bat",
+   "model": "weighted",
+   "metric": "ops",
+   "group": "all",
+   "n": 412,
+   "mae": 0.066,
+   "mae_weighted": 0.071,
+   "baseline_mae_league": 0.073,
+   "baseline_mae_prev": 0.09,
+   "excluded": 1108
+  },
+  {
+   "target_season": 2025,
+   "role": "bat",
+   "model": "weighted",
+   "metric": "pa",
+   "group": "all",
+   "n": 1520,
+   "mae": 131.0,
+   "mae_weighted": null,
+   "baseline_mae_league": null,
+   "baseline_mae_prev": 128.5,
+   "excluded": 0
+  }
+ ]
+}

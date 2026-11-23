@@ -1,0 +1,36 @@
+# 원본·중간 데이터 — 커밋 금지 (SPEC D6·N4, MLBAM 고지 E13)
+data/raw/
+data/interim/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
+
+# 비밀값
+.env
+.env.*
+!.env.example
+
+# OS·편집기
+.DS_Store
+.idea/
+.vscode/
+
+# Claude Code 로컬 설정
+.claude/settings.local.json

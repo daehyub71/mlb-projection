@@ -1,0 +1,86 @@
+{
+ "meta": {
+  "schema_version": "1",
+  "generated_at": "2026-11-24T00:00:00Z",
+  "raw_collected_at": "2026-11-23T12:00:00Z",
+  "params_version": "v1",
+  "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "target_season": 2027,
+  "input_seasons": [
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "sources": [
+   {
+    "name": "MLB Stats API",
+    "url": "https://statsapi.mlb.com"
+   },
+   {
+    "name": "Baseball Savant",
+    "url": "https://baseballsavant.mlb.com"
+   }
+  ],
+  "disclaimer": "재미로 보는 예측입니다."
+ },
+ "player": {
+  "player_id": 2,
+  "name": "Sample Pitcher",
+  "birth_date": null,
+  "primary_position": "P",
+  "bats": "L",
+  "throws": "L",
+  "active": false,
+  "last_mlb_season": 2025
+ },
+ "bat": null,
+ "pit": {
+  "window": {
+   "input_first": 2024,
+   "input_last": 2025,
+   "n_seasons": 2
+  },
+  "sample_bf": 402,
+  "sample_ip": 95.7,
+  "projection": {
+   "ip": 41.3,
+   "era": 4.05,
+   "k_bb_pct": 14.2
+  },
+  "prev": null,
+  "league_baseline": {
+   "era": 4.15,
+   "k_bb_pct": 13.6
+  },
+  "group_error": {
+   "group": "seasons_1_2",
+   "mae": {
+    "era": null,
+    "ip": 29.5,
+    "k_bb_pct": 3.8
+   }
+  },
+  "history": [
+   {
+    "season": 2025,
+    "age": 30,
+    "team_name": null,
+    "is_short_season": false,
+    "g": 38,
+    "gs": 0,
+    "ip": 40.333,
+    "era": 3.79,
+    "fip": 3.91,
+    "k_pct": 24.0,
+    "bb_pct": 9.1,
+    "k_bb_pct": 14.9,
+    "xera": 3.95,
+    "xwoba_against": 0.301,
+    "whiff_pct": 27.3
+   }
+  ]
+ },
+ "fielding": []
+}

@@ -1,0 +1,209 @@
+# PLAN.md — mlb-projection
+
+> **상태: v0.1 확정** (2026-11-24 사용자 확인). 기준 문서는 `docs/SPEC.md` v0.2.1이다. 문서끼리 다르면 SPEC이 기준이다.
+> 결정 P1~P4는 2026-11-23 사용자 답이다. 작업 항목과 진도는 `docs/TASKS.md`에 있다.
+
+---
+
+## 1. 계획 결정
+
+| ID | 항목 | 결정 | 근거 |
+|---|---|---|---|
+| P1 | 패키지 | 아래 §6 목록을 승인받았다. 목록에 없는 패키지를 추가할 때는 다시 확인받는다 | 워크스페이스 의존성 규칙 |
+| P2 | DESIGN 시점 | M1(수집)이 끝나면 M5(DESIGN)를 시작해 M2~M4와 **병행**한다. 웹용 JSON 형식은 M0에서 먼저 고정한다. 화면 구현(M6)은 시안 합의와 M4가 모두 끝난 뒤에 한다 | 사용자가 시안을 검토하는 시간이 생겨 전체 기간이 짧아진다 |
+| P3 | Workflow 강도 | 마일스톤마다 **모듈별 3단(Red 테스트 작성 → Green 구현 → Refactor 리뷰) + 독립 검증 1명**. 워크플로당 에이전트는 10명 이하다. 계약 고정·통합·TASKS 갱신·사용자 보고는 메인 세션이 맡는다(§4) | SPEC D4 |
+| P4 | 테스트 픽스처 | **실제 응답에서 잘라 쓴다.** 선수 수는 파일당 12명 이하로 제한한다. 출처·받은 날짜·선택한 선수와 이유를 `tests/fixtures/SOURCE.md`에 적는다. 실제로 생기지 않는 경계 사례(K=0 등)는 `tests/fixtures/synthetic/`에 따로 만들어 섞지 않는다 | 사용자 결정. 공개 저장소에 MLB 원본 일부가 들어가므로 규모를 작게 유지한다(SPEC E13) |
+
+---
+
+## 2. 아키텍처
+
+### 2-1. 디렉토리 구조
+
+```
+mlb-projection/
+├── CLAUDE.md                  # 프로젝트 규칙·실행·검증 명령 (M0)
+├── README.md / README_KO.md   # 첫 푸시부터 (SPEC D22), M7에서 완성
+├── pyproject.toml             # 패키지 정의 + ruff·mypy·pytest 설정
+├── requirements.txt           # pandas
+├── requirements-dev.txt       # pytest, ruff, mypy, pandas-stubs
+├── mlbproj/                   # 파이프라인 패키지
+│   ├── contracts.py           # 열 정의, 행 타입, 상수 (메인이 고정)
+│   ├── collect/  http.py · statsapi.py · savant.py
+│   ├── validate.py            # F2 완전성 검사
+│   ├── clean/    players.py · batting.py · pitching.py · fielding.py
+│   ├── cohort.py              # F4 예측 대상, F5 사용 기간
+│   ├── models/   league.py · baseline.py · weighted.py · playing_time.py · extended.py
+│   ├── evaluate.py            # F10 MAE·그룹·기준선
+│   ├── tune.py                # 2024·2025로 파라미터 조정
+│   ├── export.py              # CSV + 웹 JSON
+│   └── cli.py                 # python -m mlbproj <명령>
+├── contracts/web-data.schema.json   # 파이프라인·웹이 함께 쓰는 JSON 계약
+├── config/params_v1.json      # 고정 파라미터 (M3 끝에 커밋)
+├── tests/  fixtures/ · fixtures/synthetic/ · live/ · test_*.py
+├── data/raw/                  # 원본 (gitignore, SPEC D6)
+├── data/interim/              # 정제 표 (gitignore, 언제든 다시 만든다)
+├── data/out/                  # 예측·검증 CSV (커밋)
+├── web/                       # Next.js 16 + Astryx (public/data/*.json, public/images/)
+└── docs/  SPEC · PLAN · DESIGN · TASKS · images/
+```
+
+![모듈 구조: contracts가 collect·clean·export·web의 형식을 고정하고, collect → validate → clean → cohort → models → evaluate → export 순으로 흐른다](images/plan-architecture.png)
+
+*그림 1. 모듈과 데이터 저장 위치. 점선 원통(`data/raw`·`data/interim`)은 커밋하지 않는다. `contracts`는 메인 세션이 고정하는 공유 계약이고, 에이전트는 읽기만 한다. 모든 단계는 `cli` 명령으로 실행한다.*
+
+### 2-2. 모듈 의존관계와 계약
+
+| 모듈 | 입력 | 출력 | 의존 |
+|---|---|---|---|
+| `collect.http` | URL | 응답 바이트 (캐시·재시도·1초 간격·일반 UA, SPEC N3) | — |
+| `collect.statsapi` | 시즌, 역할 | `data/raw/statsapi/{season}_{bat\|pit}.json`, `people_{batch}.json` | http |
+| `collect.savant` | 시즌, 종류 | `data/raw/savant/{season}_{batter\|pitcher\|oaa\|frv}.csv` | http |
+| `validate` | raw 한 시즌 | 검사 결과(통과/실패 + 사유). 실패하면 이후 단계를 막는다 | contracts |
+| `clean.*` | 통과한 raw | `players`, `batting_seasons`, `pitching_seasons`, `fielding_seasons` (SPEC §6) | contracts, validate |
+| `cohort` | 정제 표, 목표 시즌 Y | 역할별 대상 선수와 사용 시즌 목록(F4·F5) | clean |
+| `models.league` | 정제 표 | 시즌별 리그 평균·FIP 상수 | clean |
+| `models.baseline` | cohort | 직전 시즌 예측(F6) | league |
+| `models.weighted` | cohort, params | 성분 가중 + 리그 평균 회귀 비율 예측(F7) | league |
+| `models.playing_time` | cohort, 학습 시즌 | PA·IP 예측(F8) | league |
+| `models.extended` | 위 + 나이·Statcast | 확장 예측(F9), ERA 구성 지표 모델(D11) | weighted, playing_time |
+| `evaluate` | 예측, 실제 | MAE 표(모델 × 지표 × 그룹, 기준선, 제외 건수) | models |
+| `export` | 예측, 검증, 과거 기록 | `data/out/*.csv`, `web/public/data/*.json` | contracts |
+
+**계약 고정 방식.** 메인 세션이 마일스톤을 시작하기 전에 다음을 커밋한다.
+1. `contracts.py`의 열 이름·타입
+2. 해당 마일스톤 모듈의 **함수 시그니처 스텁**(본문은 `raise NotImplementedError`)
+3. 픽스처
+
+그래서 Red 단계의 테스트는 import 오류가 아니라 실제 단언으로 실패한다. 웹과 공유하는 계약은 `contracts/web-data.schema.json` 하나다. 파이프라인 테스트는 `export` 결과를 이 스키마로 검사하고, 웹은 같은 스키마에서 TypeScript 타입을 만든다.
+
+### 2-3. 모델 설계 요점
+
+| 대상 | 방식 | 파라미터 |
+|---|---|---|
+| 타자 비율 | 성분(1B·2B·3B·HR·BB·HBP·SF·AB per PA)을 시즌 가중합한다. 성분마다 `(Σw·count + R·리그율) / (Σw·PA + R)`로 회귀하고, 그 결과로 OBP·SLG·OPS·HR/PA를 계산한다 | 가중치 w1~w5(초기 5·4·3·2·1), 성분별 회귀 표본 R |
+| 투수 비율 | K·BB·HBP·HR per BF로 K−BB%를 계산한다. ERA 후보는 (a) 가중 ER/아웃 회귀 (b) 구성 지표 ERA(FIP식 + 리그 보정) (c) xERA 가중 중 MAE로 고른다(D11) | 같은 형식 + 후보 선택 |
+| 출전량 | 선형 모델 `PA_Y ~ PA_{Y−1}, PA_{Y−2}, 공백 시즌 수, (투수) GS/G`. 0 미만은 0으로 자른다. **목표 Y의 계수는 Y−1 이하 목표들로만 적합한다**(N2) | numpy 최소제곱(pandas에 포함). 2020 입력은 162/60 환산(D9) |
+| HR | 예상 PA × 예상 HR/PA | — |
+| 확장 | 나이 곡선, K%·BB%, Statcast(xwOBA·Barrel%·EV, 투수 xERA·Whiff%)를 성분 회귀식에 더한다. 2024·2025 MAE가 나아질 때만 채택한다 | 항목별 채택 여부 |
+
+**파라미터 고정 절차.** `tune`은 목표 2024·2025만 읽는다. 조정이 끝나면 `config/params_v1.json`을 만들고, 그 해시를 TASKS에 적은 뒤 커밋한다. `final-test --target 2026`은 파라미터 파일이 커밋된 상태가 아니면 실행을 거부한다. 결과는 `data/out/final_test_2026.json`에 남긴다. 다시 실행하려면 `--rerun` 사유를 받아 기록에 남긴다(SPEC F10 "한 번만").
+
+### 2-4. CLI (SPEC D25 수동 갱신)
+
+```
+python -m mlbproj collect   --seasons 2019-2026      # F1
+python -m mlbproj validate  --seasons 2019-2026      # F2
+python -m mlbproj build                               # F3~F5 정제·대상
+python -m mlbproj backtest  --target 2024             # F10
+python -m mlbproj tune      --targets 2024,2025
+python -m mlbproj final-test --target 2026            # 고정 파라미터, 1회
+python -m mlbproj project   --target 2027             # F11
+python -m mlbproj export                              # CSV + 웹 JSON
+python -m mlbproj refresh                             # collect → … → export 한 번에 (수동 갱신)
+```
+
+---
+
+## 3. 마일스톤
+
+![로드맵: 데이터·모델 줄은 M0→M1→M2→M3→M4, 디자인·웹 줄은 M1 이후 M5를 병행하고 M4와 M5가 끝나면 M6→M7](images/plan-milestones.png)
+
+*그림 2. 마일스톤 순서. M5(DESIGN)는 M1이 끝난 뒤 M2~M4와 나란히 진행한다(P2). M6(웹)은 M4의 예측과 M5의 시안 합의가 모두 있어야 시작한다. 마름모는 마일스톤마다 사용자 확인을 받는 지점이다. 2026 최종 검증은 M4에서 한 번만 돌린다.*
+
+| 마일스톤 | 범위 (SPEC ID) | 실행 | 완료 기준 |
+|---|---|---|---|
+| **M0 기반·계약** | git 초기화, `.gitignore`(data/raw·interim·venv·node_modules·.next·out), **Homebrew Python 3.13 venv**(E17), 패키지 설치, ruff·mypy·pytest 설정, 프로젝트 CLAUDE.md, README 2종 골격, `contracts.py` + `web-data.schema.json`, 실제 데이터 픽스처(P4), 웹 골격 빌드 확인(Next.js + Astryx + Tailwind 정적 export, **화면 없이**), 깃허브 공개 저장소 생성·첫 푸시(사용자 확인 후) | 메인 단독 | `ruff`·`mypy`·`pytest`(빈 스위트)·웹 `build` 통과, 첫 푸시 |
+| **M1 수집·검증** | F1·F2, N3. 모듈 A `collect.http`+`statsapi`, B `collect.savant`(리더보드·OAA·FRV), C `validate` | Workflow | 2019~2026 원본 수집, 전 시즌 검증 통과. 수치가 SPEC E2·E6과 맞음(타자 Savant = API PA>0, 투수는 F2 ④ 포함 관계) |
+| **M2 정제·대상** | F3~F5, D8·D9·D21·D23. 모듈 A `clean.players`+`batting`, B `clean.pitching`, C `clean.fielding`+`cohort` | Workflow | 정제 표 재현 가능, 역할 판정 결과(2019·2021 투수 타석 제외)와 대상 규모를 기록. SPEC E9 대비 차이를 설명 |
+| **M3 모델·과거 검증** | F6~F8·F10, N2. 모듈 A `models.league`+`baseline`+`evaluate`(누설 테스트 포함), B `models.weighted`, C `models.playing_time` → 메인이 `tune` 실행 | Workflow + 메인 | 2024·2025 검증표. OPS·K−BB%가 리그 평균보다 낫다. `params_v1.json` 고정·커밋 |
+| **M4 확장·최종 예측** | F9·F11·D11·N1·N6. 모듈 A `models.extended`, B `export`(스키마 검사·크기 1MB), C `cli refresh`+재현성 테스트 → 메인이 **2026 최종 검증 1회** → 2027 예측 | Workflow + 메인 | v0.1 완료 기준 1·2(SPEC §7). 2026 결과를 그대로 사용자에게 보고 |
+| **M5 DESIGN** (M1 이후 병행) | IA → 와이어프레임 → Astryx 전용 테마 토큰 → Claude Design 디자인 시스템·캔버스 시안(예측표·선수 상세·검증·소개) → Codex 이미지(히어로·섹션·OG, D19) → O6 차트·O7 사진 결정 → **사용자 합의** | 메인 + Codex | `docs/DESIGN.md`에 합의 기록, 이미지 목록·프롬프트 기록 |
+| **M6 웹 구현** | F13~F17, N6·N9·N10. 메인이 앱 골격·테마·데이터 로더·스키마 타입을 고정한 뒤 모듈 A 예측표, B 선수 상세(차트·수비), C 검증·소개·공통(고지·출처·이미지·OG) | Workflow | 웹 lint·test·build 통과, 시안 대비 화면 확인(스크린샷), 명도 대비 검사 |
+| **M7 배포** | SPEC N7. 보안 리뷰·시크릿·`data/raw` 미추적 확인, 공개 저장소 산출물 점검, Vercel 배포(깃허브 연동 자동 배포), README 2종 완성(스크린샷) | 메인 | 공개 URL 동작, 워크스페이스 프로젝트 표 갱신 |
+
+---
+
+## 4. 오케스트레이션 (SPEC D4, P3)
+
+![마일스톤 Workflow 구조: 메인이 계약을 고정하고, 모듈 A·B·C가 각각 Red→Green→Refactor 3단을 병렬로 거친 뒤 독립 검증, 메인 통합, 사용자 확인](images/plan-workflow.png)
+
+*그림 3. 한 마일스톤의 Workflow. 모듈마다 테스트를 쓰는 에이전트와 구현하는 에이전트가 다르다. 레인끼리는 파일을 공유하지 않는다. 독립 검증 에이전트가 전체 검사를 돌린 뒤 메인 세션이 통합하고 TASKS를 갱신하고 사용자에게 보고한다.*
+
+| 단계 | 담당 | 하는 일 | 산출 (구조화 출력) |
+|---|---|---|---|
+| 계약 | 메인 | 열 정의·스텁·픽스처 커밋, 모듈별 파일 경계와 SPEC ID를 Workflow `args`로 넘긴다 | — |
+| Red | 테스트 작성 에이전트 | 맡은 모듈의 SPEC 요구사항으로 `tests/test_{module}.py`를 쓰고, 스텁에서 **실패하는 것을 확인**한다. 구현 파일은 건드리지 않는다 | 테스트 목록, 실패 출력 요약 |
+| Green | 구현 에이전트 | 테스트를 고치지 않고 통과시키는 최소 구현을 쓴다. 테스트가 틀렸다고 판단하면 고치지 않고 사유를 보고한다 | 변경 파일, 통과 출력 |
+| Refactor | 리뷰 에이전트 | SPEC 대조, 누설·경계 조건 점검, 테스트를 유지하며 정리하고 남은 문제를 보고한다 | 지적 목록(심각도), 정리 내역 |
+| 검증 | 독립 검증 에이전트 | 전체 `ruff`·`mypy`·`pytest`(웹은 lint·test·build), 완료 기준 대조, 레인 사이 계약 위반 확인 | 통과/실패, 근거 |
+| 통합 | 메인 | 결과를 직접 다시 돌려 확인하고, 실데이터 실행(수집·검증표 등)과 TASKS 갱신·커밋, 사용자 보고 | — |
+
+운영 규칙
+
+- **에이전트 수**: 3 모듈 × 3단 + 검증 1 = 10명 이하. 모듈이 4개 이상이면 묶거나 워크플로를 나눈다.
+- **파일 경계**: 레인마다 쓸 수 있는 파일을 프롬프트에 명시한다. 경계가 분리되어 있으므로 worktree 격리는 쓰지 않는다. 레인 안에서는 자기 테스트 파일만 돌리고, 전체 스위트는 검증 단계에서 돌린다.
+- **실데이터와 외부 호출**: 에이전트는 픽스처로만 작업한다. 실제 수집·최종 검증·배포는 메인이 한다.
+- **2026 최종 검증**: 에이전트에게 맡기지 않는다. 메인이 파라미터 커밋을 확인한 뒤 한 번 실행한다.
+- **재개**: 실패한 레인은 Workflow `resumeFromRunId`로 그 지점부터 다시 돌린다.
+- **문서 그림**: SDD 문서에 그림이 필요하면 Codex(`codex exec`)로 만들고 직접 열어 라벨을 대조한다(워크스페이스 문서 그림 원칙).
+
+---
+
+## 5. 테스트 전략
+
+| 층 | 대상 | 방식 |
+|---|---|---|
+| 단위 | 계산 함수(IP→아웃, OPS 성분, 회귀식, FIP 상수, 2020 환산, 역할 판정, 사용 기간) | 손으로 계산한 기대값과 비교. 테스트 이름은 `test_{module}_{scenario}` |
+| 픽스처 기반 | 수집 파서, 검증, 정제, 대상 선정 | 실제 응답에서 잘라 낸 픽스처(P4). 아래 사례가 하나 이상씩 들어가게 고른다 |
+| 불변식 | 누설 방지(N2) | 목표 Y 이후 시즌에 "독" 값을 넣어도 예측이 같아야 한다. 출전량 학습 표본에 Y 이후 목표가 없어야 한다 |
+| 재현성 | N1 | 같은 원본으로 두 번 돌린 산출물의 해시가 같다 |
+| 계약 | 웹 JSON | `export` 결과를 `web-data.schema.json`으로 검사한다. 웹 빌드 때도 같은 스키마로 검사한다 |
+| live | 외부 형식 변화 | `tests/live/`(기본 실행에서 제외, `-m live`). 출처마다 1회 요청해 필수 열이 있는지만 본다 |
+| 웹 | F13~F17 | Vitest + Testing Library(정렬·검색·전환·상세 렌더링·고지 표시), 빌드 성공 |
+
+**픽스처에 넣을 사례** (실제 선수에서 고른다)
+
+- 5시즌 모두 출전한 선수
+- 2024 데뷔, 2026 데뷔
+- 2025 결장 후 복귀, 2023 이후 미출전
+- 투타 겸업(E7)
+- 등판한 야수, 2021 이전 투수 타석(E10)
+- 시즌 중 이적(합산 1행)
+- 2020 시즌 기록
+- 포수(FRV 세부)
+
+`tests/fixtures/SOURCE.md`에 출처 URL, 받은 날짜, 선수 ID와 선택 이유를 적는다.
+
+---
+
+## 6. 패키지 (P1 승인)
+
+| 구분 | 패키지 | 비고 |
+|---|---|---|
+| Python 런타임 | `pandas` (numpy 포함) | HTTP는 표준 라이브러리 `urllib`. venv는 Homebrew Python 3.13 |
+| Python 개발 | `pytest`, `ruff`, `mypy`, `pandas-stubs` | `requirements-dev.txt` |
+| 웹 런타임 | `next@16`, `react@19`, `react-dom@19`, `@astryxdesign/core@0.7.17`(정확히 고정), `@astryxdesign/theme-*`(기반 테마 1종), `@stylexjs/stylex@^0.19` | 테마는 DESIGN에서 기반 1종을 골라 덮어쓴다 |
+| 웹 개발 | `typescript`, `tailwindcss@4`, `@tailwindcss/postcss`, `@astryxdesign/cli`, `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`, `eslint`, `eslint-config-next` | lockfile 커밋 |
+| 미정 | 차트 라이브러리 | SPEC O6, M5에서 정한다. 추가할 때 다시 확인받는다 |
+
+`astryx init`은 `AGENTS.md`/`CLAUDE.md`에 안내문을 쓴다(SPEC E14). M0에서 실행한 뒤 프로젝트 CLAUDE.md 변경분을 검토하고 필요한 부분만 남긴다.
+
+---
+
+## 7. 리스크
+
+| ID | 리스크 | 대응 |
+|---|---|---|
+| R1 | python.org Python에서 HTTPS 인증서 실패(E17) | Homebrew Python으로 venv를 만든다. 윈도우는 별도 확인 |
+| R2 | Savant·API 형식 변경, 요청 제한 | 캐시·간격·재시도, live 테스트, 검증 단계에서 멈춤 |
+| R3 | MLBAM 이용 조건(E13) — 공개 저장소, 실제 픽스처(P4) | 원본 비커밋, 픽스처 소규모·출처 기록, 공개 화면은 예측과 필요한 과거 기록만, 출처 표기 |
+| R4 | Astryx 베타의 깨지는 변경 | 정확한 버전 고정 + lockfile. 올릴 때는 빌드·테스트 후 |
+| R5 | Next.js 16 정적 export와 Astryx(클라이언트 테마 공급자) 호환 | M0에서 화면 없는 빌드로 먼저 확인 |
+| R6 | ERA 예측력이 약함(E11) | 구성 지표 후보, 기준선 병기, 결과를 숨기지 않음(SPEC §7-2) |
+| R7 | 2024·2025에 과적합 | 2026은 고정 후 1회, 파라미터 해시 기록 |
+| R8 | 최근 5시즌 전체 대상(D3)이라 출전량 MAE가 미출전자에 좌우됨 | "직전 시즌 출전 / 미출전" 그룹 MAE를 따로 낸다 |
+| R9 | Workflow 토큰 비용 | 워크플로당 10명 이하, 기계적 단계는 effort를 낮춘다. 통합 검증은 메인이 한다 |
+| R10 | 생성 이미지의 글자 깨짐·상표·인물 | 라벨은 짧은 영어, 넣기 전에 직접 확인(N9). UI 이미지는 글자 없이 |
+| R11 | Vercel 계정 2단계 인증 잠김(CLI 로그인 불가) | 깃허브 연동 자동 배포를 쓴다. 필요하면 기존 토큰을 사용자 승인 후 쓴다 |
+| R12 | 맥·윈도우 교차 작업 시 `data/raw`가 없음 | `refresh` 한 번으로 다시 받는다 |

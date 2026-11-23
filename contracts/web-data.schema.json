@@ -1,0 +1,1105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/daehyub71/mlb-projection/contracts/web-data.schema.json",
+  "title": "mlb-projection web data",
+  "description": "Contract between the Python pipeline (export) and the web app. Files: batters.json -> BatTable, pitchers.json -> PitTable, validation.json -> ValidationReport, players/{id}.json -> PlayerDetail. Units: *_pct are percents (0-100); obp/slg/ops/woba are decimals; ip is decimal innings (outs / 3).",
+  "$defs": {
+    "Meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "generated_at",
+        "raw_collected_at",
+        "params_version",
+        "params_sha256",
+        "target_season",
+        "input_seasons",
+        "sources",
+        "disclaimer"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1"
+        },
+        "generated_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+        },
+        "raw_collected_at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+        },
+        "params_version": {
+          "type": "string"
+        },
+        "params_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "target_season": {
+          "type": "integer",
+          "minimum": 2020
+        },
+        "input_seasons": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 1,
+          "maxItems": 5
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "url"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^https://"
+              }
+            }
+          }
+        },
+        "disclaimer": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Role": {
+      "enum": [
+        "bat",
+        "pit"
+      ]
+    },
+    "GroupName": {
+      "enum": [
+        "all",
+        "seasons_1_2",
+        "seasons_3_5",
+        "prev_played",
+        "prev_absent"
+      ]
+    },
+    "ModelName": {
+      "enum": [
+        "league",
+        "baseline",
+        "weighted",
+        "extended"
+      ]
+    },
+    "PlayerSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "player_id",
+        "name",
+        "age",
+        "team_name",
+        "active",
+        "last_mlb_season"
+      ],
+      "properties": {
+        "player_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "age": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "age in the target season"
+        },
+        "team_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "team of the last input season"
+        },
+        "active": {
+          "type": "boolean",
+          "description": "display only: false -> show 'not active' (SPEC D23)"
+        },
+        "last_mlb_season": {
+          "type": "integer"
+        }
+      }
+    },
+    "InputWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_first",
+        "input_last",
+        "n_seasons"
+      ],
+      "properties": {
+        "input_first": {
+          "type": "integer"
+        },
+        "input_last": {
+          "type": "integer"
+        },
+        "n_seasons": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        }
+      }
+    },
+    "BatProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pa",
+        "hr",
+        "obp",
+        "slg",
+        "ops"
+      ],
+      "properties": {
+        "pa": {
+          "type": "number",
+          "minimum": 0
+        },
+        "hr": {
+          "type": "number",
+          "minimum": 0
+        },
+        "obp": {
+          "type": "number",
+          "minimum": 0
+        },
+        "slg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ops": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "PitProjection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ip",
+        "era",
+        "k_bb_pct"
+      ],
+      "properties": {
+        "ip": {
+          "type": "number",
+          "minimum": 0
+        },
+        "era": {
+          "type": "number",
+          "minimum": 0
+        },
+        "k_bb_pct": {
+          "type": "number"
+        }
+      }
+    },
+    "BatPrev": {
+      "description": "actual values in the last input season (null when absent that season)",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "season",
+        "pa",
+        "hr",
+        "ops"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "pa": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hr": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ops": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "PitPrev": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "season",
+        "ip",
+        "era",
+        "k_bb_pct"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "ip": {
+          "type": "number",
+          "minimum": 0
+        },
+        "era": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "k_bb_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "BatRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "player",
+        "window",
+        "sample_pa",
+        "projection",
+        "prev"
+      ],
+      "properties": {
+        "player": {
+          "$ref": "#/$defs/PlayerSummary"
+        },
+        "window": {
+          "$ref": "#/$defs/InputWindow"
+        },
+        "sample_pa": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "projection": {
+          "$ref": "#/$defs/BatProjection"
+        },
+        "prev": {
+          "$ref": "#/$defs/BatPrev"
+        }
+      }
+    },
+    "PitRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "player",
+        "window",
+        "sample_bf",
+        "sample_ip",
+        "projection",
+        "prev"
+      ],
+      "properties": {
+        "player": {
+          "$ref": "#/$defs/PlayerSummary"
+        },
+        "window": {
+          "$ref": "#/$defs/InputWindow"
+        },
+        "sample_bf": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_ip": {
+          "type": "number",
+          "minimum": 0
+        },
+        "projection": {
+          "$ref": "#/$defs/PitProjection"
+        },
+        "prev": {
+          "$ref": "#/$defs/PitPrev"
+        }
+      }
+    },
+    "BatTable": {
+      "description": "batters.json — first screen (F13), <= 1MB (N6)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "role",
+        "model",
+        "league_baseline",
+        "rows"
+      ],
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "role": {
+          "const": "bat"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelName"
+        },
+        "league_baseline": {
+          "description": "league-average baseline for comparison",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BatRow"
+          }
+        }
+      }
+    },
+    "PitTable": {
+      "description": "pitchers.json — first screen (F13), <= 1MB (N6)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "role",
+        "model",
+        "league_baseline",
+        "rows"
+      ],
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "role": {
+          "const": "pit"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelName"
+        },
+        "league_baseline": {
+          "description": "league-average baseline for comparison",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PitRow"
+          }
+        }
+      }
+    },
+    "BatSeason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "season",
+        "age",
+        "team_name",
+        "is_short_season",
+        "pa",
+        "hr",
+        "obp",
+        "slg",
+        "ops",
+        "k_pct",
+        "bb_pct",
+        "woba",
+        "xwoba",
+        "barrel_pct",
+        "hard_hit_pct",
+        "ev_avg"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "age": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "team_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_short_season": {
+          "type": "boolean"
+        },
+        "pa": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hr": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "obp": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "slg": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ops": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "k_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "bb_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "woba": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "xwoba": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "barrel_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "hard_hit_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "ev_avg": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "PitSeason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "season",
+        "age",
+        "team_name",
+        "is_short_season",
+        "g",
+        "gs",
+        "ip",
+        "era",
+        "fip",
+        "k_pct",
+        "bb_pct",
+        "k_bb_pct",
+        "xera",
+        "xwoba_against",
+        "whiff_pct"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "age": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "team_name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "is_short_season": {
+          "type": "boolean"
+        },
+        "g": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "gs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ip": {
+          "type": "number",
+          "minimum": 0
+        },
+        "era": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "fip": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "k_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "bb_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "k_bb_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "xera": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "xwoba_against": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "whiff_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "GroupError": {
+      "description": "past validation MAE of the player's group (F14)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group",
+        "mae"
+      ],
+      "properties": {
+        "group": {
+          "$ref": "#/$defs/GroupName"
+        },
+        "mae": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "BatDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "window",
+        "sample_pa",
+        "projection",
+        "prev",
+        "league_baseline",
+        "group_error",
+        "history"
+      ],
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/InputWindow"
+        },
+        "sample_pa": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "projection": {
+          "$ref": "#/$defs/BatProjection"
+        },
+        "prev": {
+          "$ref": "#/$defs/BatPrev"
+        },
+        "league_baseline": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "group_error": {
+          "$ref": "#/$defs/GroupError"
+        },
+        "history": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/BatSeason"
+          }
+        }
+      }
+    },
+    "PitDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "window",
+        "sample_bf",
+        "sample_ip",
+        "projection",
+        "prev",
+        "league_baseline",
+        "group_error",
+        "history"
+      ],
+      "properties": {
+        "window": {
+          "$ref": "#/$defs/InputWindow"
+        },
+        "sample_bf": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sample_ip": {
+          "type": "number",
+          "minimum": 0
+        },
+        "projection": {
+          "$ref": "#/$defs/PitProjection"
+        },
+        "prev": {
+          "$ref": "#/$defs/PitPrev"
+        },
+        "league_baseline": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "group_error": {
+          "$ref": "#/$defs/GroupError"
+        },
+        "history": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/PitSeason"
+          }
+        }
+      }
+    },
+    "FieldingSeason": {
+      "description": "display only (SPEC D21). FRV and OAA are never summed",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "season",
+        "oaa",
+        "frv_total",
+        "frv_range",
+        "frv_arm",
+        "frv_dp",
+        "frv_framing",
+        "frv_blocking",
+        "frv_throwing",
+        "outs_by_pos"
+      ],
+      "properties": {
+        "season": {
+          "type": "integer",
+          "minimum": 2022
+        },
+        "oaa": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_total": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_range": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_arm": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_dp": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_framing": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_blocking": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "frv_throwing": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "outs_by_pos": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "C": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "1B": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "2B": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "3B": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "SS": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "LF": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "CF": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "RF": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "PlayerDetail": {
+      "description": "players/{player_id}.json (F14). A role key is present only when the player is a target in that role (F12)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "player",
+        "bat",
+        "pit",
+        "fielding"
+      ],
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "player": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "player_id",
+            "name",
+            "birth_date",
+            "primary_position",
+            "bats",
+            "throws",
+            "active",
+            "last_mlb_season"
+          ],
+          "properties": {
+            "player_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "birth_date": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "primary_position": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "bats": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "throws": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "active": {
+              "type": "boolean"
+            },
+            "last_mlb_season": {
+              "type": "integer"
+            }
+          }
+        },
+        "bat": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/BatDetail"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pit": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/PitDetail"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fielding": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/FieldingSeason"
+          }
+        }
+      }
+    },
+    "EvalRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "target_season",
+        "role",
+        "model",
+        "metric",
+        "group",
+        "n",
+        "mae",
+        "mae_weighted",
+        "baseline_mae_league",
+        "baseline_mae_prev",
+        "excluded"
+      ],
+      "properties": {
+        "target_season": {
+          "type": "integer"
+        },
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelName"
+        },
+        "metric": {
+          "enum": [
+            "ops",
+            "pa",
+            "hr",
+            "era",
+            "ip",
+            "k_bb_pct"
+          ]
+        },
+        "group": {
+          "$ref": "#/$defs/GroupName"
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mae": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "mae_weighted": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "baseline_mae_league": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "baseline_mae_prev": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "excluded": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ValidationReport": {
+      "description": "validation.json (F15)",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "meta",
+        "final_test",
+        "rows"
+      ],
+      "properties": {
+        "meta": {
+          "$ref": "#/$defs/Meta"
+        },
+        "final_test": {
+          "description": "the one-time 2026 test with frozen params (SPEC F10). null until it runs",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "target_season",
+            "ran_at",
+            "params_sha256",
+            "reruns"
+          ],
+          "properties": {
+            "target_season": {
+              "type": "integer"
+            },
+            "ran_at": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T"
+            },
+            "params_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "reruns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "ran_at",
+                  "reason"
+                ],
+                "properties": {
+                  "ran_at": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EvalRow"
+          }
+        }
+      }
+    }
+  }
+}

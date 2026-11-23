@@ -1,0 +1,146 @@
+# TASKS.md — mlb-projection
+
+> 기준: `docs/SPEC.md` v0.2.1 · `docs/PLAN.md` v0.1(2026-11-24 확정). 항목은 완료 즉시 체크하고 대시보드를 같이 갱신한다.
+> 마일스톤 순서와 병행 관계는 PLAN 그림 2(`images/plan-milestones.png`), 한 마일스톤 안의 Workflow는 PLAN 그림 3을 본다.
+
+## 진도율 대시보드
+
+| 마일스톤 | 진도 | % | 태스크 | 상태 |
+|---|---|---|---|---|
+| M0 기반·계약 | ██████████ | 100% | 11/11 | ✅ 2026-11-24 |
+| M1 수집·검증 | ░░░░░░░░░░ | 0% | 0/8 | 🔜 사용자 확인 후 시작 |
+| M2 정제·대상 | ░░░░░░░░░░ | 0% | 0/7 | 🔜 |
+| M3 모델·과거 검증 | ░░░░░░░░░░ | 0% | 0/8 | 🔜 |
+| M4 확장·최종 예측 | ░░░░░░░░░░ | 0% | 0/9 | 🔜 |
+| M5 DESIGN (M1 이후 병행) | ░░░░░░░░░░ | 0% | 0/7 | 🔜 |
+| M6 웹 구현 | ░░░░░░░░░░ | 0% | 0/7 | 🔜 |
+| M7 배포 | ░░░░░░░░░░ | 0% | 0/5 | 🔜 |
+| **전체** | ██░░░░░░░░ | **18%** | **11/62** | |
+
+---
+
+## M0 기반·계약 (메인 단독)
+
+완료 기준: `ruff`·`mypy`·`pytest`·웹 `lint`·`test`·`build` 통과, 첫 푸시.
+
+- [x] T0-1 git 초기화(`main`)·`.gitignore`(`data/raw`·`data/interim`·`venv`·`node_modules`·`.next`·`out`·`.env`·캐시)
+- [x] T0-2 Homebrew Python 3.13 venv(`venv/`)·urllib HTTPS 인증서 확인(E17)·패키지 설치(`requirements.txt`·`requirements-dev.txt`)
+- [x] T0-3 `pyproject.toml`(ruff·mypy·pytest 설정, `live` 마커 기본 제외)·`mlbproj` 패키지 골격(`python -m mlbproj --help`만)
+- [x] T0-4 프로젝트 `CLAUDE.md`(스택·실행·검증 명령·공개 저장소 규칙)
+- [x] T0-5 `README.md`·`README_KO.md` 골격(상호 링크, 고지·출처)
+- [x] T0-6 `mlbproj/contracts.py` — 시즌·역할·원본 경로·Savant 요청 열·정제 표 열(SPEC §6)·평가 집단 상수 + 계약 테스트
+- [x] T0-7 `contracts/web-data.schema.json` — 예측표·선수 상세·검증 JSON 계약 + 스키마 검사 테스트
+- [x] T0-8 실제 데이터 픽스처(파일당 12명 이하, PLAN §5 사례) + `tests/fixtures/SOURCE.md`
+- [x] T0-9 원본 비커밋 검사 테스트(N4: `data/raw`·`data/interim`이 git에 추적되지 않음)
+- [x] T0-10 웹 골격 — Next.js 16 + Astryx 0.7.17 + Tailwind 4 정적 export, 화면 없이 lint·test·build(R5), `astryx init` 안내문 검토
+- [x] T0-11 전체 검증 → 깃허브 공개 저장소 `daehyub71/mlb-projection` 생성·첫 푸시(사용자 확인 후)
+
+## M1 수집·검증 (Workflow)
+
+완료 기준: 2019~2026 원본 수집, 전 시즌 검증 통과, 수치가 SPEC E2·E6과 맞음.
+
+- [ ] T1-1 계약: `collect`·`validate` 함수 시그니처 스텁·픽스처 연결 커밋(메인)
+- [ ] T1-2 레인 A `collect.http`(캐시·재시도·지수 백오프·1초 간격·일반 UA, N3) + `collect.statsapi`
+- [ ] T1-3 레인 B `collect.savant` — 타자·투수 리더보드, OAA, FRV(빈 `year` 열 채움, E4)
+- [ ] T1-4 레인 C `validate` — F2 검사 5종, 실패하면 이후 단계를 막고 사유를 남김
+- [ ] T1-5 독립 검증(전체 ruff·mypy·pytest, 레인 사이 계약 위반)
+- [ ] T1-6 live 테스트(`tests/live`, 출처마다 1회 요청해 필수 열 확인)
+- [ ] T1-7 실수집 2019~2026 + 전 시즌 검증 통과(메인)
+- [ ] T1-8 수치 대조(타자 Savant = API PA>0, 투수 F2 ④ 포함 관계, 리그 PA 합계 E6) 기록 → 사용자 확인
+
+## M2 정제·대상 (Workflow)
+
+완료 기준: 정제 표 재현 가능, 역할 판정 결과와 대상 규모 기록, SPEC E9 대비 차이 설명.
+
+- [ ] T2-1 계약: `clean`·`cohort` 스텁, 정제 표 열 고정(메인)
+- [ ] T2-2 레인 A `clean.players`(`active`·`last_mlb_season`, D23) + `clean.batting`(역할 D8, 2020 환산 D9, Savant 결합)
+- [ ] T2-3 레인 B `clean.pitching`(IP → 아웃, GS는 API에서, E3)
+- [ ] T2-4 레인 C `clean.fielding`(OAA·FRV, D21) + `cohort`(F4·F5, 투타 겸업 F12)
+- [ ] T2-5 독립 검증
+- [ ] T2-6 실데이터 `build` — 두 번 돌려 같은 결과, 역할 판정(2019·2021 투수 타석 제외)·대상 규모 기록
+- [ ] T2-7 사용자 확인
+
+## M3 모델·과거 검증 (Workflow + 메인)
+
+완료 기준: 2024·2025 검증표, OPS·K−BB%가 리그 평균보다 낫다, `params_v1.json` 고정·커밋.
+
+- [ ] T3-1 계약: `models`·`evaluate` 스텁, 평가 표 열 고정(메인)
+- [ ] T3-2 레인 A `models.league`(리그 평균·FIP 상수) + `models.baseline`(F6) + `evaluate`(F10·D13 집단·그룹, 누설 테스트 N2)
+- [ ] T3-3 레인 B `models.weighted`(F7 성분 가중 + 리그 평균 회귀)
+- [ ] T3-4 레인 C `models.playing_time`(F8·D12, 목표 Y−1 이하로만 적합)
+- [ ] T3-5 독립 검증
+- [ ] T3-6 2024·2025 과거 검증표(실데이터)
+- [ ] T3-7 `tune` → `config/params_v1.json` 고정·커밋, 해시를 아래 검증 기록에 적음
+- [ ] T3-8 사용자 확인
+
+## M4 확장·최종 예측 (Workflow + 메인)
+
+완료 기준: SPEC §7 완료 기준 1·2, 2026 결과를 그대로 보고.
+
+- [ ] T4-1 계약: `models.extended`·`export`·`refresh` 스텁(메인)
+- [ ] T4-2 레인 A `models.extended`(F9 나이·Statcast, D11 ERA 후보 선택)
+- [ ] T4-3 레인 B `export`(CSV + 웹 JSON, 스키마 검사, 첫 화면 1MB 이하 N6)
+- [ ] T4-4 레인 C `cli refresh` + 재현성 테스트(N1)
+- [ ] T4-5 독립 검증
+- [ ] T4-6 2026 최종 검증 1회(메인, 파라미터 커밋 확인 뒤)
+- [ ] T4-7 2027 예측 생성·내보내기(F11)
+- [ ] T4-8 2024~2026 오차 확인 → 예측 구간 표시를 SPEC에 넣을지 사용자와 결정(D24)
+- [ ] T4-9 사용자 확인
+
+## M5 DESIGN (M1 이후 M2~M4와 병행, 메인 + Codex)
+
+완료 기준: `docs/DESIGN.md`에 합의 기록, 이미지 목록·프롬프트 기록.
+
+- [ ] T5-1 IA(정보구조도)
+- [ ] T5-2 화면별 와이어프레임(예측표·선수 상세·검증·소개)
+- [ ] T5-3 Astryx 기반 테마 1종 선택 + 사이트 전용 테마 토큰(D18·D20)
+- [ ] T5-4 Claude Design 디자인 시스템·캔버스 시안
+- [ ] T5-5 Codex 이미지(히어로·섹션·OG, D19) — 인물·상표·글자 확인(N9)
+- [ ] T5-6 O6 차트 방식·O7 선수 사진 결정
+- [ ] T5-7 사용자 합의 → `docs/DESIGN.md` 기록
+
+## M6 웹 구현 (Workflow)
+
+완료 기준: 웹 lint·test·build 통과, 시안 대비 화면 확인, 명도 대비 검사.
+
+- [ ] T6-1 계약: 앱 골격·테마·데이터 로더·스키마 타입 고정(메인)
+- [ ] T6-2 레인 A 예측표(F13)
+- [ ] T6-3 레인 B 선수 상세(F14 — 과거 기록 차트·수비·"현역 아님")
+- [ ] T6-4 레인 C 검증(F15)·소개·공통(F16 고지·출처, F17 이미지·OG)
+- [ ] T6-5 독립 검증
+- [ ] T6-6 시안 대비 화면 확인(스크린샷)·명도 대비 4.5:1(N10)
+- [ ] T6-7 사용자 확인
+
+## M7 배포 (메인)
+
+완료 기준: 공개 URL 동작, 워크스페이스 프로젝트 표 갱신.
+
+- [ ] T7-1 보안 리뷰(변경분)
+- [ ] T7-2 시크릿·`data/raw` 미추적·공개 산출물 점검(N4·N7)
+- [ ] T7-3 Vercel 배포(깃허브 연동 자동 배포, R11)
+- [ ] T7-4 README 2종 완성(스크린샷)
+- [ ] T7-5 공개 URL 동작 확인·워크스페이스 프로젝트 표 갱신
+
+---
+
+## 검증 기록
+
+| 일자 | 마일스톤 | 내용 |
+|---|---|---|
+| 2026-11-24 | M0 | ruff·format·mypy 통과, pytest 102개(계약·스키마 검사기·픽스처 위생), 웹 lint·test 1개·정적 export build·`astryx doctor --built out` 16 pass |
+
+## 미해소 이슈
+
+| # | 내용 | 상태 |
+|---|---|---|
+| ① | 이 맥의 Node 22.20.0이 jsdom 30·31 의존 패키지의 엔진 요구(≥22.22.2)보다 낮다 — npm 경고만 나고 테스트는 정상. Node를 올리면 사라진다 | 관찰 |
+| ② | 웹 기반 테마 neutral은 빌드 확인용 임시값 — 사이트 전용 테마는 T5-3 | 대기 |
+
+## 트러블슈팅
+
+| 일자 | 증상 | 원인 | 조치 |
+|---|---|---|---|
+| 2026-11-24 | Savant 투수 CSV 2019·2020에 선수 ID 중복 | 양손 투수 Pat Venditte가 같은 값 2행 | SPEC E19 추가, F2 ②를 "같은 행은 합치고 기록"으로 보완, 픽스처에 포함 |
+| 2026-11-24 | 픽스처에서 "Savant 투수 차이 = 등판한 야수"가 성립하지 않음 | 11-23 실측(E2)에서 인원수(56)만 같고 사람은 달랐다. 등판한 야수 일부는 Savant에 있고, 상대 타자 22명 이하 투수 일부는 없다 | 8시즌 전체 재대조 → SPEC E2·E10 정정(v0.2.1), F2 ④를 포함 관계 + BF 상한으로 |
+| 2026-11-24 | Savant 2019 CSV 열이 2026과 다름 | 11-23 확인용 다운로드에서 연도마다 요청 열이 달랐다 | 요청 열을 `contracts.SAVANT_*_SELECTIONS`로 고정하고 8시즌을 다시 받아 열이 같은 것을 확인(F1) |
+| 2026-11-24 | TypeScript 최신이 7.0 | Next 16과 쓴 사례가 이 워크스페이스에 없다 | 형제 프로젝트에서 검증된 5.9.3으로 고정 |

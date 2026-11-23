@@ -1,0 +1,64 @@
+{
+ "meta": {
+  "schema_version": "1",
+  "generated_at": "2026-11-24T00:00:00Z",
+  "raw_collected_at": "2026-11-23T12:00:00Z",
+  "params_version": "v1",
+  "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "target_season": 2027,
+  "input_seasons": [
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "sources": [
+   {
+    "name": "MLB Stats API",
+    "url": "https://statsapi.mlb.com"
+   },
+   {
+    "name": "Baseball Savant",
+    "url": "https://baseballsavant.mlb.com"
+   }
+  ],
+  "disclaimer": "재미로 보는 예측입니다."
+ },
+ "role": "bat",
+ "model": "weighted",
+ "league_baseline": {
+  "ops": 0.718
+ },
+ "rows": [
+  {
+   "player": {
+    "player_id": 1,
+    "name": "Sample Batter",
+    "age": 29,
+    "team_name": "Sample Team",
+    "active": true,
+    "last_mlb_season": 2026
+   },
+   "window": {
+    "input_first": 2022,
+    "input_last": 2026,
+    "n_seasons": 5
+   },
+   "sample_pa": 3012,
+   "projection": {
+    "pa": 610.4,
+    "hr": 27.1,
+    "obp": 0.351,
+    "slg": 0.472,
+    "ops": 0.823
+   },
+   "prev": {
+    "season": 2026,
+    "pa": 655,
+    "hr": 31,
+    "ops": 0.861
+   }
+  }
+ ]
+}

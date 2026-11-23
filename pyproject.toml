@@ -1,0 +1,32 @@
+[project]
+name = "mlbproj"
+version = "0.1.0"
+description = "Just-for-fun MLB player projections (2027) from the last five seasons"
+requires-python = ">=3.11"
+dependencies = ["pandas>=3.1"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mlbproj*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+# 한국어 주석·문서의 전각 문자 경고, pytest.approx와 부딪히는 SIM300은 끈다
+ignore = ["RUF001", "RUF002", "RUF003", "SIM300"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["mlbproj"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not live'"
+markers = ["live: 외부 출처에 실제 요청을 보내는 테스트 (기본 실행에서 제외, -m live로 실행)"]

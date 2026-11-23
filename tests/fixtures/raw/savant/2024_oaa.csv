@@ -1,0 +1,5 @@
+﻿"last_name, first_name","player_id","display_team_name","year","primary_pos_formatted","fielding_runs_prevented","outs_above_average","outs_above_average_infront","outs_above_average_lateral_toward3bline","outs_above_average_lateral_toward1bline","outs_above_average_behind","outs_above_average_rhh","outs_above_average_lhh","actual_success_rate_formatted","adj_estimated_success_rate_formatted","diff_success_rate_formatted"
+"Devers, Rafael","646240","Red Sox","","3B","-5",-7,1,2,-9,0,-6,-1,"70%","72%","-2%"
+"Hernández, Enrique","571771","Dodgers","","3B","1",1,1,0,-2,2,0,1,"75%","74%","1%"
+"Jiménez, Eloy","650391","White Sox","","RF","0",0,0,0,0,0,0,0,"100%","99%","1%"
+"Merrill, Jackson","701538","Padres","","CF","11",12,0,4,6,2,6,6,"94%","91%","3%"

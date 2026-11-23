@@ -1,0 +1,126 @@
+{
+ "meta": {
+  "schema_version": "1",
+  "generated_at": "2026-11-24T00:00:00Z",
+  "raw_collected_at": "2026-11-23T12:00:00Z",
+  "params_version": "v1",
+  "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "target_season": 2027,
+  "input_seasons": [
+   2022,
+   2023,
+   2024,
+   2025,
+   2026
+  ],
+  "sources": [
+   {
+    "name": "MLB Stats API",
+    "url": "https://statsapi.mlb.com"
+   },
+   {
+    "name": "Baseball Savant",
+    "url": "https://baseballsavant.mlb.com"
+   }
+  ],
+  "disclaimer": "재미로 보는 예측입니다."
+ },
+ "player": {
+  "player_id": 1,
+  "name": "Sample Batter",
+  "birth_date": "1998-04-01",
+  "primary_position": "SS",
+  "bats": "R",
+  "throws": "R",
+  "active": true,
+  "last_mlb_season": 2026
+ },
+ "bat": {
+  "window": {
+   "input_first": 2022,
+   "input_last": 2026,
+   "n_seasons": 5
+  },
+  "sample_pa": 3012,
+  "projection": {
+   "pa": 610.4,
+   "hr": 27.1,
+   "obp": 0.351,
+   "slg": 0.472,
+   "ops": 0.823
+  },
+  "prev": {
+   "season": 2026,
+   "pa": 655,
+   "hr": 31,
+   "ops": 0.861
+  },
+  "league_baseline": {
+   "ops": 0.718
+  },
+  "group_error": {
+   "group": "seasons_3_5",
+   "mae": {
+    "ops": 0.066,
+    "pa": 131.0,
+    "hr": 7.2
+   }
+  },
+  "history": [
+   {
+    "season": 2020,
+    "age": 22,
+    "team_name": "Sample Team",
+    "is_short_season": true,
+    "pa": 210,
+    "hr": 8,
+    "obp": 0.362,
+    "slg": 0.499,
+    "ops": 0.861,
+    "k_pct": 21.4,
+    "bb_pct": 10.2,
+    "woba": null,
+    "xwoba": null,
+    "barrel_pct": 12.9,
+    "hard_hit_pct": 48.1,
+    "ev_avg": 91.6
+   },
+   {
+    "season": 2026,
+    "age": 28,
+    "team_name": "Sample Team",
+    "is_short_season": false,
+    "pa": 655,
+    "hr": 31,
+    "obp": 0.362,
+    "slg": 0.499,
+    "ops": 0.861,
+    "k_pct": 21.4,
+    "bb_pct": 10.2,
+    "woba": 0.368,
+    "xwoba": 0.371,
+    "barrel_pct": 12.9,
+    "hard_hit_pct": 48.1,
+    "ev_avg": 91.6
+   }
+  ]
+ },
+ "pit": null,
+ "fielding": [
+  {
+   "season": 2026,
+   "oaa": 3.0,
+   "frv_total": 4.0,
+   "frv_range": 3.0,
+   "frv_arm": 1.0,
+   "frv_dp": 0.0,
+   "frv_framing": null,
+   "frv_blocking": null,
+   "frv_throwing": null,
+   "outs_by_pos": {
+    "SS": 3450,
+    "2B": 120
+   }
+  }
+ ]
+}

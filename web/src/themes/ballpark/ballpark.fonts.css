@@ -1,2 +1,5 @@
 /* Written by `astryx experimental theme editor show ballpark` after every build of themes/ballpark/; do not edit it here. Change the theme with the editor. */
-/* No font stylesheets: no installed package loads the theme's fonts. A font the system does not have shows only once its package is installed (experimental theme editor show ballpark names it). */
+@import "@fontsource/noto-sans-kr/400.css";
+@import "@fontsource/noto-sans-kr/500.css";
+@import "@fontsource/noto-sans-kr/600.css";
+@import "@fontsource/noto-sans-kr/700.css";

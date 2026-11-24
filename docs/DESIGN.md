@@ -72,7 +72,7 @@
 | buttons | caps | 대문자·굵게·자간 — 중계 화면 느낌 |
 | type / headings | display / bold | 큰 숫자·큰 제목 (D20) |
 | badges | solid | 상태 배지를 색으로 분명히 |
-| font | `'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif` | 한글. 불러오는 방법은 결정 대기(아래) |
+| font | `'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif` | 한글. `@fontsource/noto-sans-kr`(OFL, 2026-11-24 사용자 승인)로 사이트가 직접 제공 — 400·500·600·700 |
 
 명도 대비 조정 (N10, 편집기 검사 + 미리보기 그림을 직접 확인)
 
@@ -81,7 +81,7 @@
 - 위험(destructive) 버튼 글자: 4.44:1 → `#FFD2CE`.
 - 남은 그림 문제 없음 (`show ballpark --png`, `pictureProblem: none`).
 
-남은 일: Noto Sans KR 불러오기 — Astryx 진단(`doctor --built`)은 설치된 글꼴 패키지만 인정한다. `@fontsource/noto-sans-kr` 설치(새 패키지, 확인 필요) 전까지 맥은 Apple SD Gothic Neo, 윈도우는 맑은 고딕으로 대신 그려진다.
+글꼴: `@fontsource/noto-sans-kr` 설치 뒤 `astryx doctor --built out` 30개 항목 모두 통과. 정적 빌드는 글꼴 조각 때문에 약 20MB지만 브라우저는 화면에 나온 글자 범위의 조각만 받는다.
 
 ## 4. 시안 (T5-4) — 예정
 

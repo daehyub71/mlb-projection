@@ -56,6 +56,7 @@ from mlbproj.contracts import (
     ROLES,
     TARGET_SEASON,
     WEB_DISCLAIMER,
+    WEB_ROUND,
     WEB_SCHEMA_VERSION,
     WEB_SOURCES,
     WINDOW,
@@ -533,7 +534,34 @@ def _projection_target(projections: Mapping[Role, pd.DataFrame]) -> int:
     return targets[0]
 
 
-def _final_test_summary(record: Mapping[str, Any]) -> dict[str, Any]:
+def first_run_path(final_test_path: Path) -> Path:
+    """다시 돌린 최종 검증의 첫 실행 보관본 경로 (`final_test_2026.json` → `final_test_2026_run1.json`)."""
+    return final_test_path.with_name(f"{final_test_path.stem}_run1.json")
+
+
+def _first_run(
+    record: Mapping[str, Any], final_test_path: Path, adoption: Adoption
+) -> dict[str, Any] | None:
+    """첫 실행 요약 (SPEC D31) — 다시 돌린 기록이고 보관본이 있으면 {ran_at, mae: 지표 → 최종 모델 "all" mae}.
+
+    역할마다 최종 모델(`final_model_name`)의 행만 쓴다. 다시 돌리지 않았거나 보관본이 없으면 None.
+    """
+    path = first_run_path(final_test_path)
+    if not record["reruns"] or not path.exists():
+        return None
+    first, rows = _read_record(path)
+    final = {role: final_model_name(adoption, role) for role in ROLES}
+    mine = rows[(rows["group"] == "all") & (rows["model"] == rows["role"].map(final))]
+    mae = {
+        str(metric): (None if pd.isna(value) else round(float(value), WEB_ROUND["mae"]))
+        for metric, value in zip(mine["metric"], mine["mae"], strict=True)
+    }
+    return {"ran_at": first["ran_at"], "mae": mae}
+
+
+def _final_test_summary(
+    record: Mapping[str, Any], first_run: dict[str, Any] | None
+) -> dict[str, Any]:
     """검사한 기록 → 스키마 ValidationReport.final_test 모양 (commit·adoption_sha256은 내보내지 않는다)."""
     return {
         "target_season": record["target_season"],
@@ -542,6 +570,7 @@ def _final_test_summary(record: Mapping[str, Any]) -> dict[str, Any]:
         "reruns": [
             {"ran_at": rerun["ran_at"], "reason": rerun["reason"]} for rerun in record["reruns"]
         ],
+        "first_run": first_run,
     }
 
 
@@ -591,7 +620,7 @@ def build_export_input(
                 "2026을 잰 모델과 2027 예측 모델이 섞인다"
             )
         evaluations = pd.concat([evaluations, rows], ignore_index=True)
-        final_test = _final_test_summary(record)
+        final_test = _final_test_summary(record, _first_run(record, final_test_path, adoption))
     evaluations = evaluations.sort_values(list(EVALUATIONS.keys), kind="mergesort").reset_index(
         drop=True
     )

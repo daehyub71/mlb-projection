@@ -1216,6 +1216,7 @@ FINAL_TEST: dict[str, Any] = {
     "ran_at": "2026-12-01T03:00:00Z",
     "params_sha256": SHA,
     "reruns": [{"ran_at": "2026-12-02T03:00:00Z", "reason": "원본 재수집 뒤 다시 실행"}],
+    "first_run": {"ran_at": "2026-12-01T03:00:00Z", "mae": {"ops": 0.0609, "era": 0.85}},
 }
 
 

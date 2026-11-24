@@ -14,6 +14,7 @@
     "@astryxdesign/core": "0.7.18-canary.gfca8508",
     "@astryxdesign/theme-neutral": "0.7.18-canary.gfca8508",
     "@fontsource/noto-sans-kr": "5.3.1",
+    "@heroicons/react": "2.2.0",
     "@stylexjs/stylex": "0.19.2",
     "next": "16.4.6",
     "react": "19.3.1",

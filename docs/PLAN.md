@@ -190,6 +190,7 @@ python -m mlbproj refresh                             # collect → … → expo
 | 웹 런타임 | `next@16`, `react@19`, `react-dom@19`, `@astryxdesign/core`·`@astryxdesign/theme-*`(기반 테마 1종)·`@astryxdesign/charts`를 **같은 canary 빌드로 정확히 고정**(D26, M0의 0.7.17에서 M6 시작 때 바꾼다), `@stylexjs/stylex@^0.19` | 테마는 DESIGN에서 기반 1종을 골라 덮어쓴다. charts는 d3-array·d3-scale·d3-shape를 끌어온다 |
 | 웹 개발 | `typescript`, `tailwindcss@4`, `@tailwindcss/postcss`, `@astryxdesign/cli`, `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`, `eslint`, `eslint-config-next` | lockfile 커밋 |
 | 차트 | `@astryxdesign/charts` canary | SPEC D26 (2026-11-24 사용자 결정·설치 승인) |
+| 아이콘 | `@heroicons/react@2.2.0` (MIT) | Astryx 페이지 템플릿(table-page·documentation-technical)이 쓴다. 2026-11-24 사용자 승인(M6) |
 | 글꼴 | `@fontsource/noto-sans-kr@5.3.1` (OFL) | 한글 본문·제목. Astryx 테마 진단이 설치된 글꼴 패키지만 인정한다 (2026-11-24 사용자 승인) |
 
 `astryx init`은 `AGENTS.md`/`CLAUDE.md`에 안내문을 쓴다(SPEC E14). M0에서 실행한 뒤 프로젝트 CLAUDE.md 변경분을 검토하고 필요한 부분만 남긴다.

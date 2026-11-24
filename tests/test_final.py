@@ -1253,6 +1253,7 @@ def test_final_build_export_input_with_final_test(tmp_path: Path) -> None:
         "ran_at": NOW1,
         "params_sha256": params_sha256(PARAMS),
         "reruns": [{"ran_at": NOW2, "reason": "원본 정정"}],
+        "first_run": None,  # 첫 실행 보관본(*_run1.json)이 없다
     }
     assert inp.meta == EXPECTED_META
     _check_schema(inp)
@@ -1632,6 +1633,7 @@ def test_final_run_final_test_record_feeds_build_export_input(
         "ran_at": NOW1,
         "params_sha256": params_sha256(PARAMS),
         "reruns": [],
+        "first_run": None,
     }
     _check_schema(inp)
 
@@ -1661,3 +1663,37 @@ def test_final_build_export_input_rejects_record_from_other_model(
             backtest_csv=backtest_csv,
             final_test_path=final_test_path,
         )
+
+
+def test_final_build_export_input_first_run_from_archive(tmp_path: Path) -> None:
+    # 다시 돌린 기록이면 옆의 *_run1.json(첫 실행 보관본)에서 최종 모델 "all" MAE를 꺼낸다 (SA-4, D31)
+    raw_dir, backtest_csv, final_test_path = _export_paths(tmp_path, with_record=True)
+    first = {**_final_record(), "ran_at": NOW1, "reruns": [], "rows": FINAL_ROWS}
+    final_test_path.with_name("final_test_2026_run1.json").write_text(
+        json.dumps(first, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    inp = final.build_export_input(
+        _world(),
+        PARAMS,
+        ADOPTION,
+        _projections_2027(),
+        raw_dir=raw_dir,
+        backtest_csv=backtest_csv,
+        final_test_path=final_test_path,
+    )
+    assert inp.final_test is not None
+    first_run = inp.final_test["first_run"]
+    assert first_run["ran_at"] == NOW1
+    # 역할마다 최종 모델 행의 "all" 그룹 mae (타자 extended, 투수 weighted — 채택표 ops만)
+    expected = {
+        row["metric"]: round(row["mae"], c.WEB_ROUND["mae"])
+        for row in FINAL_ROWS
+        if row["group"] == "all" and row["model"] == final.final_model_name(ADOPTION, row["role"])
+    }
+    assert first_run["mae"] == expected
+    _check_schema(inp)
+
+
+def test_final_build_export_input_first_run_none_without_archive(tmp_path: Path) -> None:
+    inp = _build(tmp_path, _world(), with_record=True)
+    assert inp.final_test is not None and inp.final_test["first_run"] is None

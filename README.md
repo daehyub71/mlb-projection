@@ -25,12 +25,14 @@ The model parameters and the extended-model choices were fixed using the 2024 an
 
 | Metric | This model | League average | Prior season |
 |---|---|---|---|
-| OPS (200+ PA) | **.061** | .069 | .098 |
-| K−BB% (50+ IP) | **3.63** | 4.40 | 4.43 |
-| ERA (50+ IP) | **0.85** | 0.93 | 1.25 |
+| OPS (200+ PA) | **.062** | .069 | .098 |
+| K−BB% (50+ IP) | **3.62** | 4.40 | 4.43 |
+| ERA (50+ IP) | **0.84** | 0.93 | 1.25 |
 | PA | **72.4** | — | 74.9 |
 | IP | **17.1** | — | 17.6 |
-| HR | **2.60** | — | 2.91 |
+| HR | **2.61** | — | 2.91 |
+
+The 2026 test was run a second time, once, after fixing a defect: small-sample batters' Statcast features were not shrunk toward the league average, so a 1-PA batter was projected at .963 OPS. The defect showed up in the 2027 table, not in the 2026 results. The first run (OPS .061, K−BB% 3.63, ERA 0.85, HR 2.60) is kept in [`data/out/final_test_2026_run1.json`](data/out/final_test_2026_run1.json); the table shows the second run.
 
 Playing-time projections are conservative: they price in injury and absence risk, so regulars tend to be projected below their usual workload.
 

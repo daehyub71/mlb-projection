@@ -1,6 +1,6 @@
 # PLAN.md — mlb-projection
 
-> **상태: v0.2** (2026-11-24). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. 기준 문서는 `docs/SPEC.md` v0.3이다. 문서끼리 다르면 SPEC이 기준이다.
+> **상태: v0.2.1** (2026-11-24). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. v0.2.1은 M3에서 정한 조정 순서(§2-3, SPEC D28)를 적었다. 기준 문서는 `docs/SPEC.md` v0.3.1이다. 문서끼리 다르면 SPEC이 기준이다.
 > 결정 P1~P4는 2026-11-23 사용자 답이다. 작업 항목과 진도는 `docs/TASKS.md`에 있다.
 
 ---
@@ -87,7 +87,7 @@ mlb-projection/
 | HR | 예상 PA × 예상 HR/PA | — |
 | 확장 | 나이 곡선, K%·BB%, Statcast(xwOBA·Barrel%·EV, 투수 xERA·Whiff%)를 성분 회귀식에 더한다. 2024·2025 MAE가 나아질 때만 채택한다 | 항목별 채택 여부 |
 
-**파라미터 고정 절차.** `tune`은 목표 2024·2025만 읽는다. 조정이 끝나면 `config/params_v1.json`을 만들고, 그 해시를 TASKS에 적은 뒤 커밋한다. `final-test --target 2026`은 파라미터 파일이 커밋된 상태가 아니면 실행을 거부한다. 결과는 `data/out/final_test_2026.json`에 남긴다. 다시 실행하려면 `--rerun` 사유를 받아 기록에 남긴다(SPEC F10 "한 번만").
+**파라미터 고정 절차.** `tune`은 목표 2024·2025만 읽는다. 격자 탐색 순서는 타자 OPS(시즌 가중치 × 공통 R) → 타자 HR(HR 성분 R만, OPS 평균 MAE를 지키는 후보 중, SPEC D28) → 투수 K−BB%(가중치 × 공통 R) → 투수 ERA(방식 er/fip × R_er)이고, 두 해 평균 MAE로 고른다. 후보 결과는 `data/out/tune_report.csv`, 과거 검증표는 `data/out/backtest.csv`·`.json`에 남는다. 조정이 끝나면 `config/params_v1.json`을 만들고, 그 해시를 TASKS에 적은 뒤 커밋한다. `final-test --target 2026`은 파라미터 파일이 커밋된 상태가 아니면 실행을 거부한다. 결과는 `data/out/final_test_2026.json`에 남긴다. 다시 실행하려면 `--rerun` 사유를 받아 기록에 남긴다(SPEC F10 "한 번만").
 
 ### 2-4. CLI (SPEC D25 수동 갱신)
 

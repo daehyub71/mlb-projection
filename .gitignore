@@ -17,7 +17,8 @@ htmlcov/
 # Node / Next.js
 node_modules/
 .next/
-out/
+# Next.js 정적 빌드만 — data/out/(검증표)은 커밋한다
+/web/out/
 next-env.d.ts
 *.tsbuildinfo
 .vercel/

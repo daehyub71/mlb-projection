@@ -19,6 +19,8 @@ node_modules/
 .next/
 # Next.js 정적 빌드만 — data/out/(검증표)은 커밋한다
 /web/out/
+# 웹 JSON(선수별 과거 기록 포함) — 커밋 여부는 M7 전에 정한다 (PLAN §2-3, TASKS 미해소 이슈 ⑥)
+/web/public/data/
 next-env.d.ts
 *.tsbuildinfo
 .vercel/

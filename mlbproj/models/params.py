@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from mlbproj.contracts import BAT_COMPONENTS, ERA_METHODS, PIT_COMPONENTS, WINDOW
+from mlbproj.contracts import BAT_COMPONENTS, ERA_METHODS, EXT_METRICS, PIT_COMPONENTS, WINDOW
 
 _PIT_REGRESS_KEYS: tuple[str, ...] = (*PIT_COMPONENTS, "er")
 
@@ -147,3 +147,83 @@ def save_params(params: Params, path: Path) -> None:
 def load_params(path: Path) -> Params:
     """파라미터 파일을 읽는다."""
     return from_json(path.read_text(encoding="utf-8"))
+
+
+# ---------------------------------------------------------------------------
+# 확장 모델 채택표 (SPEC F9) — `config/extended_v1.json`
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Adoption:
+    """확장 모델(F9) 지표별 채택 여부. 2024·2025 MAE가 나아진 지표만 True.
+
+    params와 같이 2026 최종 검증 전에 커밋해 고정한다.
+
+    Attributes:
+        version: 채택표 이름 (예: "v1").
+        adopt: 지표(`contracts.EXT_METRICS`) → 보정을 쓰는지.
+    """
+
+    version: str
+    adopt: dict[str, bool]
+
+
+# 아무 보정도 쓰지 않는 채택표 — 확장 모델 = 가중 모델
+NO_ADOPTION = Adoption(version="v0", adopt={m: False for m in EXT_METRICS})
+
+
+def validate_adoption(adoption: Adoption) -> None:
+    """채택표가 형식을 지키는지 확인한다.
+
+    Raises:
+        ValueError: 버전이 비었거나, 지표가 `EXT_METRICS`와 다르거나, 값이 bool이 아닐 때.
+    """
+    if not adoption.version:
+        raise ValueError("version이 비었다")
+    if set(adoption.adopt) != set(EXT_METRICS):
+        raise ValueError(f"adopt 키가 {sorted(EXT_METRICS)}와 다르다: {sorted(adoption.adopt)}")
+    bad = {k: v for k, v in adoption.adopt.items() if not isinstance(v, bool)}
+    if bad:
+        raise ValueError(f"adopt 값은 true/false여야 한다: {bad}")
+
+
+def adoption_to_json(adoption: Adoption) -> str:
+    """키를 정렬한 JSON 문자열 (같은 값이면 같은 문자열)."""
+    validate_adoption(adoption)
+    doc = {"adopt": dict(sorted(adoption.adopt.items())), "version": adoption.version}
+    return json.dumps(doc, ensure_ascii=False, indent=1, sort_keys=True) + "\n"
+
+
+def adoption_from_json(text: str) -> Adoption:
+    """`adoption_to_json` 결과를 읽는다.
+
+    Raises:
+        ValueError: 모르는 키가 있거나 형식이 틀릴 때.
+    """
+    doc = json.loads(text)
+    if not isinstance(doc, dict) or set(doc) != {"adopt", "version"}:
+        raise ValueError(
+            f"채택표 최상위 키가 다르다: {sorted(doc) if isinstance(doc, dict) else doc!r}"
+        )
+    if not isinstance(doc["adopt"], dict):
+        raise ValueError("adopt는 객체여야 한다")
+    adoption = Adoption(version=str(doc["version"]), adopt=dict(doc["adopt"]))
+    validate_adoption(adoption)
+    return adoption
+
+
+def adoption_sha256(adoption: Adoption) -> str:
+    """채택표 직렬화의 sha256 (TASKS·최종 검증 기록에 남긴다)."""
+    return hashlib.sha256(adoption_to_json(adoption).encode("utf-8")).hexdigest()
+
+
+def save_adoption(adoption: Adoption, path: Path) -> None:
+    """채택표를 파일로 쓴다."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(adoption_to_json(adoption), encoding="utf-8")
+
+
+def load_adoption(path: Path) -> Adoption:
+    """채택표 파일을 읽는다."""
+    return adoption_from_json(path.read_text(encoding="utf-8"))

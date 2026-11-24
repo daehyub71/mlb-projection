@@ -76,6 +76,10 @@ INTERIM_DIR: Final = Path("data/interim")
 OUT_DIR: Final = Path("data/out")
 WEB_DATA_DIR: Final = Path("web/public/data")
 PARAMS_PATH: Final = Path("config/params_v1.json")
+# 확장 모델 채택표 (F9). 2024·2025로 정하고 2026 최종 검증 전에 커밋한다 (params와 같은 규칙)
+ADOPTION_PATH: Final = Path("config/extended_v1.json")
+FINAL_TEST_PATH: Final = OUT_DIR / "final_test_2026.json"  # 최종 검증 기록 (F10, 한 번만)
+BACKTEST_CSV: Final = OUT_DIR / "backtest.csv"  # 2024·2025 과거 검증표 (M3)
 WEB_SCHEMA_PATH: Final = Path("contracts/web-data.schema.json")
 # F2 검증 결과. M2 이후 단계는 이 보고서가 통과·최신인지 확인한 뒤에만 진행한다
 VALIDATION_REPORT_PATH: Final = INTERIM_DIR / "validation_report.json"
@@ -447,7 +451,36 @@ PIT_COMPONENTS: Final[tuple[str, ...]] = ("so", "bb", "hbp", "hr")
 ERA_METHODS: Final[tuple[str, ...]] = (
     "er",
     "fip",
-)  # D11 후보 (a) 가중 ER/아웃 (b) FIP식 + 리그 보정. xERA는 M4
+)  # D11 후보 (a) 가중 ER/아웃 (b) FIP식 + 리그 보정. xERA는 확장 모델 특성으로 (M4)
+
+# ---------------------------------------------------------------------------
+# 확장 모델 (M4, SPEC F9·D10·D11) — 가중 모델 위의 지표별 잔차 보정
+# ---------------------------------------------------------------------------
+
+# 보정 학습에 쓰는 목표 시즌 T = EXT_TRAIN_FIRST … Y−1 (입력은 T−5 ~ T−1, 데이터 시작 2019).
+# 출전량 지표(pa·ip)는 T의 출전량 모델이 학습 목표 둘(2021·2022) 이상을 가져야 해서 2023부터다.
+EXT_TRAIN_FIRST: Final = 2021
+EXT_TRAIN_FIRST_VOLUME: Final = 2023
+AGE_CENTER: Final = 27  # age_c = 시즌 나이 − 27
+# 시즌 나이 = 그해 6월 30일 기준 만 나이 (`mlbproj.age.season_age`)
+SEASON_AGE_MONTH_DAY: Final[tuple[int, int]] = (6, 30)
+
+# 보정하는 지표와 순서. 출전량을 먼저 정해야 HR(= PA × HR/PA)을 평가할 수 있다.
+EXT_ROLE_METRICS: Final[dict[Role, tuple[str, ...]]] = {
+    "bat": ("pa", "hr", "ops"),
+    "pit": ("ip", "era", "k_bb_pct"),
+}
+EXT_METRICS: Final[tuple[str, ...]] = (*EXT_ROLE_METRICS["bat"], *EXT_ROLE_METRICS["pit"])
+# 지표 → 보정 특성 (순서가 계수 순서다). 정의는 `models/extended.py` 모듈 docstring.
+EXT_FEATURES: Final[dict[str, tuple[str, ...]]] = {
+    "pa": ("age_c", "age_c2"),
+    "hr": ("age_c", "barrel_pct", "ev_avg"),
+    "ops": ("age_c", "age_c2", "k_pct", "xwoba_minus_woba", "barrel_pct", "ev_avg"),
+    "ip": ("age_c", "age_c2"),
+    "era": ("age_c", "xera_minus_proj", "whiff_pct"),
+    "k_bb_pct": ("age_c", "whiff_pct"),
+}
+EXT_MIN_ROWS_PER_COEF: Final = 10  # 학습 행이 (특성 수 + 1) × 이 값보다 적으면 보정 0
 
 
 def _rates(prefix: str, names: Iterable[str]) -> tuple[Column, ...]:
@@ -579,7 +612,60 @@ WEB_FILES: Final[dict[str, str]] = {
     "validation.json": "ValidationReport",
 }
 WEB_PLAYER_DEF: Final = "PlayerDetail"  # players/{player_id}.json
-WEB_FIRST_SCREEN_MAX_BYTES: Final = 1_000_000  # N6
+WEB_FIRST_SCREEN_MAX_BYTES: Final = 1_000_000  # N6 — batters.json·pitchers.json 각각
+WEB_FIRST_SCREEN_FILES: Final[tuple[str, ...]] = ("batters.json", "pitchers.json")
+
+# Meta 고정값 (SPEC D16)
+WEB_SOURCES: Final[tuple[tuple[str, str], ...]] = (
+    ("MLB Stats API", "https://statsapi.mlb.com"),
+    ("Baseball Savant", "https://baseballsavant.mlb.com"),
+)
+WEB_DISCLAIMER: Final = (
+    "재미로 보는 예측입니다. 최근 5시즌 기록으로 만든 통계 모델의 점 예측이며, "
+    "실제 성적을 보장하지 않습니다. 데이터: MLB Stats API, Baseball Savant."
+)
+
+# 웹 JSON 숫자 반올림 자릿수 (열 이름 → 소수 자릿수). 목록에 없는 실수는 그대로 둔다.
+WEB_ROUND: Final[dict[str, int]] = {
+    "obp": 3,
+    "slg": 3,
+    "ops": 3,
+    "woba": 3,
+    "xwoba": 3,
+    "xwoba_against": 3,
+    "era": 2,
+    "fip": 2,
+    "xera": 2,
+    "k_bb_pct": 1,
+    "k_pct": 1,
+    "bb_pct": 1,
+    "barrel_pct": 1,
+    "hard_hit_pct": 1,
+    "whiff_pct": 1,
+    "ev_avg": 1,
+    "pa": 1,
+    "hr": 1,
+    "ip": 1,
+    "sample_ip": 1,
+    "oaa": 1,
+    "frv_total": 1,
+    "frv_range": 1,
+    "frv_arm": 1,
+    "frv_dp": 1,
+    "frv_framing": 1,
+    "frv_blocking": 1,
+    "frv_throwing": 1,
+    "mae": 4,
+    "mae_weighted": 4,
+    "baseline_mae_league": 4,
+    "baseline_mae_prev": 4,
+}
+
+# 2027 예측 CSV (검토용, F11). 최종 모델 행만.
+PROJECTION_CSV: Final[dict[Role, Path]] = {
+    "bat": OUT_DIR / "projections_2027_bat.csv",
+    "pit": OUT_DIR / "projections_2027_pit.csv",
+}
 
 
 def interim_path(spec: TableSpec, base: Path = INTERIM_DIR) -> Path:

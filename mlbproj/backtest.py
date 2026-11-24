@@ -10,66 +10,27 @@
 """
 
 from collections.abc import Iterable
-from dataclasses import dataclass
-from pathlib import Path
 
 import pandas as pd
 
 from mlbproj import contracts as c
-from mlbproj.clean.players import people_records
 from mlbproj.evaluate import evaluate
-from mlbproj.interim import read_table
 from mlbproj.models.assemble import assemble_bat, assemble_pit
 from mlbproj.models.baseline import baseline_playing_time, baseline_rates, league_model_rates
-from mlbproj.models.league import league_batting, league_pitching
 from mlbproj.models.params import Params
 from mlbproj.models.playing_time import predict_playing_time
 from mlbproj.models.weighted import weighted_rates
+from mlbproj.tables import Tables, cohort_for, load_tables
 
-
-@dataclass(frozen=True)
-class Tables:
-    """과거 검증에 쓰는 정제 표 묶음.
-
-    Attributes:
-        seasons: 역할 → 정제 시즌 표.
-        cohorts: 대상 표 (모든 목표 시즌·역할).
-        league: 역할 → 시즌별 리그 평균 표.
-        debuts: 선수 ID → MLB 데뷔 연도 (F5, E21).
-    """
-
-    seasons: dict[c.Role, pd.DataFrame]
-    cohorts: pd.DataFrame
-    league: dict[c.Role, pd.DataFrame]
-    debuts: dict[int, int]
-
-
-def load_tables(interim_dir: Path = c.INTERIM_DIR, raw_dir: Path = c.RAW_DIR) -> Tables:
-    """정제 표와 리그 평균, 데뷔 연도를 읽는다."""
-    batting = read_table(c.BATTING_SEASONS, c.interim_path(c.BATTING_SEASONS, interim_dir))
-    pitching = read_table(c.PITCHING_SEASONS, c.interim_path(c.PITCHING_SEASONS, interim_dir))
-    cohorts = read_table(c.COHORTS, c.interim_path(c.COHORTS, interim_dir))
-    debuts = {
-        int(str(p["id"])): int(str(p["mlbDebutDate"])[:4])
-        for p in people_records(raw_dir)
-        if p.get("mlbDebutDate")
-    }
-    return Tables(
-        seasons={"bat": batting, "pit": pitching},
-        cohorts=cohorts,
-        league={"bat": league_batting(batting), "pit": league_pitching(pitching)},
-        debuts=debuts,
-    )
-
-
-def cohort_for(tables: Tables, role: c.Role, target: int) -> pd.DataFrame:
-    """한 목표 시즌·역할의 대상 표 (player_id 순)."""
-    cohorts = tables.cohorts
-    mask = (cohorts["target_season"] == target) & (cohorts["role"] == role)
-    out = cohorts[mask].sort_values("player_id").reset_index(drop=True)
-    if out.empty:
-        raise ValueError(f"{target} {role} 대상 표가 없다 (build를 먼저 돌린다)")
-    return out
+__all__ = [
+    "Tables",
+    "baseline_projections",
+    "cohort_for",
+    "load_tables",
+    "run_backtest",
+    "summary",
+    "weighted_projection",
+]
 
 
 def _assemble(

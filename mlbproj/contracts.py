@@ -44,9 +44,12 @@ RATE_MIN_OUTS: Final = 150  # 50 IP
 Role = Literal["bat", "pit"]
 ROLES: Final[tuple[Role, ...]] = ("bat", "pit")
 
-# 투구 기록의 포지션 표기. 2026 실측에서 오타니가 `TWP`였다.
-# 정확한 역할 판정식(D8)은 M2에서 실측으로 확정한다.
+# 역할 판정 (D8, 2026-11-24 실측으로 확정)
+# - 타자: API 타격 기록 중 포지션이 BATTER_EXCLUDED_POSITIONS가 아니고 타석이 1 이상인 행.
+#   포지션 X(시즌당 13~59행)·DH도 타자다. 투수의 타격(포지션 P)은 뺀다. 타석 0인 행(대주자 등)은 기록으로 치지 않는다.
+# - 투수: API 투구 기록 중 포지션이 PITCHER_POSITIONS인 행. 등판한 야수는 뺀다. 오타니의 투구 포지션은 TWP다.
 PITCHER_POSITIONS: Final = frozenset({"P", "TWP"})
+BATTER_EXCLUDED_POSITIONS: Final = frozenset({"P"})
 
 ModelName = Literal["league", "baseline", "weighted", "extended"]
 MODELS: Final[tuple[ModelName, ...]] = ("league", "baseline", "weighted", "extended")
@@ -430,6 +433,26 @@ PIT_PROJECTIONS = TableSpec(
     ),
 )
 
+# 예측 대상과 사용 기간 (F4·F5). 목표 시즌 Y, 역할 r마다 한 표.
+COHORTS = TableSpec(
+    name="cohorts",
+    keys=("player_id", "role", "target_season"),
+    columns=(
+        Column("player_id", "int"),
+        Column("role", "str"),
+        Column("target_season", "int"),
+        Column("window_first", "int"),  # max(Y−5, 그 역할의 첫 기록 시즌)
+        Column("window_last", "int"),  # Y−1
+        Column("n_window", "int"),  # window_last − window_first + 1 (미출전 시즌 포함)
+        Column("input_first", "int"),  # 기간 안 첫 기록 시즌
+        Column("input_last", "int"),  # 기간 안 마지막 기록 시즌
+        Column("n_seasons", "int"),  # 기간 안 기록이 있는 시즌 수 (1~5, D13 그룹 기준)
+        Column("played_prev", "bool"),  # Y−1에 기록이 있는지 (PLAN R8 그룹 기준)
+        Column("sample", "int"),  # 기간 누적 타석(타자) 또는 상대 타자(투수)
+        Column("sample_outs", "int", nullable=True),  # 투수만: 기간 누적 아웃
+    ),
+)
+
 EVALUATIONS = TableSpec(
     name="evaluations",
     keys=("target_season", "model", "metric", "group"),
@@ -453,6 +476,7 @@ TABLES: Final[tuple[TableSpec, ...]] = (
     BATTING_SEASONS,
     PITCHING_SEASONS,
     FIELDING_SEASONS,
+    COHORTS,
     BAT_PROJECTIONS,
     PIT_PROJECTIONS,
     EVALUATIONS,
@@ -470,6 +494,11 @@ WEB_FILES: Final[dict[str, str]] = {
 }
 WEB_PLAYER_DEF: Final = "PlayerDetail"  # players/{player_id}.json
 WEB_FIRST_SCREEN_MAX_BYTES: Final = 1_000_000  # N6
+
+
+def interim_path(spec: TableSpec, base: Path = INTERIM_DIR) -> Path:
+    """정제 표 CSV 경로 (`data/interim/{name}.csv`)."""
+    return base / f"{spec.name}.csv"
 
 
 def web_player_path(player_id: int) -> Path:

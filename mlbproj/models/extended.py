@@ -18,6 +18,10 @@ True인 지표에만 더한다. 모든 지표가 False면 확장 예측의 값�
   - 타자: k_pct = 100 · Σ(w·so) / Σ(w·pa) (w는 시즌 가중치만), barrel_pct = x̄(barrel_pct), ev_avg = x̄(ev_avg),
     xwoba_minus_woba = x̄(xwoba) − x̄(woba) — 두 값이 모두 있는 행만으로 각각 계산한다.
   - 투수: whiff_pct = x̄(whiff_pct), xera_minus_proj = x̄(xera) − 가중 era(Y 예측).
+- 표본 회귀 (SPEC D31, `EXT_SHRINK_SAMPLE` = k): 위 기간 평균 x̄(barrel·ev·xwoba·woba·k%·whiff·xera)마다
+  x = (n·x̄ + k·lg) / (n + k). n = 그 평균에 쓴 행의 pa(투수 bf) 합(시즌 가중치 없이), lg = Y−1 시즌 리그 값
+  (그 시즌 모든 행의 pa·bf 가중 평균, k%는 100·Σso/Σpa, 값이 있는 행만). 행이 없으면(n = 0) lg 그대로.
+  lg를 낼 수 없으면(Y−1에 값이 있는 행이 없음) 줄이지 않는다. k = 0이면 줄이지 않은 x̄(행이 없으면 결측).
 - 결측 특성은 학습 행의 그 특성 평균(`Correction.fill`)으로 채운다. 학습 행에도 값이 없으면 0.
 
 보정 대상 y (학습 목표 T의 실제값 − T의 가중 예측; 실제값은 `evaluate.actual_values`)
@@ -55,6 +59,7 @@ from mlbproj.contracts import (
     EXT_FEATURES,
     EXT_MIN_ROWS_PER_COEF,
     EXT_ROLE_METRICS,
+    EXT_SHRINK_SAMPLE,
     EXT_TRAIN_FIRST,
     EXT_TRAIN_FIRST_VOLUME,
     PIT_PROJECTIONS,
@@ -162,17 +167,37 @@ def _window_sums(rows: pd.DataFrame, role: Role, ids: pd.Index) -> pd.DataFrame:
     """대상마다 기간 평균의 분자(`<이름>_num`)·분모(`<이름>_den`) 합 (index = ids, 행이 없으면 0)."""
     season_w = _floats(rows["_w"])
     weight = season_w * _floats(rows[_MEAN_DENOMINATOR[role]])
+    raw = _floats(rows[_MEAN_DENOMINATOR[role]])
     parts: dict[str, npt.NDArray[np.float64]] = {}
     if role == "bat":
         # k_pct의 가중치는 시즌 가중치만이다: 100 · Σ(w·so) / Σ(w·pa)
         parts["k_pct_num"] = season_w * _floats(rows["so"])
         parts["k_pct_den"] = season_w * _floats(rows["pa"])
+        parts["k_pct_n"] = _floats(rows["pa"])
     for name, (column, need) in _WINDOW_MEANS[role].items():
         present = rows[list(need)].notna().all(axis=1).to_numpy(dtype=bool)
         parts[f"{name}_num"] = np.where(present, weight * _floats(rows[column]), 0.0)
         parts[f"{name}_den"] = np.where(present, weight, 0.0)
+        parts[f"{name}_n"] = np.where(present, raw, 0.0)  # 표본 회귀의 n (가중치 없이)
     sums = pd.DataFrame(parts).groupby(rows["player_id"].to_numpy()).sum()
     return sums.reindex(ids, fill_value=0.0)
+
+
+def _league_means(seasons: pd.DataFrame, role: Role, season: int) -> dict[str, float]:
+    """표본 회귀의 lg — 그 시즌 모든 행의 분모(pa·bf) 가중 평균 (k_pct는 Σso/Σpa). 값이 없으면 결측."""
+    rows = seasons[seasons["season"] == season].sort_values(_SEASON_KEYS[role], kind="mergesort")
+    den = _floats(rows[_MEAN_DENOMINATOR[role]])
+    out: dict[str, float] = {}
+    if role == "bat":
+        pa = _floats(rows["pa"])
+        out["k_pct"] = float(_floats(rows["so"]).sum() / pa.sum()) if pa.sum() > 0 else np.nan
+    for name, (column, need) in _WINDOW_MEANS[role].items():
+        present = rows[list(need)].notna().all(axis=1).to_numpy(dtype=bool)
+        weight = np.where(present, den, 0.0)
+        total = float(weight.sum())
+        values = np.where(present, _floats(rows[column]), 0.0)
+        out[name] = float((weight * values).sum() / total) if total > 0 else np.nan
+    return out
 
 
 def _birth_age(birth_date: object, target: int) -> float:
@@ -213,8 +238,17 @@ def _features(
     rows = _window_rows(tables.seasons[role], cohort, role, target, params)
     sums = _window_sums(rows, role, ids)
 
+    k = float(EXT_SHRINK_SAMPLE[role])
+    league = _league_means(tables.seasons[role], role, target - 1)
+
     def mean(name: str) -> npt.NDArray[np.float64]:
-        return _ratio(_floats(sums[f"{name}_num"]), _floats(sums[f"{name}_den"]))
+        """기간 평균 x̄를 표본 회귀한 값 (모듈 docstring "표본 회귀")."""
+        x = _ratio(_floats(sums[f"{name}_num"]), _floats(sums[f"{name}_den"]))
+        lg = league[name]
+        if k <= 0 or np.isnan(lg):
+            return x
+        n = _floats(sums[f"{name}_n"])
+        return (np.where(n > 0, n * np.nan_to_num(x), 0.0) + k * lg) / (n + k)
 
     age_c = _season_ages(tables.players, rows, ids, target) - AGE_CENTER
     values: dict[str, npt.NDArray[np.float64]] = {"age_c": age_c, "age_c2": age_c * age_c}

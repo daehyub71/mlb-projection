@@ -19,6 +19,7 @@
 """
 
 import functools
+import math
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -908,6 +909,12 @@ def _constant_fit(monkeypatch: pytest.MonkeyPatch, deltas: Mapping[str, float]) 
 # ---------------------------------------------------------------------------
 
 
+@pytest.fixture
+def no_shrink(monkeypatch: pytest.MonkeyPatch) -> None:
+    """표본 회귀(D31)를 끈다 — 손 계산 기대값은 줄이지 않은 기간 평균 x̄로 적었다(k = 0이면 그대로)."""
+    monkeypatch.setattr(ext_mod, "EXT_SHRINK_SAMPLE", {"bat": 0, "pit": 0})
+
+
 def test_models_extended_role_features_cover_metric_features() -> None:
     for role in c.ROLES:
         seen: list[str] = []
@@ -940,7 +947,7 @@ def test_models_extended_world_is_big_enough() -> None:
 
 
 @pytest.mark.parametrize("role", c.ROLES)
-def test_models_extended_features_hand_values(role: Role) -> None:
+def test_models_extended_features_hand_values(role: Role, no_shrink: None) -> None:
     out = extended_features(_hand_tables(), role, Y_HAND, P_HAND, _hand_weighted(role))
     assert list(out.columns) == ["player_id", *ROLE_FEATURES[role]]
     expected = HAND_EXPECTED[role]
@@ -1045,7 +1052,9 @@ ORDER_EXPECTED: dict[Role, dict[int, tuple[float, ...]]] = {
 
 
 @pytest.mark.parametrize("role", c.ROLES)
-def test_models_extended_features_season_weights_and_age_fallback(role: Role) -> None:
+def test_models_extended_features_season_weights_and_age_fallback(
+    role: Role, no_shrink: None
+) -> None:
     """시즌 Y−k의 가중치 = weights[k−1] (역할별), 분모는 실제 pa·bf, 나이는 기간 안 마지막 행만 대신 쓴다."""
     tables = _tables(_rows("bat", ORDER_BAT), _rows("pit", ORDER_PIT), ORDER_BIRTHS)
     cohort = cohort_for(tables, role, Y_HAND)
@@ -1100,13 +1109,13 @@ def test_models_extended_features_ignore_rows_from_target_season() -> None:
 
 
 @pytest.mark.parametrize(("role", "metric"), sorted(TINY_EXPECTED))
-def test_models_extended_residual_hand_rows(role: Role, metric: str) -> None:
+def test_models_extended_residual_hand_rows(role: Role, metric: str, no_shrink: None) -> None:
     out = residual_frame(_tiny_tables(), role, metric, Y_TINY, P_HAND)
     assert list(out.columns) == _residual_columns(metric)
     _assert_records(_residual_records(out, metric), TINY_EXPECTED[(role, metric)])
 
 
-def test_models_extended_residual_drops_rate_rows_without_actual_value() -> None:
+def test_models_extended_residual_drops_rate_rows_without_actual_value(no_shrink: None) -> None:
     """실제 pa ≥ 200인데 실제 ops가 결측이면 ops 학습 행에서 뺀다 (y를 맞출 수 없다 — 평가의 대표 집단과 같다).
 
     같은 선수는 hr 학습 행에는 든다. 36: 2020 pa 100·hr 2 → 가중 hr/pa = 2·2 / (2·100) = .02 (R = 0),
@@ -1692,3 +1701,55 @@ def test_models_extended_no_leakage(role: Role) -> None:
         extended_projection(clean, role, Y_WORLD, P_WORLD, adoption),
         extended_projection(poisoned, role, Y_WORLD, P_WORLD, adoption),
     )
+
+
+# ---------------------------------------------------------------------------
+# Statcast·K% 특성의 표본 회귀 (SPEC D31, M4 재검증 때 메인이 더함)
+# x = (n·x̄ + k·리그 Y−1 값) / (n + k), n = 그 평균에 쓴 행의 타석(투수 상대 타자) 합(가중치 없이)
+# ---------------------------------------------------------------------------
+
+
+def _shrunk(x: float, n: float, k: float, lg: float) -> float:
+    return (n * x + k * lg) / (n + k) if not math.isnan(x) else lg
+
+
+def test_models_extended_features_shrink_toward_league(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(ext_mod, "EXT_SHRINK_SAMPLE", {"bat": 200, "pit": 200})
+    out = extended_features(_hand_tables(), "bat", Y_HAND, P_HAND, _hand_weighted("bat"))
+    got = out.set_index("player_id")
+    # 리그 Y−1(2024) 값: 2024 타격 행은 11(pa 500, barrel 8.0, so 100, xwoba .400, woba 결측)·
+    # 13(pa 50, barrel 4.0, ev 85.0, so 5, woba .250, xwoba 결측)
+    lg_barrel = (500 * 8.0 + 50 * 4.0) / 550  # 7.636…
+    lg_ev = 85.0  # ev는 13만
+    lg_k = 100 * (100 + 5) / (500 + 50)  # 19.09…
+    # 11: barrel x̄ 10.0 (n = 400 + 500), ev x̄ 89.0 (n = 400 + 200), k x̄ 22.5 (n = 400 + 200 + 500)
+    assert got.loc[11, "barrel_pct"] == pytest.approx(_shrunk(10.0, 900, 200, lg_barrel))
+    assert got.loc[11, "ev_avg"] == pytest.approx(_shrunk(89.0, 600, 200, lg_ev))
+    assert got.loc[11, "k_pct"] == pytest.approx(_shrunk(22.5, 1100, 200, lg_k))
+    # 12: Statcast 행이 없으면 리그 값 그대로 (n = 0)
+    assert got.loc[12, "barrel_pct"] == pytest.approx(lg_barrel)
+    assert got.loc[12, "ev_avg"] == pytest.approx(lg_ev)
+    # xwoba·woba가 같이 있는 2024 행이 없어 리그 차이가 없다 → 그 특성은 줄이지 않는다
+    assert got.loc[11, "xwoba_minus_woba"] == pytest.approx(-0.01)
+    # 나이는 줄이지 않는다
+    assert got.loc[11, "age_c"] == pytest.approx(2.0)
+
+
+def test_models_extended_features_shrink_pitcher(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(ext_mod, "EXT_SHRINK_SAMPLE", {"bat": 200, "pit": 200})
+    out = extended_features(_hand_tables(), "pit", Y_HAND, P_HAND, _hand_weighted("pit"))
+    got = out.set_index("player_id")
+    # 리그 2024 투구: 21(bf 200, whiff 25.0, xera 결측)·22(bf 250, Statcast 없음) → whiff 25.0, xera 없음
+    # 21 whiff: x̄ 27.0, n = 400 + 200
+    assert got.loc[21, "whiff_pct"] == pytest.approx(_shrunk(27.0, 600, 200, 25.0))
+    assert got.loc[22, "whiff_pct"] == pytest.approx(25.0)  # 행 없음 → 리그 값
+    # 리그 xera가 없으면 줄이지 않는다: 21 xera 3.4 − 3.9
+    assert got.loc[21, "xera_minus_proj"] == pytest.approx(-0.5)
+
+
+def test_models_extended_features_tiny_sample_stays_near_league(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # 실제 결함(E25): 7타석의 xwOBA−wOBA +.181이 그대로 보정에 들어갔다. 표본 회귀면 거의 리그 값
+    monkeypatch.setattr(ext_mod, "EXT_SHRINK_SAMPLE", {"bat": 200, "pit": 200})
+    assert _shrunk(0.181, 7, 200, 0.0) == pytest.approx(0.00612, abs=1e-5)

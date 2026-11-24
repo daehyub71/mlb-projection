@@ -482,6 +482,9 @@ EXT_FEATURES: Final[dict[str, tuple[str, ...]]] = {
     "k_bb_pct": ("age_c", "whiff_pct"),
 }
 EXT_MIN_ROWS_PER_COEF: Final = 10  # 학습 행이 (특성 수 + 1) × 이 값보다 적으면 보정 0
+# 기간 평균 특성(Statcast·K%)의 표본 회귀 (SPEC D31): x = (n·x̄ + k·리그 Y−1 값) / (n + k).
+# n = 그 평균에 쓴 행의 타석(투수 상대 타자) 합. k는 비율 지표 대표 집단 기준과 같은 200
+EXT_SHRINK_SAMPLE: Final[dict[Role, int]] = {"bat": 200, "pit": 200}
 
 
 def _rates(prefix: str, names: Iterable[str]) -> tuple[Column, ...]:

@@ -4,7 +4,10 @@
 만지고, `Fetcher`는 주입받은 transport·sleep·clock으로 동작하므로 테스트는 가짜를 넣는다.
 """
 
+import http.client
 import time
+import urllib.error
+import urllib.request
 from collections.abc import Callable, Mapping
 
 from mlbproj.contracts import MIN_INTERVAL_SECONDS, USER_AGENT
@@ -15,6 +18,16 @@ RETRY_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
 # transport(url, headers, timeout) → (HTTP 상태, 응답 바이트).
 # 연결 실패·시간 초과처럼 응답 자체가 없으면 TransientError를 낸다.
 Transport = Callable[[str, Mapping[str, str], float], tuple[int, bytes]]
+
+# 응답을 받지 못한 실패 — 모두 TransientError로 바꿔 재시도한다.
+# - OSError: URLError(연결 실패·DNS·인증서), TimeoutError, ConnectionError(RemoteDisconnected·
+#   ConnectionResetError 포함), ssl.SSLError(SSLEOFError 등)
+# - http.client.HTTPException: IncompleteRead(본문을 읽다 끊김), BadStatusLine·LineTooLong(상태 줄·헤더가 깨짐)
+# urlopen은 요청을 보내는 단계의 OSError만 URLError로 감싸고, 상태 줄을 읽는 단계(getresponse)와
+# 본문을 읽는 단계(read)의 오류는 그대로 내보낸다. 그래서 URLError만이 아니라 두 계열을 다 잡는다.
+# HTTPError도 OSError(URLError)의 하위 클래스이므로 먼저 따로 잡아야 한다.
+# 테스트의 네트워크 차단(RuntimeError)이나 잘못된 URL(ValueError)은 여기에 들지 않아 그대로 올라간다.
+_NO_RESPONSE_ERRORS: tuple[type[Exception], ...] = (OSError, http.client.HTTPException)
 
 
 class TransientError(Exception):
@@ -51,7 +64,32 @@ def urllib_transport(url: str, headers: Mapping[str, str], timeout: float) -> tu
     Returns:
         (HTTP 상태, 응답 바이트).
     """
-    raise NotImplementedError
+    request = urllib.request.Request(url, headers=dict(headers), method="GET")
+    try:
+        try:
+            # 테스트가 모듈 속성을 바꿔 끼우므로 부를 때마다 urllib.request에서 찾는다
+            with urllib.request.urlopen(request, timeout=timeout) as resp:
+                status: int = resp.status
+                body: bytes = resp.read()
+                return status, body
+        except urllib.error.HTTPError as err:
+            # 4xx·5xx도 응답이다. 판단은 Fetcher가 한다
+            with err:
+                return err.code, _read_error_body(err)
+    except _NO_RESPONSE_ERRORS as err:
+        raise TransientError(f"{url}: {err}") from err
+
+
+def _read_error_body(err: urllib.error.HTTPError) -> bytes:
+    """오류 응답의 본문을 읽는다. 읽다가 끊기면 빈 바이트를 돌려준다.
+
+    상태 줄은 이미 받았으므로 '응답이 없는 실패'(TransientError)가 아니다. Fetcher는 2xx가 아닌
+    응답의 본문을 쓰지 않으므로, 본문을 잃어도 상태(예: 404면 바로 실패)는 그대로 전한다.
+    """
+    try:
+        return err.read()
+    except _NO_RESPONSE_ERRORS:
+        return b""
 
 
 class Fetcher:
@@ -80,12 +118,35 @@ class Fetcher:
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
-        raise NotImplementedError
+        if max_attempts < 1:
+            raise ValueError(f"max_attempts는 1 이상이어야 한다: {max_attempts}")
+        self._transport = transport
+        self._headers: dict[str, str] = {"User-Agent": user_agent}
+        self._min_interval = min_interval
+        self._max_attempts = max_attempts
+        self._backoff_base = backoff_base
+        self._timeout = timeout
+        self._sleep = sleep
+        self._clock = clock
+        # 직전 transport 호출이 시작한 시각. None이면 아직 요청한 적이 없다
+        # (시계가 0.0에서 시작할 수 있으므로 0.0으로 초기화하지 않는다)
+        self._last_start: float | None = None
+        self._requests_made = 0
 
     @property
     def requests_made(self) -> int:
         """transport를 부른 횟수."""
-        raise NotImplementedError
+        return self._requests_made
+
+    def _send(self, url: str) -> tuple[int, bytes]:
+        """요청 간격을 지킨 뒤 transport를 한 번 부른다 (재시도도 이 길로 나간다)."""
+        if self._last_start is not None:
+            remaining = self._last_start + self._min_interval - self._clock()
+            if remaining > 0:
+                self._sleep(remaining)
+        self._last_start = self._clock()
+        self._requests_made += 1
+        return self._transport(url, self._headers, self._timeout)
 
     def get(self, url: str) -> bytes:
         """URL을 받아 응답 바이트를 돌려준다.
@@ -99,4 +160,32 @@ class Fetcher:
         Raises:
             FetchError: 재시도해도 실패했거나 재시도 대상이 아닌 상태일 때.
         """
-        raise NotImplementedError
+        # 마지막으로 받은 HTTP 상태. 한 번도 응답을 받지 못했으면 None으로 남는다
+        status: int | None = None
+        last_problem = ""
+        # 마지막 시도가 응답 없이 끝났을 때의 원인 (FetchError의 __cause__로 잇는다)
+        last_error: TransientError | None = None
+        for attempt in range(1, self._max_attempts + 1):
+            try:
+                status, body = self._send(url)
+            except TransientError as err:
+                last_problem = f"응답 없음 ({err})"
+                last_error = err
+            else:
+                last_error = None
+                if 200 <= status < 300:
+                    return body
+                if status not in RETRY_STATUSES:
+                    raise FetchError(
+                        url, status, attempt, f"{url}: HTTP {status} (재시도 대상이 아니다)"
+                    )
+                last_problem = f"HTTP {status}"
+            # 마지막 시도가 실패한 뒤에는 기다리지 않는다
+            if attempt < self._max_attempts:
+                self._sleep(self._backoff_base ** (attempt - 1))
+        raise FetchError(
+            url,
+            status,
+            self._max_attempts,
+            f"{url}: {self._max_attempts}번 시도했지만 받지 못했다 (마지막: {last_problem})",
+        ) from last_error

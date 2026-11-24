@@ -55,7 +55,7 @@ def test_repo_hygiene_fixture_files_exist() -> None:
     names = {p.relative_to(FIXTURE_RAW).as_posix() for p in _fixture_files()}
     for season in c.SEASONS:
         for role in c.ROLES:
-            assert c.raw_statsapi_path(season, role).relative_to(c.RAW_DIR).as_posix() in names
+            assert c.raw_statsapi_path(season, role).as_posix() in names
         for kind in ("batter", "pitcher"):
             assert f"savant/{season}_{kind}.csv" in names
     for season in c.FIELDING_YEARS:

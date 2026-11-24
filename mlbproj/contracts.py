@@ -74,26 +74,32 @@ OUT_DIR: Final = Path("data/out")
 WEB_DATA_DIR: Final = Path("web/public/data")
 PARAMS_PATH: Final = Path("config/params_v1.json")
 WEB_SCHEMA_PATH: Final = Path("contracts/web-data.schema.json")
-MANIFEST_PATH: Final = RAW_DIR / "manifest.json"  # 파일별 URL·받은 시각·sha256 (F1·N1)
+# F2 검증 결과. M2 이후 단계는 이 보고서가 통과·최신인지 확인한 뒤에만 진행한다
+VALIDATION_REPORT_PATH: Final = INTERIM_DIR / "validation_report.json"
+MANIFEST_NAME: Final = "manifest.json"  # 원본 디렉토리 안. 파일별 URL·받은 시각·sha256 (F1·N1)
 
 SavantKind = Literal["batter", "pitcher", "oaa", "frv"]
 
 PEOPLE_BATCH_SIZE: Final = 100
+MIN_INTERVAL_SECONDS: Final = 1.0  # 요청 사이 최소 간격 (N3)
+
+# 아래 원본 경로는 모두 **원본 디렉토리 기준 상대 경로**다. 실제 위치는 `RAW_DIR / 경로`,
+# 테스트에서는 `tests/fixtures/raw / 경로`다. 매니페스트 키도 이 상대 경로(posix)다.
 
 
 def raw_statsapi_path(season: int, role: Role) -> Path:
-    """API 시즌 기록 원본 경로를 돌려준다."""
-    return RAW_DIR / "statsapi" / f"{season}_{role}.json"
+    """API 시즌 기록 원본의 상대 경로를 돌려준다."""
+    return Path("statsapi") / f"{season}_{role}.json"
 
 
 def raw_people_path(batch: int) -> Path:
-    """API 선수 정보 원본 경로를 돌려준다. batch는 0부터 센다."""
-    return RAW_DIR / "statsapi" / f"people_{batch:03d}.json"
+    """API 선수 정보 원본의 상대 경로를 돌려준다. batch는 0부터 센다."""
+    return Path("statsapi") / f"people_{batch:03d}.json"
 
 
 def raw_savant_path(season: int, kind: SavantKind) -> Path:
-    """Savant CSV 원본 경로를 돌려준다."""
-    return RAW_DIR / "savant" / f"{season}_{kind}.csv"
+    """Savant CSV 원본의 상대 경로를 돌려준다."""
+    return Path("savant") / f"{season}_{kind}.csv"
 
 
 # ---------------------------------------------------------------------------

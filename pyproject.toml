@@ -18,8 +18,9 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
-# 한국어 주석·문서의 전각 문자 경고, pytest.approx와 부딪히는 SIM300은 끈다
-ignore = ["RUF001", "RUF002", "RUF003", "SIM300"]
+# 한국어 주석·문서의 전각 문자 경고, pytest.approx와 부딪히는 SIM300은 끈다.
+# E501: 코드 줄 길이는 ruff format이 맞추고, 한글 docstring은 두 칸 너비로 세어져 끈다.
+ignore = ["RUF001", "RUF002", "RUF003", "SIM300", "E501"]
 
 [tool.mypy]
 python_version = "3.11"

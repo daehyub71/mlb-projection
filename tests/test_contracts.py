@@ -18,9 +18,10 @@ def test_contracts_seasons_and_windows() -> None:
 
 
 def test_contracts_raw_paths() -> None:
-    assert c.raw_statsapi_path(2020, "bat") == Path("data/raw/statsapi/2020_bat.json")
-    assert c.raw_people_path(3) == Path("data/raw/statsapi/people_003.json")
-    assert c.raw_savant_path(2026, "frv") == Path("data/raw/savant/2026_frv.csv")
+    assert c.raw_statsapi_path(2020, "bat") == Path("statsapi/2020_bat.json")
+    assert c.raw_people_path(3) == Path("statsapi/people_003.json")
+    assert c.raw_savant_path(2026, "frv") == Path("savant/2026_frv.csv")
+    assert c.RAW_DIR / c.raw_savant_path(2026, "frv") == Path("data/raw/savant/2026_frv.csv")
     assert c.web_player_path(660271) == Path("web/public/data/players/660271.json")
 
 
@@ -142,7 +143,7 @@ def test_contracts_fixture_statsapi_has_required_fields(season: int) -> None:
         ("bat", c.STATSAPI_HITTING_STAT_FIELDS),
         ("pit", c.STATSAPI_PITCHING_STAT_FIELDS),
     ):
-        path = FIXTURE_RAW / c.raw_statsapi_path(season, role).relative_to(c.RAW_DIR)
+        path = FIXTURE_RAW / c.raw_statsapi_path(season, role)
         splits = json.loads(path.read_text(encoding="utf-8"))["stats"][0]["splits"]
         assert splits
         for split in splits:
@@ -154,7 +155,7 @@ def test_contracts_fixture_people_has_required_fields() -> None:
     import json
 
     for batch in (0, 1):
-        path = FIXTURE_RAW / c.raw_people_path(batch).relative_to(c.RAW_DIR)
+        path = FIXTURE_RAW / c.raw_people_path(batch)
         for person in json.loads(path.read_text(encoding="utf-8"))["people"]:
             assert set(c.PEOPLE_FIELDS) <= set(person), person["id"]
 

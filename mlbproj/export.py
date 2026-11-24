@@ -52,15 +52,108 @@ validation.json(ValidationReport), players/{player_id}.json(PlayerDetail). 여�
 name 열을 붙여 `PROJECTION_CSV[role]`에 쓴다. player_id 순, 줄 끝 "\\n", 실수는 pandas 기본 표기.
 """
 
-from collections.abc import Mapping
+import json
+import math
+import re
+from collections.abc import Hashable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
+from mlbproj import contracts as c
+from mlbproj.age import season_age
 from mlbproj.contracts import PROJECTION_CSV, Role
+from mlbproj.schema import validate
 from mlbproj.tables import Tables
+
+_OUTS_PER_GAME = 27  # ERA = 9이닝(27아웃)당 자책점
+_OUTS_PER_INNING = 3
+_PCT = 100.0
+_SHORT_CAREER_MAX = 2  # seasons_1_2 그룹의 n_seasons 상한 (evaluate와 같은 규칙, D13)
+_GROUP_SHORT = "seasons_1_2"
+_GROUP_LONG = "seasons_3_5"
+_SHOW_MAX = 5  # 오류 메시지에 적는 선수 ID·스키마 위반의 최대 개수
+
+_PLAYERS_DIR = "players"  # 선수 상세 하위 디렉토리 (`contracts.web_player_path`와 같다)
+_PLAYER_FILE = re.compile(rf"{_PLAYERS_DIR}/[1-9][0-9]*\.json")
+_VALIDATION_FILE = "validation.json"
+_TABLE_FILES: dict[Role, str] = {"bat": "batters.json", "pit": "pitchers.json"}
+# 검증 행 순서. EVALUATIONS 키에 role을 더한 것이다 (문자열 사전순)
+_EVAL_ORDER: list[str] = ["target_season", "role", "model", "metric", "group"]
+
+_PROJECTION_SPECS: dict[Role, c.TableSpec] = {"bat": c.BAT_PROJECTIONS, "pit": c.PIT_PROJECTIONS}
+_METRICS: dict[Role, tuple[str, ...]] = {"bat": c.BAT_METRICS, "pit": c.PIT_METRICS}
+# 리그 평균 기준선 = 그 역할의 비율 지표 (타자 ops, 투수 era·k_bb_pct)
+_BASELINE_KEYS: dict[Role, tuple[str, ...]] = {
+    role: tuple(m for m in _METRICS[role] if m in c.RATE_METRICS) for role in c.ROLES
+}
+
+# 웹 JSON 객체의 키 (스키마 정의의 필수 키 순서)
+_SUMMARY_KEYS = ("player_id", "name", "age", "team_name", "active", "last_mlb_season")
+_WINDOW_KEYS = ("input_first", "input_last", "n_seasons")
+_SAMPLE_KEYS: dict[Role, tuple[str, ...]] = {
+    "bat": ("sample_pa",),
+    "pit": ("sample_bf", "sample_ip"),
+}
+_PROJECTION_KEYS: dict[Role, tuple[str, ...]] = {
+    "bat": ("pa", "hr", "obp", "slg", "ops"),
+    "pit": ("ip", "era", "k_bb_pct"),
+}
+_PREV_KEYS: dict[Role, tuple[str, ...]] = {
+    "bat": ("season", "pa", "hr", "ops"),
+    "pit": ("season", "ip", "era", "k_bb_pct"),
+}
+_HISTORY_KEYS: dict[Role, tuple[str, ...]] = {
+    "bat": (
+        "season",
+        "age",
+        "team_name",
+        "is_short_season",
+        "pa",
+        "hr",
+        "obp",
+        "slg",
+        "ops",
+        "k_pct",
+        "bb_pct",
+        "woba",
+        "xwoba",
+        "barrel_pct",
+        "hard_hit_pct",
+        "ev_avg",
+    ),
+    "pit": (
+        "season",
+        "age",
+        "team_name",
+        "is_short_season",
+        "g",
+        "gs",
+        "ip",
+        "era",
+        "fip",
+        "k_pct",
+        "bb_pct",
+        "k_bb_pct",
+        "xera",
+        "xwoba_against",
+        "whiff_pct",
+    ),
+}
+_FIELDING_KEYS = (
+    "season",
+    "oaa",
+    "frv_total",
+    "frv_range",
+    "frv_arm",
+    "frv_dp",
+    "frv_framing",
+    "frv_blocking",
+    "frv_throwing",
+)
 
 
 @dataclass(frozen=True)
@@ -84,18 +177,314 @@ class ExportInput:
     meta: dict[str, Any]
 
 
+# ---------------------------------------------------------------------------
+# 값 변환
+# ---------------------------------------------------------------------------
+
+
+def _json_value(value: Any, key: str) -> Any:
+    """표 값 하나를 JSON 값으로. 결측 → None, 정수 → int, 실수는 키가 WEB_ROUND에 있으면 반올림.
+
+    반올림 결과가 −0.0이면 0.0으로 바꾼다 (FRV −0.04 → "-0.0"이 화면에 나오지 않게. 값은 같다).
+    inf는 그대로 두고 쓰기 단계(스키마 검사·`dump_json`)에서 거부한다.
+    """
+    if isinstance(value, bool | np.bool_):
+        return bool(value)
+    if isinstance(value, int | np.integer):
+        return int(value)
+    if isinstance(value, float | np.floating):
+        number = float(value)
+        if math.isnan(number):
+            return None
+        digits = c.WEB_ROUND.get(key)
+        rounded = number if digits is None else round(number, digits)
+        return 0.0 if rounded == 0 else rounded
+    if value is None or value is pd.NA:
+        return None
+    if isinstance(value, str):
+        return value
+    raise TypeError(f"{key}: JSON 값으로 바꿀 수 없다 ({type(value).__name__}: {value!r})")
+
+
+def _pick(record: Mapping[Hashable, Any], keys: Iterable[str]) -> dict[str, Any]:
+    """레코드에서 keys만 골라 JSON 값 객체로 만든다 (키 순서 = keys 순서)."""
+    return {key: _json_value(record[key], key) for key in keys}
+
+
+def _by_player(df: pd.DataFrame, keys: Iterable[str]) -> dict[int, list[dict[str, Any]]]:
+    """선수 ID → 그 선수 행들의 JSON 객체 목록 (표의 행 순서 그대로)."""
+    names = tuple(keys)
+    out: dict[int, list[dict[str, Any]]] = {}
+    for record in df.to_dict("records"):
+        out.setdefault(int(record["player_id"]), []).append(_pick(record, names))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 예측표 행·선수 상세 (역할마다)
+# ---------------------------------------------------------------------------
+
+
+def _require_ids(ids: pd.Series, known: pd.Series, what: str) -> None:
+    """예측 표의 선수가 모두 known에 있는지 확인한다. 없으면 ValueError."""
+    missing = sorted(set(ids.tolist()) - set(known.tolist()))
+    if missing:
+        raise ValueError(f"예측 표의 선수 {len(missing)}명이 {what}에 없다: {missing[:_SHOW_MAX]}")
+
+
+def _checked_projections(inp: ExportInput, role: Role, target: int) -> pd.DataFrame:
+    """예측 표가 ExportInput 계약(그 역할·목표 Y·최종 모델 행만)을 지키는지 확인하고 player_id 순으로 돌려준다.
+
+    다른 목표 시즌(예: 2026)의 예측이 2027로 공개되거나, 모델 이름과 값이 어긋나는 것을 막는다.
+
+    Raises:
+        ValueError: 표 계약(`BAT_PROJECTIONS`·`PIT_PROJECTIONS`) 위반, 또는 role·target_season·model이
+            (role, Y, inp.model[role])이 아닌 행이 있을 때.
+    """
+    projections = inp.projections[role]
+    problems = c.check_frame(projections, _PROJECTION_SPECS[role])
+    if problems:
+        raise ValueError(f"{role} 예측 표가 계약을 어긴다: " + "; ".join(problems))
+    expected: dict[str, Any] = {"role": role, "target_season": target, "model": inp.model[role]}
+    for column, value in expected.items():
+        wrong = sorted(set(projections[column].tolist()) - {value})
+        if wrong:
+            raise ValueError(
+                f"{role} 예측 표의 {column}은 {value!r}만 있어야 하는데 {wrong[:_SHOW_MAX]}도 있다"
+            )
+    return projections.sort_values("player_id", kind="mergesort").reset_index(drop=True)
+
+
+def _checked_evaluations(inp: ExportInput, target: int) -> pd.DataFrame:
+    """평가표를 확인하고 (target_season, role, model, metric, group) 순으로 정렬한다.
+
+    2026 행(`FINAL_TEST_TARGET`)은 최종 검증 기록(final_test)이 있을 때만 받는다 — 한 번만 돌리는
+    최종 검증(F10)을 거치지 않은 2026 결과를 공개하지 않는다.
+
+    Raises:
+        ValueError: 표 계약(`EVALUATIONS`) 위반, 목표 Y 이후 행, final_test 없이 2026 행이 있을 때.
+    """
+    evaluations = inp.evaluations
+    problems = c.check_frame(evaluations, c.EVALUATIONS)
+    if problems:
+        raise ValueError("평가표가 계약을 어긴다: " + "; ".join(problems))
+    seasons = evaluations["target_season"]
+    late = sorted(set(seasons[seasons >= target].tolist()))
+    if late:
+        raise ValueError(f"평가표에 목표 {target} 이후 시즌 행이 있다: {late}")
+    if inp.final_test is None and bool((seasons == c.FINAL_TEST_TARGET).any()):
+        raise ValueError(
+            f"평가표에 {c.FINAL_TEST_TARGET} 행이 있는데 최종 검증 기록(final_test)이 없다"
+        )
+    # 평균·행 순서가 입력 행 순서에 기대지 않게 정렬한다 (N1)
+    return evaluations.sort_values(_EVAL_ORDER, kind="mergesort").reset_index(drop=True)
+
+
+def _role_base(inp: ExportInput, role: Role, target: int) -> pd.DataFrame:
+    """예측 표 + 대상 표(기간·표본) + 선수 표 + input_last 행(나이·팀). player_id 순, 선수당 한 행.
+
+    Raises:
+        ValueError: 예측 표가 계약을 어기거나, 예측 표의 선수가 목표 Y 대상 표나 players 표에 없을 때.
+    """
+    tables = inp.tables
+    projections = _checked_projections(inp, role, target)
+    cohorts = tables.cohorts
+    cohort = cohorts[(cohorts["target_season"] == target) & (cohorts["role"] == role)]
+    _require_ids(projections["player_id"], cohort["player_id"], f"{target} {role} 대상 표")
+    _require_ids(projections["player_id"], tables.players["player_id"], "players 표")
+
+    last = tables.seasons[role][["player_id", "season", "age", "team_name"]].rename(
+        columns={"season": "input_last", "age": "last_age"}
+    )
+    base = (
+        projections[["player_id", *_PROJECTION_KEYS[role]]]
+        .merge(
+            cohort[["player_id", *_WINDOW_KEYS, "sample", "sample_outs"]],
+            on="player_id",
+            how="left",
+            validate="one_to_one",
+        )
+        .merge(tables.players, on="player_id", how="left", validate="one_to_one")
+        .merge(last, on=["player_id", "input_last"], how="left", validate="one_to_one")
+    )
+    # 나이: 생년월일 기준 Y 시즌 나이, 없으면 input_last 행 나이 + (Y − input_last), 그것도 없으면 결측
+    born = [season_age(b if isinstance(b, str) else None, target) for b in base["birth_date"]]
+    fallback = base["last_age"] + (target - base["input_last"])
+    base["age"] = pd.Series(born, index=base.index, dtype="Int64").fillna(fallback)
+    if role == "bat":
+        base["sample_pa"] = base["sample"]
+    else:
+        base["sample_bf"] = base["sample"]
+        base["sample_ip"] = base["sample_outs"].astype("float64") / _OUTS_PER_INNING
+    return base
+
+
+def _season_stats(role: Role, seasons: pd.DataFrame, league: pd.DataFrame) -> pd.DataFrame:
+    """정제 시즌 표 + 표시용 계산 열 (모듈 docstring history·prev). 분모가 0이면 그 값은 결측."""
+    if role == "bat":
+        pa = seasons["pa"].where(seasons["pa"] > 0)
+        return seasons.assign(k_pct=_PCT * seasons["so"] / pa, bb_pct=_PCT * seasons["bb"] / pa)
+    outs = seasons["outs"].where(seasons["outs"] > 0)
+    bf = seasons["bf"].where(seasons["bf"] > 0)
+    fip_const = seasons["season"].map(league.set_index("season")["fip_const"])
+    fip_core = 13 * seasons["hr"] + 3 * (seasons["bb"] + seasons["hbp"]) - 2 * seasons["so"]
+    return seasons.assign(
+        ip=seasons["outs"] / _OUTS_PER_INNING,
+        era=_OUTS_PER_GAME * seasons["er"] / outs,
+        fip=fip_core / (outs / _OUTS_PER_INNING) + fip_const,
+        k_pct=_PCT * seasons["so"] / bf,
+        bb_pct=_PCT * seasons["bb"] / bf,
+        # = k_pct − bb_pct. prev와 같은 식이라 같은 시즌이면 같은 값이 나온다
+        k_bb_pct=_PCT * (seasons["so"] - seasons["bb"]) / bf,
+    )
+
+
+def _league_baseline(league: pd.DataFrame, role: Role, season: int) -> dict[str, Any]:
+    """리그 평균 기준선 (Y−1 시즌 행의 비율 지표)."""
+    rows = league[league["season"] == season].to_dict("records")
+    if len(rows) != 1:
+        raise ValueError(f"{role} 리그 평균에 {season} 시즌 행이 하나가 아니다 ({len(rows)}개)")
+    return _pick(rows[0], _BASELINE_KEYS[role])
+
+
+def _group_error(means: pd.Series, role: Role, n_seasons: int) -> dict[str, Any]:
+    """선수가 속한 그룹의 과거 검증 MAE (GroupError). 지표 키 이름으로 반올림한다."""
+    group = _GROUP_SHORT if n_seasons <= _SHORT_CAREER_MAX else _GROUP_LONG
+    mae = {m: _json_value(means.get((m, group), math.nan), m) for m in _METRICS[role]}
+    return {"group": group, "mae": mae}
+
+
+def _role_entries(
+    inp: ExportInput, role: Role, target: int, evaluations: pd.DataFrame
+) -> tuple[dict[str, Any], dict[int, dict[str, Any]]]:
+    """한 역할의 예측표 객체(BatTable·PitTable)와 선수 ID → 상세 블록(BatDetail·PitDetail)."""
+    tables = inp.tables
+    model = inp.model[role]
+    base = _role_base(inp, role, target)
+    stats = _season_stats(role, tables.seasons[role], tables.league[role])
+
+    prev = {
+        pid: rows[0]
+        for pid, rows in _by_player(stats[stats["season"] == target - 1], _PREV_KEYS[role]).items()
+    }
+    spans = stats.merge(base[["player_id", "input_first", "input_last"]], on="player_id")
+    in_window = (spans["season"] >= spans["input_first"]) & (spans["season"] <= spans["input_last"])
+    history = _by_player(
+        spans[in_window].sort_values(["player_id", "season"], kind="mergesort"),
+        _HISTORY_KEYS[role],
+    )
+    baseline = _league_baseline(tables.league[role], role, target - 1)
+    # (지표, 그룹) → 목표 시즌들에 걸친 mae 단순 평균 (결측은 빼고, 전부 결측이면 결측)
+    mine = evaluations[(evaluations["role"] == role) & (evaluations["model"] == model)]
+    means = mine.groupby(["metric", "group"])["mae"].mean()
+
+    rows: list[dict[str, Any]] = []
+    details: dict[int, dict[str, Any]] = {}
+    for record in base.to_dict("records"):
+        pid = int(record["player_id"])
+        core = {
+            "window": _pick(record, _WINDOW_KEYS),
+            **_pick(record, _SAMPLE_KEYS[role]),
+            "projection": _pick(record, _PROJECTION_KEYS[role]),
+            "prev": prev.get(pid),
+        }
+        rows.append({"player": _pick(record, _SUMMARY_KEYS), **core})
+        details[pid] = {
+            **core,
+            "league_baseline": baseline,
+            "group_error": _group_error(means, role, int(record["n_seasons"])),
+            "history": history.get(pid, []),
+        }
+    table = {
+        "meta": inp.meta,
+        "role": role,
+        "model": model,
+        "league_baseline": baseline,
+        "rows": rows,
+    }
+    return table, details
+
+
+def _fielding(
+    fielding: pd.DataFrame, ids: Iterable[int], target: int
+) -> dict[int, list[dict[str, Any]]]:
+    """선수 ID → FieldingSeason 목록 (`FIELDING_YEARS` 안 최근 `WINDOW`개, season 순).
+
+    목표 Y 이후 시즌은 넣지 않는다 — 다른 블록처럼 Y−1까지만 보여준다(N2). 2027에서는 FIELDING_YEARS가
+    모두 2026 이하라 결과가 같다.
+    """
+    if fielding.empty:
+        return {}
+    keep = (
+        fielding["season"].isin(c.FIELDING_YEARS)
+        & (fielding["season"] < target)
+        & fielding["player_id"].isin(list(ids))
+    )
+    rows = (
+        fielding[keep]
+        .sort_values(["player_id", "season"], kind="mergesort")
+        .groupby("player_id")
+        .tail(c.WINDOW)
+    )
+    out: dict[int, list[dict[str, Any]]] = {}
+    for record in rows.to_dict("records"):
+        entry = _pick(record, _FIELDING_KEYS)
+        outs = {c.POSITION_ABBR[p]: int(record[f"outs_{p}"]) for p in c.FRV_OUT_POSITIONS}
+        entry["outs_by_pos"] = {pos: n for pos, n in outs.items() if n > 0}
+        out.setdefault(int(record["player_id"]), []).append(entry)
+    return out
+
+
 def build_web(inp: ExportInput) -> dict[str, Any]:
     """웹 JSON 묶음. 상대 경로("batters.json", "players/660271.json" …) → JSON 객체.
 
     Raises:
         ValueError: 예측 표의 선수가 목표 Y 대상 표에 없거나, players 표에 없을 때.
     """
-    raise NotImplementedError
+    target = int(inp.meta["target_season"])
+    evaluations = _checked_evaluations(inp, target)
+    files: dict[str, Any] = {}
+    details: dict[Role, dict[int, dict[str, Any]]] = {}
+    for role in c.ROLES:
+        files[_TABLE_FILES[role]], details[role] = _role_entries(inp, role, target, evaluations)
+
+    ids = sorted(set(details["bat"]) | set(details["pit"]))
+    players = inp.tables.players
+    people = {
+        int(record["player_id"]): _pick(record, c.PLAYERS.column_names)
+        for record in players[players["player_id"].isin(ids)].to_dict("records")
+    }
+    fielding = _fielding(inp.tables.fielding, ids, target)
+    for pid in ids:
+        files[f"{_PLAYERS_DIR}/{pid}.json"] = {
+            "meta": inp.meta,
+            "player": people[pid],
+            "bat": details["bat"].get(pid),
+            "pit": details["pit"].get(pid),
+            "fielding": fielding.get(pid, []),
+        }
+    files[_VALIDATION_FILE] = {
+        "meta": inp.meta,
+        "final_test": inp.final_test,
+        "rows": [
+            _pick(record, c.EVALUATIONS.column_names) for record in evaluations.to_dict("records")
+        ],
+    }
+    return dict(sorted(files.items()))
 
 
 def dump_json(obj: Any) -> str:
     """결정적 직렬화 (모듈 docstring "직렬화")."""
-    raise NotImplementedError
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n"
+
+
+def _def_name(path: str) -> str:
+    """웹 파일 상대 경로 → 스키마 정의 이름. 모르는 이름이면 ValueError."""
+    if path in c.WEB_FILES:
+        return c.WEB_FILES[path]
+    if _PLAYER_FILE.fullmatch(path):
+        return c.WEB_PLAYER_DEF
+    raise ValueError(f"모르는 웹 파일 이름: {path!r}")
 
 
 def write_web(files: Mapping[str, Any], out_dir: Path, schema: dict[str, Any]) -> dict[str, int]:
@@ -104,11 +493,46 @@ def write_web(files: Mapping[str, Any], out_dir: Path, schema: dict[str, Any]) -
     Raises:
         ValueError: 스키마 위반, 첫 화면 크기 초과, 모르는 파일 이름일 때 (아무것도 쓰지 않는다).
     """
-    raise NotImplementedError
+    # 검사를 모두 마친 뒤에만 디스크를 건드린다
+    encoded: dict[str, bytes] = {}
+    for path in sorted(files):
+        def_name = _def_name(path)
+        errors = validate(files[path], def_name, schema)
+        if errors:
+            raise ValueError(
+                f"{path}: 스키마 {def_name} 위반 {len(errors)}건 — {errors[:_SHOW_MAX]}"
+            )
+        encoded[path] = dump_json(files[path]).encode("utf-8")
+    limit = c.WEB_FIRST_SCREEN_MAX_BYTES  # 호출 시점의 계약 값
+    for path in c.WEB_FIRST_SCREEN_FILES:
+        if path in encoded and len(encoded[path]) > limit:
+            raise ValueError(
+                f"{path}: {len(encoded[path]):,}바이트 — 첫 화면 한도 {limit:,}바이트를 넘는다 (N6)"
+            )
+
+    players_dir = out_dir / _PLAYERS_DIR
+    players_dir.mkdir(parents=True, exist_ok=True)
+    for old in sorted(players_dir.glob("*.json")):
+        if old.is_file() and f"{_PLAYERS_DIR}/{old.name}" not in encoded:
+            old.unlink()
+    for path, data in encoded.items():
+        (out_dir / path).write_bytes(data)
+    return {path: len(data) for path, data in encoded.items()}
 
 
 def write_projection_csv(
     inp: ExportInput, paths: Mapping[Role, Path] = PROJECTION_CSV
 ) -> dict[Role, Path]:
     """검토용 2027 예측 CSV를 쓴다 (모듈 docstring "검토용 CSV")."""
-    raise NotImplementedError
+    target = int(inp.meta["target_season"])
+    names = inp.tables.players[["player_id", "name"]]
+    frames: dict[Role, pd.DataFrame] = {}
+    # 두 역할을 모두 확인한 뒤에만 쓴다 (한 역할만 바뀐 CSV가 남지 않게)
+    for role in c.ROLES:
+        projections = _checked_projections(inp, role, target)
+        _require_ids(projections["player_id"], names["player_id"], "players 표")
+        frames[role] = projections.merge(names, on="player_id", how="left", validate="one_to_one")
+    for role, frame in frames.items():
+        paths[role].parent.mkdir(parents=True, exist_ok=True)
+        frame.to_csv(paths[role], index=False, lineterminator="\n")
+    return {role: paths[role] for role in c.ROLES}

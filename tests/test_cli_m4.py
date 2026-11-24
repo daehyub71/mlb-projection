@@ -384,6 +384,15 @@ class Steps:
         self._log("write_projection_csv", inp=inp, paths=dict(paths))
         return dict(paths)
 
+    def compute_bands(
+        self, tables: Tables, params: Params, adoption: Adoption, final_test_done: bool
+    ) -> pd.DataFrame:
+        # 과거 오차 80% 범위 (D29, M4 통합 때 더함) — 가짜는 빈 표
+        self._log("compute_bands", final_test_done=final_test_done)
+        from mlbproj.bands import empty_bands
+
+        return empty_bands()
+
     def install(self, monkeypatch: pytest.MonkeyPatch, *, real: Iterable[str] = ()) -> None:
         """가짜를 끼운다. real에 적은 이름은 진짜를 그대로 둔다."""
         keep = set(real)
@@ -401,6 +410,7 @@ class Steps:
             (export, "build_web"),
             (export, "write_web"),
             (export, "write_projection_csv"),
+            (cli, "compute_bands"),
         ]
         for module, name in places:
             if name in keep:
@@ -579,13 +589,17 @@ def test_cli_m4_export_defaults(
     assert inp["raw_dir"] == c.RAW_DIR
     assert inp["backtest_csv"] == c.BACKTEST_CSV
     assert inp["final_test_path"] == c.FINAL_TEST_PATH
-    assert steps.first("build_web")["inp"] is steps.inp
+    # 내보내기 입력에 범위 표(D29)만 붙여 넘긴다 — 나머지 필드는 build_export_input 결과 그대로
+    sent = steps.first("build_web")["inp"]
+    for name in ("tables", "projections", "model", "evaluations", "final_test", "meta"):
+        assert getattr(sent, name) is getattr(steps.inp, name), name
+    assert steps.first("compute_bands")["final_test_done"] is False
     web = steps.first("write_web")
     assert web["files"] is steps.files
     assert web["out_dir"] == c.WEB_DATA_DIR
     assert web["schema"] == load_schema(ROOT / c.WEB_SCHEMA_PATH)
     csv = steps.first("write_projection_csv")
-    assert csv["inp"] is steps.inp
+    assert csv["inp"] is sent
     assert csv["paths"] == c.PROJECTION_CSV
     # 첫 화면 파일 크기 (바이트, 천 단위 쉼표는 있어도 된다)
     printed = out.replace(",", "")

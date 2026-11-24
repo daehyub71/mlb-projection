@@ -40,7 +40,12 @@ validation.json(ValidationReport), players/{player_id}.json(PlayerDetail). 여�
 - fielding: 그 선수의 수비 표 행(`FIELDING_YEARS` 안, 최근 5개, season 오름차순). outs_by_pos =
   {`POSITION_ABBR[p]`: outs_p} 중 outs_p > 0인 포지션만. 수비 행이 없으면 [].
 
-검증 (ValidationReport): {meta, final_test = inp.final_test, rows = evaluations 전부(EvalRow)}.
+검증 (ValidationReport): {meta, final_test = inp.final_test, rows = evaluations 전부(EvalRow),
+bands = inp.bands 행(BandRow, 표 순서 그대로, q80은 지표 키로 반올림, targets는 정수 목록)}.
+
+과거 오차 80% 범위 (D29, inp.bands = `contracts.BANDS`. 비면 값은 모두 null)
+- 예측표 객체의 bands = {그룹: {지표: q80}} (`BAND_GROUPS` × `BAND_METRICS[role]`).
+- 선수 상세 group_error.band80 = 그 선수 그룹의 {지표: q80}.
 
 쓰기 (`write_web`)
 - 파일마다 스키마 정의(`WEB_FILES`, 선수 상세는 `WEB_PLAYER_DEF`)로 `schema.validate` 검사. 위반이 있으면
@@ -56,7 +61,7 @@ import json
 import math
 import re
 from collections.abc import Hashable, Iterable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +70,7 @@ import pandas as pd
 
 from mlbproj import contracts as c
 from mlbproj.age import season_age
+from mlbproj.bands import empty_bands
 from mlbproj.contracts import PROJECTION_CSV, Role
 from mlbproj.schema import validate
 from mlbproj.tables import Tables
@@ -156,6 +162,11 @@ _FIELDING_KEYS = (
 )
 
 
+def _empty_bands() -> pd.DataFrame:
+    """빈 범위 표 (`contracts.BANDS` 열과 형식)."""
+    return empty_bands()
+
+
 @dataclass(frozen=True)
 class ExportInput:
     """내보내기 입력 한 묶음.
@@ -167,6 +178,7 @@ class ExportInput:
         evaluations: 과거 검증 행 (`EVALUATIONS`, 2024·2025와 최종 검증 뒤 2026).
         final_test: ValidationReport.final_test 객체. 최종 검증 전이면 None.
         meta: Meta 객체 전체 (schema_version 포함, 스키마 그대로).
+        bands: 과거 오차 80% 범위 (`contracts.BANDS`, D29). 비면 범위 값은 모두 null.
     """
 
     tables: Tables
@@ -175,6 +187,7 @@ class ExportInput:
     evaluations: pd.DataFrame
     final_test: dict[str, Any] | None
     meta: dict[str, Any]
+    bands: pd.DataFrame = field(default_factory=_empty_bands)
 
 
 # ---------------------------------------------------------------------------
@@ -347,11 +360,30 @@ def _league_baseline(league: pd.DataFrame, role: Role, season: int) -> dict[str,
     return _pick(rows[0], _BASELINE_KEYS[role])
 
 
-def _group_error(means: pd.Series, role: Role, n_seasons: int) -> dict[str, Any]:
-    """선수가 속한 그룹의 과거 검증 MAE (GroupError). 지표 키 이름으로 반올림한다."""
+def _band_values(bands: pd.DataFrame, role: Role, group: str) -> dict[str, Any]:
+    """그룹 하나의 80% 범위 (지표 → ± 값, `BAND_METRICS[role]` 순, 없으면 null). 지표 키로 반올림."""
+    mine = bands[(bands["role"] == role) & (bands["group"] == group)]
+    values = dict(zip(mine["metric"], mine["q80"], strict=True))
+    return {m: _json_value(values.get(m, math.nan), m) for m in c.BAND_METRICS[role]}
+
+
+def _checked_bands(inp: ExportInput) -> pd.DataFrame:
+    """범위 표가 비었거나 계약을 지키는지 확인한다."""
+    if inp.bands.empty:
+        return _empty_bands()
+    problems = c.check_frame(inp.bands, c.BANDS)
+    if problems:
+        raise ValueError("범위 표 계약 위반: " + "; ".join(problems))
+    return inp.bands
+
+
+def _group_error(
+    means: pd.Series, bands: pd.DataFrame, role: Role, n_seasons: int
+) -> dict[str, Any]:
+    """선수가 속한 그룹의 과거 검증 MAE와 80% 범위 (GroupError). 지표 키 이름으로 반올림한다."""
     group = _GROUP_SHORT if n_seasons <= _SHORT_CAREER_MAX else _GROUP_LONG
     mae = {m: _json_value(means.get((m, group), math.nan), m) for m in _METRICS[role]}
-    return {"group": group, "mae": mae}
+    return {"group": group, "mae": mae, "band80": _band_values(bands, role, group)}
 
 
 def _role_entries(
@@ -377,6 +409,7 @@ def _role_entries(
     # (지표, 그룹) → 목표 시즌들에 걸친 mae 단순 평균 (결측은 빼고, 전부 결측이면 결측)
     mine = evaluations[(evaluations["role"] == role) & (evaluations["model"] == model)]
     means = mine.groupby(["metric", "group"])["mae"].mean()
+    bands = _checked_bands(inp)
 
     rows: list[dict[str, Any]] = []
     details: dict[int, dict[str, Any]] = {}
@@ -392,7 +425,7 @@ def _role_entries(
         details[pid] = {
             **core,
             "league_baseline": baseline,
-            "group_error": _group_error(means, role, int(record["n_seasons"])),
+            "group_error": _group_error(means, bands, role, int(record["n_seasons"])),
             "history": history.get(pid, []),
         }
     table = {
@@ -400,6 +433,7 @@ def _role_entries(
         "role": role,
         "model": model,
         "league_baseline": baseline,
+        "bands": {group: _band_values(bands, role, group) for group in c.BAND_GROUPS},
         "rows": rows,
     }
     return table, details
@@ -468,6 +502,17 @@ def build_web(inp: ExportInput) -> dict[str, Any]:
         "final_test": inp.final_test,
         "rows": [
             _pick(record, c.EVALUATIONS.column_names) for record in evaluations.to_dict("records")
+        ],
+        "bands": [
+            {
+                "role": str(record["role"]),
+                "metric": str(record["metric"]),
+                "group": str(record["group"]),
+                "n": int(record["n"]),
+                "q80": _json_value(record["q80"], str(record["metric"])),
+                "targets": [int(t) for t in str(record["targets"]).split(",") if t],
+            }
+            for record in _checked_bands(inp).to_dict("records")
         ],
     }
     return dict(sorted(files.items()))

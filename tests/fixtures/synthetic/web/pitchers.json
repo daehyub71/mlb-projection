@@ -55,5 +55,15 @@
    },
    "prev": null
   }
- ]
+ ],
+ "bands": {
+  "seasons_1_2": {
+   "era": 1.49,
+   "k_bb_pct": 5.9
+  },
+  "seasons_3_5": {
+   "era": 1.36,
+   "k_bb_pct": 5.5
+  }
+ }
 }

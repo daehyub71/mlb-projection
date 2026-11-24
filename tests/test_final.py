@@ -1211,7 +1211,12 @@ def _sorted(df: pd.DataFrame) -> pd.DataFrame:
 def _check_schema(inp: export.ExportInput) -> None:
     schema = load_schema(ROOT / c.WEB_SCHEMA_PATH)
     assert validate(inp.meta, "Meta", schema) == []
-    report: dict[str, Any] = {"meta": inp.meta, "final_test": inp.final_test, "rows": []}
+    report: dict[str, Any] = {
+        "meta": inp.meta,
+        "final_test": inp.final_test,
+        "rows": [],
+        "bands": [],
+    }
     assert validate(report, "ValidationReport", schema) == []
 
 

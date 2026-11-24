@@ -1,6 +1,7 @@
 """명령줄 진입점 (PLAN §2-4). 명령은 마일스톤마다 붙인다."""
 
 import argparse
+import dataclasses
 import json
 import sys
 from collections.abc import Mapping, Sequence
@@ -9,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from mlbproj import __version__, export, final
+from mlbproj import __version__, bands, export, final
 from mlbproj import contracts as c
 from mlbproj.backtest import load_tables, summary
 from mlbproj.clean.batting import build_batting
@@ -304,6 +305,7 @@ def _export(
     final_test_path: Path,
     web_dir: Path,
     csv_paths: Mapping[c.Role, Path],
+    bands_csv: Path = c.BANDS_CSV,
 ) -> None:
     """2027 최종 예측 → 내보내기 입력 → 웹 JSON·검토용 CSV (F11). 최종 검증은 돌리지 않는다.
 
@@ -322,6 +324,10 @@ def _export(
     )
     for warning in _missing_model_rows(inp):
         print(warning, file=sys.stderr)
+    inp = dataclasses.replace(
+        inp, bands=compute_bands(tables, params, adoption, inp.final_test is not None)
+    )
+    write_table(inp.bands, c.BANDS, bands_csv)
     files = export.build_web(inp)
     sizes = export.write_web(files, web_dir, load_schema(c.WEB_SCHEMA_PATH))
     written = export.write_projection_csv(inp, csv_paths)
@@ -340,6 +346,18 @@ def _export(
         f"합계 {sum(sizes.values()):,} bytes → {web_dir}"
     )
     print("검토용 CSV → " + ", ".join(str(path) for path in written.values()))
+
+
+def compute_bands(
+    tables: Tables, params: Params, adoption: Adoption, final_test_done: bool
+) -> pd.DataFrame:
+    """과거 오차 80% 범위 (D29). 최종 모델로 2024·2025(최종 검증 뒤에는 2026도)를 다시 예측해 잰다.
+
+    모델은 그대로다 — 2026은 최종 검증 기록이 있을 때만 보고용으로 들어간다(F10).
+    """
+    targets = bands.band_targets(final_test_done)
+    projections = {t: final.final_projections(tables, params, adoption, t) for t in targets}
+    return bands.bands_for(projections, tables.seasons, targets)
 
 
 def _final_test_command(args: argparse.Namespace) -> int:
@@ -459,6 +477,7 @@ def _refresh_command(args: argparse.Namespace, getter: Getter | None) -> int:
             final_test_path=args.out_dir / c.FINAL_TEST_PATH.name,
             web_dir=args.web_dir,
             csv_paths={role: args.out_dir / c.PROJECTION_CSV[role].name for role in c.ROLES},
+            bands_csv=args.out_dir / c.BANDS_CSV.name,
         )
     except (ValueError, FileNotFoundError) as exc:
         print(f"갱신 중단: {exc}", file=sys.stderr)

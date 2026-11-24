@@ -80,6 +80,7 @@ PARAMS_PATH: Final = Path("config/params_v1.json")
 ADOPTION_PATH: Final = Path("config/extended_v1.json")
 FINAL_TEST_PATH: Final = OUT_DIR / "final_test_2026.json"  # 최종 검증 기록 (F10, 한 번만)
 BACKTEST_CSV: Final = OUT_DIR / "backtest.csv"  # 2024·2025 과거 검증표 (M3)
+BANDS_CSV: Final = OUT_DIR / "bands.csv"  # 과거 오차 80% 범위 (D29)
 WEB_SCHEMA_PATH: Final = Path("contracts/web-data.schema.json")
 # F2 검증 결과. M2 이후 단계는 이 보고서가 통과·최신인지 확인한 뒤에만 진행한다
 VALIDATION_REPORT_PATH: Final = INTERIM_DIR / "validation_report.json"
@@ -584,6 +585,23 @@ EVALUATIONS = TableSpec(
     ),
 )
 
+# 과거 오차 80% 범위 (SPEC D29) — 최종 모델의 선수별 |예측 − 실제| 분위수, 비율 지표만
+BAND_QUANTILE: Final = 0.8
+BAND_METRICS: Final[dict[Role, tuple[str, ...]]] = {"bat": ("ops",), "pit": ("era", "k_bb_pct")}
+BAND_GROUPS: Final[tuple[str, ...]] = ("seasons_1_2", "seasons_3_5")
+BANDS = TableSpec(
+    name="bands",
+    keys=("role", "metric", "group"),
+    columns=(
+        Column("role", "str"),
+        Column("metric", "str"),
+        Column("group", "str"),
+        Column("n", "int"),
+        Column("q80", "float", nullable=True),  # n = 0이면 결측
+        Column("targets", "str"),  # 쓴 목표 시즌, 쉼표로 ("2024,2025,2026")
+    ),
+)
+
 TABLES: Final[tuple[TableSpec, ...]] = (
     PLAYERS,
     BATTING_SEASONS,
@@ -599,6 +617,7 @@ TABLES: Final[tuple[TableSpec, ...]] = (
     BAT_PROJECTIONS,
     PIT_PROJECTIONS,
     EVALUATIONS,
+    BANDS,
 )
 
 # ---------------------------------------------------------------------------

@@ -21,6 +21,7 @@ import dataclasses
 import json
 import math
 from collections.abc import Callable, Mapping, Sequence
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -683,21 +684,28 @@ FIELDING_102 = [
 
 # group_error (최종 모델 행만, 목표 시즌 평균, 결측 제외, 지표 키 이름으로 반올림)
 # 101 타자 seasons_3_5: ops (.0712 + .0631)/2 = .06715 → .067, pa 80.0 (2025 결측 제외), hr 행 없음 → null
-GE_101: dict[str, Any] = {"group": "seasons_3_5", "mae": {"ops": 0.067, "pa": 80.0, "hr": None}}
+GE_101: dict[str, Any] = {
+    "group": "seasons_3_5",
+    "mae": {"ops": 0.067, "pa": 80.0, "hr": None},
+    "band80": {"ops": None},
+}
 # 102 타자 seasons_1_2: ops (.0801 + .0822)/2 = .08115 → .081, pa (100.04 + 110)/2 = 105.02 → 105.0, hr 전부 결측
 GE_102_BAT: dict[str, Any] = {
     "group": "seasons_1_2",
     "mae": {"ops": 0.081, "pa": 105.0, "hr": None},
+    "band80": {"ops": None},
 }
 # 102 투수 seasons_1_2: era (.95 + 1.01)/2 = .98, ip (20 + 21)/2 = 20.5, k_bb 3.84 → 3.8
 GE_102_PIT: dict[str, Any] = {
     "group": "seasons_1_2",
     "mae": {"era": 0.98, "ip": 20.5, "k_bb_pct": 3.8},
+    "band80": {"era": None, "k_bb_pct": None},
 }
 # 103 투수 seasons_3_5: era (.8 + .9)/2 = .85, ip (15 + 17)/2 = 16.0, k_bb 행 없음 → null
 GE_103: dict[str, Any] = {
     "group": "seasons_3_5",
     "mae": {"era": 0.85, "ip": 16.0, "k_bb_pct": None},
+    "band80": {"era": None, "k_bb_pct": None},
 }
 
 PLAYER_101: dict[str, Any] = {
@@ -812,6 +820,7 @@ def test_export_build_web_batters_table() -> None:
         "role": "bat",
         "model": "extended",
         "league_baseline": LG_BAT,
+        "bands": {"seasons_1_2": {"ops": None}, "seasons_3_5": {"ops": None}},  # 범위 표 없음
         "rows": [ROW_101, ROW_102_BAT],  # player_id 순
     }
 
@@ -823,6 +832,10 @@ def test_export_build_web_pitchers_table() -> None:
         "role": "pit",
         "model": "weighted",
         "league_baseline": LG_PIT,
+        "bands": {
+            "seasons_1_2": {"era": None, "k_bb_pct": None},
+            "seasons_3_5": {"era": None, "k_bb_pct": None},
+        },
         "rows": [ROW_102_PIT, ROW_103],
     }
 
@@ -1067,10 +1080,12 @@ def test_export_build_web_empty_evaluations() -> None:
     assert files["players/101.json"]["bat"]["group_error"] == {
         "group": "seasons_3_5",
         "mae": {"ops": None, "pa": None, "hr": None},
+        "band80": {"ops": None},
     }
     assert files["players/103.json"]["pit"]["group_error"] == {
         "group": "seasons_3_5",
         "mae": {"era": None, "ip": None, "k_bb_pct": None},
+        "band80": {"era": None, "k_bb_pct": None},
     }
     schema = _schema()
     for path, obj in files.items():
@@ -1091,21 +1106,25 @@ def test_export_group_error_uses_final_model_rows() -> None:
     assert files["players/101.json"]["bat"]["group_error"] == {
         "group": "seasons_3_5",
         "mae": {"ops": 0.09, "pa": None, "hr": 9.9},
+        "band80": {"ops": None},
     }
     # 102 seasons_1_2 weighted 타자 행 없음
     assert files["players/102.json"]["bat"]["group_error"] == {
         "group": "seasons_1_2",
         "mae": {"ops": None, "pa": None, "hr": None},
+        "band80": {"ops": None},
     }
     # 102 seasons_1_2 extended 투수: era 5.0만
     assert files["players/102.json"]["pit"]["group_error"] == {
         "group": "seasons_1_2",
         "mae": {"era": 5.0, "ip": None, "k_bb_pct": None},
+        "band80": {"era": None, "k_bb_pct": None},
     }
     # 103 seasons_3_5 extended 투수: k_bb 7.7만 (baseline 8.8은 다른 모델)
     assert files["players/103.json"]["pit"]["group_error"] == {
         "group": "seasons_3_5",
         "mae": {"era": None, "ip": None, "k_bb_pct": 7.7},
+        "band80": {"era": None, "k_bb_pct": None},
     }
 
 
@@ -1121,6 +1140,7 @@ def test_export_group_error_averages_every_target_season() -> None:
     assert files["players/101.json"]["bat"]["group_error"] == {
         "group": "seasons_3_5",
         "mae": {"ops": 0.072, "pa": 80.0, "hr": 3.0},
+        "band80": {"ops": None},
     }
 
 
@@ -1205,6 +1225,7 @@ def test_export_build_web_validation_without_final_test() -> None:
         "meta": META,
         "final_test": None,
         "rows": EXPECTED_VALIDATION_ROWS,
+        "bands": [],
     }
 
 
@@ -1221,6 +1242,7 @@ def test_export_build_web_validation_with_final_test() -> None:
         "meta": META,
         "final_test": FINAL_TEST,
         "rows": [*EXPECTED_VALIDATION_ROWS, row_2026],
+        "bands": [],
     }
 
 
@@ -1589,3 +1611,57 @@ def test_export_write_projection_csv_columns(tmp_path: Path) -> None:
     for role in c.ROLES:
         header = paths[role].read_text(encoding="utf-8").splitlines()[0]
         assert header.split(",") == [*specs[role].column_names, "name"]
+
+
+# ---------------------------------------------------------------------------
+# build_web — 과거 오차 80% 범위 (D29, 메인이 M4 통합 때 더함)
+# ---------------------------------------------------------------------------
+
+
+def _bands() -> pd.DataFrame:
+    rows = [
+        ("bat", "ops", "seasons_1_2", 267, 0.10712, "2024,2025,2026"),
+        ("bat", "ops", "seasons_3_5", 734, 0.09694, "2024,2025,2026"),
+        ("pit", "era", "seasons_1_2", 288, 1.4913, "2024,2025,2026"),
+        ("pit", "era", "seasons_3_5", 656, 1.3638, "2024,2025,2026"),
+        ("pit", "k_bb_pct", "seasons_1_2", 0, float("nan"), "2024,2025,2026"),
+        ("pit", "k_bb_pct", "seasons_3_5", 656, 5.5381, "2024,2025,2026"),
+    ]
+    return pd.DataFrame(rows, columns=c.BANDS.column_names)
+
+
+def test_export_build_web_bands() -> None:
+    files = build_web(replace(_world(), bands=_bands()))
+    # 표 머리: 그룹 → 지표 → ± (지표 키로 반올림: ops 3, era 2, k_bb_pct 1)
+    assert files["batters.json"]["bands"] == {
+        "seasons_1_2": {"ops": 0.107},
+        "seasons_3_5": {"ops": 0.097},
+    }
+    assert files["pitchers.json"]["bands"] == {
+        "seasons_1_2": {"era": 1.49, "k_bb_pct": None},  # n 0 → null
+        "seasons_3_5": {"era": 1.36, "k_bb_pct": 5.5},
+    }
+    # 선수 상세: 그 선수 그룹의 범위 (101 타자 seasons_3_5, 102 투수 seasons_1_2)
+    assert files["players/101.json"]["bat"]["group_error"]["band80"] == {"ops": 0.097}
+    assert files["players/102.json"]["pit"]["group_error"]["band80"] == {
+        "era": 1.49,
+        "k_bb_pct": None,
+    }
+    # 검증 페이지: 표 순서 그대로, targets는 정수 목록
+    assert files["validation.json"]["bands"][0] == {
+        "role": "bat",
+        "metric": "ops",
+        "group": "seasons_1_2",
+        "n": 267,
+        "q80": 0.107,
+        "targets": [2024, 2025, 2026],
+    }
+    assert len(files["validation.json"]["bands"]) == 6
+    schema = _schema()
+    for path, obj in files.items():
+        assert validate(obj, _def_name(path), schema) == [], path
+
+
+def test_export_build_web_rejects_bad_bands() -> None:
+    with pytest.raises(ValueError, match="범위 표"):
+        build_web(replace(_world(), bands=_bands().drop(columns=["targets"])))

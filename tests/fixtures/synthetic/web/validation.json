@@ -53,5 +53,19 @@
    "baseline_mae_prev": 128.5,
    "excluded": 0
   }
+ ],
+ "bands": [
+  {
+   "role": "bat",
+   "metric": "ops",
+   "group": "seasons_3_5",
+   "n": 734,
+   "q80": 0.097,
+   "targets": [
+    2024,
+    2025,
+    2026
+   ]
+  }
  ]
 }

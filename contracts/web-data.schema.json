@@ -358,7 +358,8 @@
         "role",
         "model",
         "league_baseline",
-        "rows"
+        "rows",
+        "bands"
       ],
       "properties": {
         "meta": {
@@ -382,6 +383,35 @@
           "items": {
             "$ref": "#/$defs/BatRow"
           }
+        },
+        "bands": {
+          "description": "past-error 80% band per group (SPEC D29): group -> metric -> half width. Rate metrics only",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "seasons_1_2",
+            "seasons_3_5"
+          ],
+          "properties": {
+            "seasons_1_2": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "seasons_3_5": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          }
         }
       }
     },
@@ -394,7 +424,8 @@
         "role",
         "model",
         "league_baseline",
-        "rows"
+        "rows",
+        "bands"
       ],
       "properties": {
         "meta": {
@@ -417,6 +448,35 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/PitRow"
+          }
+        },
+        "bands": {
+          "description": "past-error 80% band per group (SPEC D29): group -> metric -> half width. Rate metrics only",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "seasons_1_2",
+            "seasons_3_5"
+          ],
+          "properties": {
+            "seasons_1_2": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "seasons_3_5": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
           }
         }
       }
@@ -638,13 +698,24 @@
       "additionalProperties": false,
       "required": [
         "group",
-        "mae"
+        "mae",
+        "band80"
       ],
       "properties": {
         "group": {
           "$ref": "#/$defs/GroupName"
         },
         "mae": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "band80": {
+          "description": "past-error 80% band of the player's group for rate metrics (SPEC D29)",
           "type": "object",
           "additionalProperties": {
             "type": [
@@ -1040,7 +1111,8 @@
       "required": [
         "meta",
         "final_test",
-        "rows"
+        "rows",
+        "bands"
       ],
       "properties": {
         "meta": {
@@ -1097,6 +1169,59 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/EvalRow"
+          }
+        },
+        "bands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BandRow"
+          }
+        }
+      }
+    },
+    "BandRow": {
+      "description": "one past-error band (SPEC D29): 80th percentile of |projection - actual| of the final model",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "metric",
+        "group",
+        "n",
+        "q80",
+        "targets"
+      ],
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/Role"
+        },
+        "metric": {
+          "enum": [
+            "ops",
+            "era",
+            "k_bb_pct"
+          ]
+        },
+        "group": {
+          "enum": [
+            "seasons_1_2",
+            "seasons_3_5"
+          ]
+        },
+        "n": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "q80": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "integer"
           }
         }
       }

@@ -60,6 +60,10 @@
     "era": null,
     "ip": 29.5,
     "k_bb_pct": 3.8
+   },
+   "band80": {
+    "era": null,
+    "k_bb_pct": 5.9
    }
   },
   "history": [

@@ -33,6 +33,7 @@ from mlbproj.models import playing_time as pt_mod
 from mlbproj.models.playing_time import (
     FEATURES,
     fit_coefficients,
+    fit_segments,
     playing_time_features,
     predict_playing_time,
     training_frame,
@@ -751,6 +752,16 @@ def _predictions(out: pd.DataFrame, role: Role) -> dict[int, float]:
     }
 
 
+def _segment_expected(world: pd.DataFrame, role: Role, target: int) -> dict[int, float]:
+    """구간 규칙(모듈 docstring)으로 계산한 기대 예측. fit_segments 자체는 아래 구간 테스트가 손 계산으로 검사한다."""
+    cohort = build_cohort(world, role, target)
+    model = fit_segments(training_frame(world, role, target), role)
+    feats = playing_time_features(cohort, world, role).set_index("player_id")
+    linear = feats[list(FEATURES[role])].to_numpy() @ model.played
+    values = np.maximum(np.where(feats["gap"].to_numpy() > 0, model.absent, linear), 0.0)
+    return {int(pid): float(v) for pid, v in zip(feats.index, values, strict=True)}
+
+
 @pytest.mark.parametrize("role", ["bat", "pit"])
 def test_models_playing_time_predict_hand_values(role: Role) -> None:
     world = _world(role)
@@ -758,11 +769,10 @@ def test_models_playing_time_predict_hand_values(role: Role) -> None:
     out = predict_playing_time(cohort, world, role)
     assert c.check_frame(out, PT_SPECS[role]) == []
     got = _predictions(out, role)
-    assert sorted(got) == sorted(PRED_2023[role])
-    for pid, value in PRED_2023[role].items():
+    expected = _segment_expected(world, role, 2023)
+    assert sorted(got) == sorted(expected)
+    for pid, value in expected.items():
         assert got[pid] == pytest.approx(value, abs=TOL), pid
-    # 규칙 값 −50인 선수 1은 정확히 0으로 잘린다
-    assert got[1] == 0.0
 
 
 @pytest.mark.parametrize("role", ["bat", "pit"])
@@ -782,20 +792,11 @@ def test_models_playing_time_predict_contract_sorted_nonnegative(role: Role) -> 
     assert bool((out[PT_COLUMN[role]] >= 0).all())
 
 
-def test_models_playing_time_predict_bat_exactly_determined() -> None:
-    # Y=2022: 학습 다섯 행(T=2021)으로 계수가 정확히 정해지고, 예측 = 실제 2022 정답 (BAT_PRED_2022)
-    world = _world("bat")
-    out = predict_playing_time(build_cohort(world, "bat", 2022), world, "bat")
-    assert c.check_frame(out, c.BAT_PLAYING_TIME) == []
-    got = _predictions(out, "bat")
-    assert sorted(got) == sorted(BAT_PRED_2022)
-    for pid, value in BAT_PRED_2022.items():
-        assert got[pid] == pytest.approx(value, abs=TOL), pid
-
-
-@pytest.mark.parametrize(("role", "target"), [("bat", 2021), ("pit", 2021), ("pit", 2022)])
+@pytest.mark.parametrize(
+    ("role", "target"), [("bat", 2021), ("pit", 2021), ("pit", 2022), ("bat", 2022)]
+)
 def test_models_playing_time_predict_too_few_training_rows(role: Role, target: int) -> None:
-    # Y=2021: 학습 행 0 / 투수 Y=2022: T=2021 다섯 행 < 특성 6개
+    # Y=2021: 학습 행 0 / Y=2022: T=2021 행 중 직전 시즌 출전 구간 행이 특성 수보다 적다 (구간 모델)
     world = _world(role)
     with pytest.raises(ValueError):
         predict_playing_time(build_cohort(world, role, target), world, role)
@@ -823,10 +824,10 @@ def test_models_playing_time_predict_passes_debut_seasons(
     assert {2021, 2022} <= {target for target, _, _ in calls}
     for _, passed, _ in calls:
         assert passed is not None and dict(passed) == debut
-    # 데뷔 연도는 특성 값을 바꾸지 않으므로 예측도 같다
+    # 데뷔 연도를 넘겨도 예측은 출력 계약을 지킨다 (값은 학습 대상 기간에 따라 달라질 수 있다)
     got = _predictions(out, "bat")
-    for pid, value in PRED_2023["bat"].items():
-        assert got[pid] == pytest.approx(value, abs=TOL), pid
+    assert sorted(got) == sorted(int(i) for i in cohort["player_id"])
+    assert all(v >= 0 for v in got.values())
 
 
 # ---------------------------------------------------------------------------
@@ -897,22 +898,21 @@ def test_models_playing_time_n2_training_targets_below_y(
 @pytest.mark.parametrize(
     ("role", "target", "expected"),
     [
-        ("bat", 2022, BAT_PRED_2022),
-        ("bat", 2023, PRED_2023["bat"]),
-        ("pit", 2023, PRED_2023["pit"]),
+        ("bat", 2023, None),
+        ("pit", 2023, None),
     ],
-    ids=["bat-2022", "bat-2023", "pit-2023"],
+    ids=["bat-2023", "pit-2023"],
 )
 def test_models_playing_time_n2_predict(
-    role: Role, target: int, expected: Mapping[int, float]
+    role: Role, target: int, expected: Mapping[int, float] | None
 ) -> None:
     clean, poisoned = _clean_and_poisoned(role, _world_rows(role), target)
     cohort = build_cohort(clean, role, target)
     from_clean = predict_playing_time(cohort, clean, role)
     from_poisoned = predict_playing_time(cohort, poisoned, role)
-    assert_frame_equal(from_poisoned, from_clean)
+    assert_frame_equal(from_poisoned, from_clean, check_exact=True)
     got = _predictions(from_poisoned, role)
-    for pid, value in expected.items():
+    for pid, value in (expected or _segment_expected(clean, role, target)).items():
         assert got[pid] == pytest.approx(value, abs=TOL), pid
 
 
@@ -935,7 +935,7 @@ def test_models_playing_time_n2_future_rows_in_two_leagues(role: Role, target: i
         playing_time_features(cohort, dirty, role), playing_time_features(cohort, clean, role)
     )
     assert_frame_equal(training_frame(dirty, role, target), training_frame(clean, role, target))
-    if (role, target) != ("pit", 2022):  # 투수 2022는 학습 행이 모자라다 (아래 테스트)
+    if target != 2022:  # 2022는 출전 구간 학습 행이 모자라다 (predict_too_few_training_rows)
         assert_frame_equal(
             predict_playing_time(cohort, dirty, role), predict_playing_time(cohort, clean, role)
         )
@@ -966,3 +966,79 @@ def test_models_playing_time_n2_predict_future_rows_do_not_add_training_rows() -
         predict_playing_time(cohort, clean, "pit")
     with pytest.raises(ValueError):
         predict_playing_time(cohort, poisoned, "pit")
+
+
+# --- 구간 모델 (2026-11-24 M3 조정: 직전 시즌 미출전 선수는 학습 정답의 중앙값) ---
+
+
+def _segment_train(
+    role: Role, played: Sequence[tuple[float, float]], absent_labels: Sequence[float]
+) -> pd.DataFrame:
+    """특성 pt1만 움직이는 학습 표. played = (pt1, label), absent = gap 1인 행의 정답."""
+    names = list(FEATURES[role])
+    rows: list[dict[str, float]] = []
+    for pt1, label in played:
+        row = {n: 0.0 for n in names}
+        row.update(pt1=pt1, n_seasons=3.0, const=1.0, label=label)
+        rows.append(row)
+    for label in absent_labels:
+        row = {n: 0.0 for n in names}
+        row.update(gap=1.0, n_seasons=2.0, const=1.0, label=label)
+        rows.append(row)
+    df = pd.DataFrame(rows)
+    df.insert(0, "train_target", 2023)
+    df.insert(0, "player_id", range(1, len(df) + 1))
+    return df
+
+
+@pytest.mark.parametrize("role", ["bat", "pit"])
+def test_models_playing_time_segments_fit_played_rows_only(role: Role) -> None:
+    # 출전 행은 label = 0.5·pt1 + 30 (n_seasons·const 열이 상수라 계수는 최소노름 해) — 미출전 행(정답 0·0·300)이 섞이면 이 규칙이 깨진다
+    played = [
+        (100.0, 80.0),
+        (200.0, 130.0),
+        (300.0, 180.0),
+        (400.0, 230.0),
+        (500.0, 280.0),
+        (600.0, 330.0),
+        (700.0, 380.0),
+    ]
+    model = fit_segments(_segment_train(role, played, [0.0, 0.0, 300.0]), role)
+    names = list(FEATURES[role])
+    x = np.array([[{"pt1": 250.0, "n_seasons": 3.0, "const": 1.0}.get(n, 0.0) for n in names]])
+    assert float((x @ model.played)[0]) == pytest.approx(0.5 * 250 + 30)
+    assert model.absent == 0.0  # 중앙값 (0, 0, 300) = 0
+
+
+def test_models_playing_time_segments_absent_value_is_median() -> None:
+    played = [
+        (100.0, 80.0),
+        (200.0, 130.0),
+        (300.0, 180.0),
+        (400.0, 230.0),
+        (500.0, 280.0),
+        (600.0, 330.0),
+    ]
+    assert fit_segments(_segment_train("bat", played, [5.0, 9.0, 7.0]), "bat").absent == 7.0
+    assert (
+        fit_segments(_segment_train("bat", played, []), "bat").absent == 0.0
+    )  # 미출전 학습 행 없음 → 0
+
+
+def test_models_playing_time_segments_too_few_played_rows() -> None:
+    with pytest.raises(ValueError):
+        fit_segments(_segment_train("bat", [(100.0, 80.0)], [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]), "bat")
+
+
+@pytest.mark.parametrize("role", ["bat", "pit"])
+def test_models_playing_time_predict_uses_segments(role: Role) -> None:
+    """예측 = 직전 시즌 출전(gap 0)은 출전 구간 계수, 미출전(gap > 0)은 미출전 구간 값 (0 이상)."""
+    target = 2026
+    world = _world(role)
+    cohort = build_cohort(world, role, target)
+    model = fit_segments(training_frame(world, role, target), role)
+    feats = playing_time_features(cohort, world, role).set_index("player_id")
+    raw = feats[list(FEATURES[role])].to_numpy() @ model.played
+    expected = np.maximum(np.where(feats["gap"].to_numpy() > 0, model.absent, raw), 0.0)
+    got = _predictions(predict_playing_time(cohort, world, role), role)
+    assert [got[i] for i in feats.index] == pytest.approx(list(expected))

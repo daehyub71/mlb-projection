@@ -13,11 +13,16 @@ numpy 최소제곱(`numpy.linalg.lstsq`, pandas에 포함)만 쓴다.
 - 학습 목표 T = max(SEASON_FIRST + 2, …) ~ Y−1 (T−2가 데이터 안에 있어야 한다: T ≥ 2021).
 - 각 T마다 `cohort.build_cohort(seasons, role, T, debut_seasons)`로 대상을 만들고, 정답은 T의 pa_adj
   (투수 outs_adj), 행이 없으면 0.
-- 모든 T의 행을 합쳐 최소제곱으로 계수를 구한다. **season ≥ Y 행은 특성·정답 어디에도 쓰지 않는다**(N2).
-- 예측 = 특성 · 계수, 0 미만은 0으로 자른다.
+- **season ≥ Y 행은 특성·정답 어디에도 쓰지 않는다**(N2).
+- **두 구간으로 나눠 맞춘다**(2026-11-24 M3 조정, `fit_segments`): 직전 시즌에 뛴 선수(gap = 0)는 그 구간 학습 행만으로
+  최소제곱 계수를 구하고, 직전 시즌에 쉰 선수(gap > 0)는 그 구간 학습 정답의 **중앙값**(절대 오차를 가장 작게 하는
+  상수, 실데이터에서 0)을 준다. 하나의 최소제곱으로 맞추면 쉰 선수에게 평균 쪽 출전량을 주어 전체 MAE가
+  직전 시즌 값보다 나빴다(2024 타자 78.2 대 77.8).
+- 예측 = 구간별 값, 0 미만은 0으로 자른다.
 """
 
 from collections.abc import Mapping
+from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
@@ -173,6 +178,31 @@ def fit_coefficients(train: pd.DataFrame, role: Role) -> np.ndarray:
     return coef
 
 
+class SegmentModel(NamedTuple):
+    """구간별 출전량 모델.
+
+    Attributes:
+        played: 직전 시즌 출전(gap = 0) 구간의 최소제곱 계수 (`FEATURES[role]` 순서).
+        absent: 직전 시즌 미출전(gap > 0) 구간의 예측값 — 그 구간 학습 정답의 중앙값(없으면 0, 0 이상).
+    """
+
+    played: np.ndarray
+    absent: float
+
+
+def fit_segments(train: pd.DataFrame, role: Role) -> SegmentModel:
+    """학습 표를 직전 시즌 출전·미출전 두 구간으로 나눠 맞춘다.
+
+    Raises:
+        ValueError: 출전 구간의 학습 행이 특성 수보다 적을 때.
+    """
+    played = train[train["gap"] == 0]
+    absent = train[train["gap"] > 0]
+    coef = fit_coefficients(played, role)
+    value = float(absent["label"].median()) if len(absent) else 0.0
+    return SegmentModel(played=coef, absent=max(value, 0.0))
+
+
 def predict_playing_time(
     cohort: pd.DataFrame,
     seasons: pd.DataFrame,
@@ -181,7 +211,7 @@ def predict_playing_time(
 ) -> pd.DataFrame:
     """대상 표의 출전량 예측. 타자 `contracts.BAT_PLAYING_TIME`(pa), 투수 `PIT_PLAYING_TIME`(outs).
 
-    학습(`training_frame` → `fit_coefficients`)과 예측을 한 번에 한다. 결과는 player_id 순, 0 이상.
+    학습(`training_frame` → `fit_segments`)과 예측을 한 번에 한다. 결과는 player_id 순, 0 이상.
 
     Raises:
         ValueError: 입력 표가 계약을 어기거나 학습 행이 모자랄 때.
@@ -189,8 +219,9 @@ def predict_playing_time(
     # 입력 표를 먼저 확인한다 (특성은 player_id 순)
     features = playing_time_features(cohort, seasons, role)
     target = _target_season(cohort, role)
-    coef = fit_coefficients(training_frame(seasons, role, target, debut_seasons), role)
-    raw = features[list(FEATURES[role])].to_numpy(dtype="float64") @ coef
+    model = fit_segments(training_frame(seasons, role, target, debut_seasons), role)
+    linear = features[list(FEATURES[role])].to_numpy(dtype="float64") @ model.played
+    raw = np.where(features["gap"].to_numpy() > 0, model.absent, linear)
     out = pd.DataFrame(
         {
             "player_id": features["player_id"],

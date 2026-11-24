@@ -435,6 +435,84 @@ PIT_PROJECTIONS = TableSpec(
     ),
 )
 
+# ---------------------------------------------------------------------------
+# 모델 사이의 표 (M3, SPEC F6~F8·D10~D12)
+# ---------------------------------------------------------------------------
+
+# 타자 성분 (F7): 타석당 비율로 가중·회귀한다. h1 = h − b2 − b3 − hr (단타).
+BAT_COMPONENTS: Final[tuple[str, ...]] = ("h1", "b2", "b3", "hr", "bb", "hbp", "sf", "ab")
+# 투수 성분 (F7): 상대 타자당 비율. 자책점은 아웃당(er_per_out)으로 따로 둔다.
+PIT_COMPONENTS: Final[tuple[str, ...]] = ("so", "bb", "hbp", "hr")
+# 회귀 표본 키 (params의 regress): 타자 성분 + 투수 성분 + "er"
+ERA_METHODS: Final[tuple[str, ...]] = (
+    "er",
+    "fip",
+)  # D11 후보 (a) 가중 ER/아웃 (b) FIP식 + 리그 보정. xERA는 M4
+
+
+def _rates(prefix: str, names: Iterable[str]) -> tuple[Column, ...]:
+    return tuple(Column(f"{prefix}{n}", "float") for n in names)
+
+
+# 시즌별 리그 평균 (역할 표 전체 합으로 계산). 비율 열은 r_<성분> = 성분 합 / PA(또는 BF) 합.
+LEAGUE_BAT = TableSpec(
+    name="league_bat",
+    keys=("season",),
+    columns=(
+        Column("season", "int"),
+        Column("pa", "int"),
+        *_rates("r_", BAT_COMPONENTS),
+        *_cols("float", ("obp", "slg", "ops", "hr_per_pa")),
+    ),
+)
+LEAGUE_PIT = TableSpec(
+    name="league_pit",
+    keys=("season",),
+    columns=(
+        Column("season", "int"),
+        Column("bf", "int"),
+        Column("outs", "int"),
+        *_rates("r_", PIT_COMPONENTS),
+        # era = 27 × er_per_out, k_bb_pct = 100 × (r_so − r_bb)
+        # fip_const = era − (13·HR + 3·(BB+HBP) − 2·K) / IP  (리그 합 기준, IP = outs / 3)
+        *_cols("float", ("er_per_out", "era", "k_bb_pct", "fip_const", "bf_per_out")),
+    ),
+)
+
+# 모델의 비율 예측 (목표 시즌 하나, 역할 하나, 모델 하나). 결측 없음 — 기록이 없으면 리그 평균.
+BAT_RATES = TableSpec(
+    name="rates_bat",
+    keys=("player_id",),
+    columns=(
+        Column("player_id", "int"),
+        Column("target_season", "int"),
+        *_rates("r_", BAT_COMPONENTS),
+        *_cols("float", ("obp", "slg", "ops", "hr_per_pa", "lg_ops")),
+    ),
+)
+PIT_RATES = TableSpec(
+    name="rates_pit",
+    keys=("player_id",),
+    columns=(
+        Column("player_id", "int"),
+        Column("target_season", "int"),
+        *_rates("r_", PIT_COMPONENTS),
+        *_cols("float", ("er_per_out", "era", "k_bb_pct", "lg_era", "lg_k_bb_pct")),
+    ),
+)
+
+# 모델의 출전량 예측. 타자 pa, 투수 outs (0 이상 실수).
+BAT_PLAYING_TIME = TableSpec(
+    name="playing_time_bat",
+    keys=("player_id",),
+    columns=(Column("player_id", "int"), Column("target_season", "int"), Column("pa", "float")),
+)
+PIT_PLAYING_TIME = TableSpec(
+    name="playing_time_pit",
+    keys=("player_id",),
+    columns=(Column("player_id", "int"), Column("target_season", "int"), Column("outs", "float")),
+)
+
 # 예측 대상과 사용 기간 (F4·F5). 목표 시즌 Y, 역할 r마다 한 표.
 COHORTS = TableSpec(
     name="cohorts",
@@ -479,6 +557,12 @@ TABLES: Final[tuple[TableSpec, ...]] = (
     PITCHING_SEASONS,
     FIELDING_SEASONS,
     COHORTS,
+    LEAGUE_BAT,
+    LEAGUE_PIT,
+    BAT_RATES,
+    PIT_RATES,
+    BAT_PLAYING_TIME,
+    PIT_PLAYING_TIME,
     BAT_PROJECTIONS,
     PIT_PROJECTIONS,
     EVALUATIONS,

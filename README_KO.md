@@ -15,9 +15,24 @@
 
 | 마일스톤 | 범위 | 상태 |
 |---|---|---|
-| M0 | 기반 설정, 데이터 계약, 테스트 픽스처, 웹 골격 | 진행 중 |
-| M1~M4 | 수집, 정제, 모델, 과거 검증, 2027 예측 | 예정 |
-| M5~M7 | 디자인, 웹, 배포 | 예정 |
+| M0~M4 | 기반 설정, 수집, 정제, 모델, 과거 검증, 2027 예측 | 완료 |
+| M5 | 디자인(테마·시안) | 진행 중 |
+| M6~M7 | 웹, 배포 | 예정 |
+
+## 과거 검증 결과
+
+모델 파라미터와 확장 모델 채택은 2024·2025 시즌만으로 정했습니다. 그 설정을 고정한 채 2026 시즌을 한 번만 시험했습니다([`data/out/final_test_2026.json`](data/out/final_test_2026.json)). 평균 절대 오차이며 낮을수록 좋습니다.
+
+| 지표 | 이 모델 | 리그 평균 | 직전 시즌 |
+|---|---|---|---|
+| OPS (200타석 이상) | **.061** | .069 | .098 |
+| K−BB% (50이닝 이상) | **3.63** | 4.40 | 4.43 |
+| ERA (50이닝 이상) | **0.85** | 0.93 | 1.25 |
+| PA | **72.4** | — | 74.9 |
+| IP | **17.1** | — | 17.6 |
+| HR | **2.60** | — | 2.91 |
+
+출전량 예측은 보수적입니다. 부상·결장 위험을 평균에 반영하므로 주전 선수는 평소 출전량보다 낮게 예측되는 편입니다.
 
 요구사항·계획·진도는 [`docs/`](docs/)의 `SPEC.md`·`PLAN.md`·`TASKS.md`에 있습니다.
 
@@ -39,6 +54,11 @@ MLB 자료의 저작권은 MLB Advanced Media, L.P.에 있으며, 개인적·비
 python3.13 -m venv venv
 venv/bin/pip install -r requirements-dev.txt && venv/bin/pip install -e . --no-deps
 venv/bin/ruff check . && venv/bin/mypy && venv/bin/pytest
+
+# 파이프라인 (원본은 각자 내려받고 커밋하지 않습니다)
+venv/bin/python -m mlbproj collect && venv/bin/python -m mlbproj validate && venv/bin/python -m mlbproj build
+venv/bin/python -m mlbproj backtest     # 2024·2025 과거 검증
+venv/bin/python -m mlbproj export       # 2027 예측 → data/out CSV + 웹 JSON
 
 cd web && npm ci && npm run lint && npm test && npm run build
 ```

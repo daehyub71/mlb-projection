@@ -11,7 +11,7 @@ import pandas as pd
 
 from mlbproj import __version__, export, final
 from mlbproj import contracts as c
-from mlbproj.backtest import load_tables, run_backtest, summary
+from mlbproj.backtest import load_tables, summary
 from mlbproj.clean.batting import build_batting
 from mlbproj.clean.fielding import build_fielding
 from mlbproj.clean.pitching import build_pitching
@@ -26,14 +26,16 @@ from mlbproj.models.params import (
     NO_ADOPTION,
     Adoption,
     Params,
+    adoption_sha256,
     load_adoption,
     load_params,
     params_sha256,
+    save_adoption,
     save_params,
 )
 from mlbproj.schema import load_schema
 from mlbproj.tables import Tables
-from mlbproj.tune import tune
+from mlbproj.tune import extended_scorer, select_adoption, tune
 from mlbproj.validate import (
     DEFAULT_LIMITS,
     ValidationError,
@@ -163,23 +165,46 @@ def reject_final_target(targets: Sequence[int]) -> None:
 
 
 def run_backtest_command(
-    params: Params, targets: Sequence[int], interim_dir: Path, raw_dir: Path, out_dir: Path
+    params: Params,
+    adoption: Adoption,
+    targets: Sequence[int],
+    interim_dir: Path,
+    raw_dir: Path,
+    out_dir: Path,
 ) -> pd.DataFrame:
-    """과거 검증표를 `out_dir/backtest.csv`·`backtest.json`으로 쓰고 평가표를 돌려준다."""
+    """과거 검증표를 `out_dir/backtest.csv`·`backtest.json`으로 쓰고 평가표를 돌려준다.
+
+    모델: league·baseline·weighted, 그리고 채택표로 최종 모델이 extended인 역할은 extended
+    (`final.evaluate_target`, refresh와 같은 경로).
+    """
     reject_final_target(targets)
-    evaluations = run_backtest(load_tables(interim_dir, raw_dir), params, targets)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    evaluations.to_csv(out_dir / "backtest.csv", index=False, lineterminator="\n")
-    payload = {
-        "params_version": params.version,
-        "params_sha256": params_sha256(params),
-        "targets": list(targets),
-        "rows": json.loads(evaluations.to_json(orient="records")),
-    }
-    (out_dir / "backtest.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    tables = load_tables(interim_dir, raw_dir)
+    evaluations = pd.concat(
+        [final.evaluate_target(tables, params, adoption, t) for t in targets], ignore_index=True
     )
-    return evaluations
+    out_dir.mkdir(parents=True, exist_ok=True)
+    _write_backtest(evaluations, params, targets, out_dir / "backtest.csv")
+    return evaluations.sort_values(list(c.EVALUATIONS.keys), kind="mergesort").reset_index(
+        drop=True
+    )
+
+
+def run_adopt_command(
+    params: Params,
+    targets: Sequence[int],
+    interim_dir: Path,
+    raw_dir: Path,
+    out: Path,
+    report: Path,
+) -> Adoption:
+    """확장 모델 채택표(F9)를 2024·2025로 정해 out에, 지표별 결과를 report CSV에 쓴다."""
+    reject_final_target(targets)
+    tables = load_tables(interim_dir, raw_dir)
+    adoption, table = select_adoption(extended_scorer(tables, params, targets), targets)
+    report.parent.mkdir(parents=True, exist_ok=True)
+    table.to_csv(report, index=False, lineterminator="\n")
+    save_adoption(adoption, out)
+    return adoption
 
 
 def run_tune_command(
@@ -478,6 +503,19 @@ def build_parser() -> argparse.ArgumentParser:
     backtest.add_argument("--interim-dir", type=Path, default=c.INTERIM_DIR)
     backtest.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
     backtest.add_argument("--out-dir", type=Path, default=c.OUT_DIR)
+    backtest.add_argument(
+        "--adoption", type=Path, default=c.ADOPTION_PATH, help="없으면 채택 없음(extended 행 없음)"
+    )
+
+    adopt = sub.add_parser(
+        "adopt", help="확장 모델 채택표 (F9) — 2024·2025, 지표마다 MAE가 줄 때만"
+    )
+    adopt.add_argument("--targets", type=parse_seasons, default=parse_seasons(TUNE_DEFAULT))
+    adopt.add_argument("--params", type=Path, default=c.PARAMS_PATH)
+    adopt.add_argument("--interim-dir", type=Path, default=c.INTERIM_DIR)
+    adopt.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
+    adopt.add_argument("--out", type=Path, default=c.ADOPTION_PATH)
+    adopt.add_argument("--report", type=Path, default=c.OUT_DIR / "adoption_report.csv")
 
     tune_cmd = sub.add_parser("tune", help="파라미터 조정 (D10) — 2024·2025 격자 탐색")
     tune_cmd.add_argument("--targets", type=parse_seasons, default=parse_seasons(TUNE_DEFAULT))
@@ -593,16 +631,38 @@ def main(argv: list[str] | None = None, *, getter: Getter | None = None) -> int:
 
     if args.command == "backtest":
         params = load_params(args.params) if args.params.exists() else DEFAULT_PARAMS
+        adoption = load_adoption(args.adoption) if args.adoption.exists() else NO_ADOPTION
         try:
             evaluations = run_backtest_command(
-                params, args.targets, args.interim_dir, args.raw_dir, args.out_dir
+                params, adoption, args.targets, args.interim_dir, args.raw_dir, args.out_dir
             )
         except ValueError as exc:
             print(f"과거 검증 중단: {exc}", file=sys.stderr)
             return 1
-        print(f"파라미터 {params.version} (sha256 {params_sha256(params)[:12]})")
+        print(
+            f"파라미터 {params.version} (sha256 {params_sha256(params)[:12]}), "
+            f"채택표 {adoption.version} (sha256 {adoption_sha256(adoption)[:12]})"
+        )
         print(summary(evaluations).to_string())
         print(f"→ {args.out_dir / 'backtest.csv'}, {args.out_dir / 'backtest.json'}")
+        return 0
+
+    if args.command == "adopt":
+        try:
+            chosen_adoption = run_adopt_command(
+                _require_params(args.params),
+                args.targets,
+                args.interim_dir,
+                args.raw_dir,
+                args.out,
+                args.report,
+            )
+        except ValueError as exc:
+            print(f"채택 중단: {exc}", file=sys.stderr)
+            return 1
+        on = [m for m in c.EXT_METRICS if chosen_adoption.adopt[m]]
+        print(f"채택: {on or '없음'} → {args.out} (sha256 {adoption_sha256(chosen_adoption)})")
+        print(f"지표별 결과 → {args.report}")
         return 0
 
     if args.command == "tune":

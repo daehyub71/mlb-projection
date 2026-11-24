@@ -44,3 +44,85 @@ def test_backtest_cli_refuses_2026(
     assert code == 1
     assert "final-test" in capsys.readouterr().err
     assert not any(tmp_path.iterdir())  # 아무것도 쓰지 않는다
+
+
+def test_backtest_cli_adopt_refuses_2026(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    out = tmp_path / "extended_v1.json"
+    code = main(
+        ["adopt", "--targets", "2025,2026", "--out", str(out), "--report", str(tmp_path / "r.csv")]
+    )
+    assert code == 1
+    assert "2026" in capsys.readouterr().err
+    assert not out.exists()
+
+
+def test_backtest_cli_adopt_writes_adoption_and_report(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import mlbproj.cli as cli
+    from mlbproj.models.params import Adoption, load_adoption, save_params
+
+    chosen = Adoption("v1", {m: m in ("hr", "era") for m in c.EXT_METRICS})
+    report = pd.DataFrame({"role": ["bat"], "metric": ["hr"], "adopted": [True]})
+    monkeypatch.setattr(cli, "load_tables", lambda *a, **k: _empty_tables())
+    monkeypatch.setattr(cli, "extended_scorer", lambda tables, params, targets: "scorer")
+    monkeypatch.setattr(cli, "select_adoption", lambda score, targets: (chosen, report))
+    params_path = tmp_path / "params.json"
+    save_params(DEFAULT_PARAMS, params_path)
+    out, rep = tmp_path / "config" / "extended_v1.json", tmp_path / "out" / "adoption.csv"
+    code = main(["adopt", "--params", str(params_path), "--out", str(out), "--report", str(rep)])
+    assert code == 0, capsys.readouterr().err
+    assert load_adoption(out) == chosen
+    assert pd.read_csv(rep)["metric"].tolist() == ["hr"]
+    assert "sha256" in capsys.readouterr().out
+
+
+def test_backtest_cli_uses_adoption_for_extended_rows(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import mlbproj.cli as cli
+    from mlbproj.models.params import Adoption, save_adoption
+
+    seen: list[tuple[int, Adoption]] = []
+
+    def fake_eval(tables: Tables, params: object, adoption: Adoption, target: int) -> pd.DataFrame:
+        seen.append((target, adoption))
+        return pd.DataFrame(
+            {
+                "target_season": [target],
+                "role": ["bat"],
+                "model": ["extended"],
+                "metric": ["ops"],
+                "group": ["all"],
+                "n": [10],
+                "mae": [0.07],
+                "mae_weighted": [0.071],
+                "baseline_mae_league": [0.08],
+                "baseline_mae_prev": [0.09],
+                "excluded": [0],
+            }
+        )
+
+    monkeypatch.setattr(cli, "load_tables", lambda *a, **k: _empty_tables())
+    monkeypatch.setattr(cli.final, "evaluate_target", fake_eval)
+    adoption = Adoption("v1", {m: m == "ops" for m in c.EXT_METRICS})
+    adoption_path = tmp_path / "extended_v1.json"
+    save_adoption(adoption, adoption_path)
+    code = main(
+        [
+            "backtest",
+            "--targets",
+            "2024,2025",
+            "--adoption",
+            str(adoption_path),
+            "--out-dir",
+            str(tmp_path),
+        ]
+    )
+    assert code == 0
+    assert [t for t, _ in seen] == [2024, 2025]
+    assert all(a == adoption for _, a in seen)
+    written = pd.read_csv(tmp_path / "backtest.csv")
+    assert set(written["model"]) == {"extended"}

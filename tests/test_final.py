@@ -1629,3 +1629,30 @@ def test_final_run_final_test_record_feeds_build_export_input(
         "reruns": [],
     }
     _check_schema(inp)
+
+
+@pytest.mark.parametrize("mismatch", ["params", "adoption"])
+def test_final_build_export_input_rejects_record_from_other_model(
+    tmp_path: Path, mismatch: str
+) -> None:
+    # 2026 기록을 잰 모델과 2027을 내보내는 모델이 다르면 웹에 섞어 내보내지 않는다 (M4 검증 지적)
+    raw_dir, backtest_csv, final_test_path = _export_paths(tmp_path, with_record=True)
+    params = replace(PARAMS, version="v9") if mismatch == "params" else PARAMS
+    adoption = (
+        Adoption(ADOPTION.version, {**ADOPTION.adopt, "era": not ADOPTION.adopt["era"]})
+        if mismatch == "adoption"
+        else ADOPTION
+    )
+    projections = _projections_2027()
+    if mismatch == "adoption" and final.final_model_name(adoption, "pit") == "extended":
+        projections["pit"] = projections["pit"].assign(model="extended")
+    with pytest.raises(ValueError, match="최종 검증 기록"):
+        final.build_export_input(
+            _world(),
+            params,
+            adoption,
+            projections,
+            raw_dir=raw_dir,
+            backtest_csv=backtest_csv,
+            final_test_path=final_test_path,
+        )

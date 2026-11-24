@@ -11,7 +11,7 @@
 출전량 모델(F8)은 계수를 학습 기간에서 맞추므로 여기서 조정하지 않는다.
 """
 
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import replace
 
 import numpy as np
@@ -20,7 +20,8 @@ import pandas as pd
 from mlbproj import contracts as c
 from mlbproj.backtest import Tables, baseline_projections, cohort_for, weighted_projection
 from mlbproj.evaluate import evaluate
-from mlbproj.models.params import DEFAULT_PARAMS, Params, RateParams
+from mlbproj.models.extended import extended_projection
+from mlbproj.models.params import DEFAULT_PARAMS, Adoption, Params, RateParams
 from mlbproj.models.playing_time import predict_playing_time
 
 # 시즌 가중치 후보 [Y−1 … Y−5]
@@ -210,3 +211,81 @@ def tune(tables: Tables, targets: Sequence[int] = TUNE_TARGETS) -> tuple[Params,
         era_method=str(best_era["era_method"]),
     )
     return chosen, report
+
+
+# ---------------------------------------------------------------------------
+# 확장 모델 채택 (SPEC F9, PLAN §2-3)
+# ---------------------------------------------------------------------------
+
+# (역할, 지표, 채택표) → 목표 시즌마다 그 지표의 확장 모델 MAE (대표 집단 "all")
+Scorer = Callable[[c.Role, str, Adoption], tuple[float, ...]]
+
+
+def _reject_final(targets: Sequence[int]) -> None:
+    if any(t >= c.FINAL_TEST_TARGET for t in targets):
+        raise ValueError("채택에는 2024·2025만 쓴다 — 2026은 최종 검증 전용 (SPEC F10)")
+
+
+def select_adoption(
+    score: Scorer, targets: Sequence[int] = TUNE_TARGETS
+) -> tuple[Adoption, pd.DataFrame]:
+    """확장 모델 채택표를 지표 하나씩 정한다.
+
+    순서는 `EXT_ROLE_METRICS`(출전량 먼저 — HR = PA × 비율). 앞에서 켠 지표는 켠 채로 두고, 이번 지표를
+    켰을 때 목표 시즌 평균 MAE가 끈 때보다 **작으면**(같으면 끈다) 켠다.
+
+    Returns:
+        (채택표 version "v1", 결과 표 — 열: role, metric, mae_off_<목표>…, mae_on_<목표>…, adopted).
+
+    Raises:
+        ValueError: 목표에 최종 검증 시즌(2026) 이후가 있을 때.
+    """
+    _reject_final(targets)
+    adopt = {m: False for m in c.EXT_METRICS}
+    records: list[dict[str, object]] = []
+    for role in c.ROLES:
+        for metric in c.EXT_ROLE_METRICS[role]:
+            off = score(role, metric, Adoption("v1", dict(adopt)))
+            on = score(role, metric, Adoption("v1", {**adopt, metric: True}))
+            take = float(np.mean(on)) < float(np.mean(off))
+            records.append(
+                {
+                    "role": role,
+                    "metric": metric,
+                    **{f"mae_off_{t}": v for t, v in zip(targets, off, strict=True)},
+                    **{f"mae_on_{t}": v for t, v in zip(targets, on, strict=True)},
+                    "adopted": take,
+                }
+            )
+            adopt[metric] = take
+    return Adoption("v1", adopt), pd.DataFrame(records)
+
+
+def extended_scorer(
+    tables: Tables, params: Params, targets: Sequence[int] = TUNE_TARGETS
+) -> Scorer:
+    """실데이터 채점기 — 확장 예측을 기준선 둘과 함께 평가해 그 지표의 "all" MAE를 낸다.
+
+    Raises:
+        ValueError: 목표에 최종 검증 시즌(2026) 이후가 있을 때.
+    """
+    _reject_final(targets)
+    base = {(role, t): baseline_projections(tables, role, t) for role in c.ROLES for t in targets}
+
+    def score(role: c.Role, metric: str, adoption: Adoption) -> tuple[float, ...]:
+        maes: list[float] = []
+        for t in targets:
+            projection = extended_projection(tables, role, t, params, adoption)
+            ev = evaluate(
+                pd.concat([base[(role, t)], projection], ignore_index=True),
+                tables.seasons[role],
+                cohort_for(tables, role, t),
+                role,
+            )
+            row = ev[
+                (ev["model"] == "extended") & (ev["metric"] == metric) & (ev["group"] == "all")
+            ]
+            maes.append(float(row["mae"].iloc[0]))
+        return tuple(maes)
+
+    return score

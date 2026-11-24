@@ -579,6 +579,17 @@ def build_export_input(
     final_test: dict[str, Any] | None = None
     if final_test_path.exists():
         record, rows = _read_record(final_test_path)  # 목표 2026 행만, 계약 종류 그대로
+        # 2026을 잰 모델과 2027을 내보내는 모델이 같아야 검증 페이지와 예측표가 짝이 맞는다
+        expected = {
+            "params_sha256": params_sha256(params),
+            "adoption_sha256": adoption_sha256(adoption),
+        }
+        differ = [key for key, value in expected.items() if record.get(key) != value]
+        if differ:
+            raise ValueError(
+                f"최종 검증 기록 {final_test_path}의 {differ}가 지금 내보내는 파라미터·채택표와 다르다 — "
+                "2026을 잰 모델과 2027 예측 모델이 섞인다"
+            )
         evaluations = pd.concat([evaluations, rows], ignore_index=True)
         final_test = _final_test_summary(record)
     evaluations = evaluations.sort_values(list(EVALUATIONS.keys), kind="mergesort").reset_index(

@@ -40,6 +40,7 @@ from mlbproj.models.params import (
     NO_ADOPTION,
     Adoption,
     Params,
+    adoption_sha256,
     params_sha256,
     save_adoption,
     save_params,
@@ -187,7 +188,7 @@ FINAL_RECORD: dict[str, Any] = {
     "target_season": 2026,
     "ran_at": "2026-11-25T01:02:03Z",
     "params_sha256": params_sha256(PARAMS),
-    "adoption_sha256": "b" * 64,
+    "adoption_sha256": adoption_sha256(ADOPTION),  # 내보내기 안전장치가 대조한다
     "commit": "c" * 40,
     "reruns": [],
     "rows": [

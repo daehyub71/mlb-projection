@@ -34,3 +34,7 @@ next-env.d.ts
 
 # Claude Code 로컬 설정
 .claude/settings.local.json
+
+# Astryx 테마 편집기 미리보기 (편집할 때마다 다시 생성)
+web/themes/*/preview.*
+web/themes/*/sheet*.*

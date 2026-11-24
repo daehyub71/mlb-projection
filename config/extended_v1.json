@@ -1,0 +1,11 @@
+{
+ "adopt": {
+  "era": true,
+  "hr": true,
+  "ip": false,
+  "k_bb_pct": true,
+  "ops": true,
+  "pa": false
+ },
+ "version": "v1"
+}

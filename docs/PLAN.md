@@ -99,11 +99,11 @@ mlb-projection/
 python -m mlbproj collect   --seasons 2019-2026      # F1
 python -m mlbproj validate  --seasons 2019-2026      # F2
 python -m mlbproj build                               # F3~F5 정제·대상
-python -m mlbproj backtest  --target 2024             # F10
-python -m mlbproj tune      --targets 2024,2025
-python -m mlbproj final-test --target 2026            # 고정 파라미터, 1회
-python -m mlbproj project   --target 2027             # F11
-python -m mlbproj export                              # CSV + 웹 JSON
+python -m mlbproj tune      --targets 2024,2025      # 파라미터 → config/params_v1.json
+python -m mlbproj adopt     --targets 2024,2025      # 확장 모델 채택표 → config/extended_v1.json (F9)
+python -m mlbproj backtest  --targets 2024,2025      # F10 과거 검증표 (2026은 거부)
+python -m mlbproj final-test --target 2026            # 파라미터·채택표 커밋 뒤 1회
+python -m mlbproj export                              # 2027 예측(F11) → 검토용 CSV + 웹 JSON
 python -m mlbproj refresh                             # collect → … → export 한 번에 (수동 갱신)
 ```
 

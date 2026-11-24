@@ -1,0 +1,129 @@
+{
+  "recipe": "astryx-oklch-v2",
+  "modeStrategy": "light-and-dark",
+  "families": [
+    {
+      "id": "accent",
+      "name": "Accent",
+      "seed": "#e11d74",
+      "anchors": [
+        {
+          "mode": "light",
+          "stop": 55,
+          "color": "#e11d74",
+          "policy": "exact"
+        },
+        {
+          "mode": "dark",
+          "stop": 55,
+          "color": "#e11d74",
+          "policy": "exact"
+        }
+      ]
+    },
+    {
+      "id": "neutral",
+      "name": "Neutral",
+      "seed": "#5b7b79",
+      "kind": "neutral",
+      "anchors": [
+        {
+          "mode": "light",
+          "stop": 50,
+          "color": "#5b7b79",
+          "policy": "exact"
+        },
+        {
+          "mode": "dark",
+          "stop": 50,
+          "color": "#5b7b79",
+          "policy": "exact"
+        }
+      ]
+    },
+    {
+      "id": "info",
+      "name": "Info",
+      "seed": "#7c3aed",
+      "anchors": [
+        {
+          "mode": "light",
+          "stop": 45,
+          "color": "#7c3aed",
+          "policy": "exact"
+        }
+      ]
+    },
+    {
+      "id": "red",
+      "name": "Red",
+      "seed": "#d62a25"
+    },
+    {
+      "id": "orange",
+      "name": "Orange",
+      "seed": "#d6701c"
+    },
+    {
+      "id": "yellow",
+      "name": "Yellow",
+      "seed": "#fec424"
+    },
+    {
+      "id": "green",
+      "name": "Green",
+      "seed": "#44882f"
+    },
+    {
+      "id": "teal",
+      "name": "Teal",
+      "seed": "#1d735c"
+    },
+    {
+      "id": "cyan",
+      "name": "Cyan",
+      "seed": "#186d87"
+    },
+    {
+      "id": "blue",
+      "name": "Blue",
+      "seed": "#2571e3"
+    },
+    {
+      "id": "purple",
+      "name": "Purple",
+      "seed": "#980fb2"
+    },
+    {
+      "id": "pink",
+      "name": "Pink",
+      "seed": "#ae1373"
+    },
+    {
+      "id": "brown",
+      "name": "Brown",
+      "seed": "#995c0d"
+    },
+    {
+      "id": "indigo",
+      "name": "Indigo",
+      "seed": "#7887fe"
+    },
+    {
+      "id": "success",
+      "name": "Success",
+      "seed": "#198100"
+    },
+    {
+      "id": "warning",
+      "name": "Warning",
+      "seed": "#ffce2f"
+    },
+    {
+      "id": "danger",
+      "name": "Danger",
+      "seed": "#c9303a"
+    }
+  ],
+  "vibrancy": 60
+}

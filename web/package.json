@@ -10,15 +10,16 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@astryxdesign/core": "0.7.17",
-    "@astryxdesign/theme-neutral": "0.7.17",
+    "@astryxdesign/charts": "0.7.18-canary.gfca8508",
+    "@astryxdesign/core": "0.7.18-canary.gfca8508",
+    "@astryxdesign/theme-neutral": "0.7.18-canary.gfca8508",
     "@stylexjs/stylex": "0.19.2",
     "next": "16.4.6",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@astryxdesign/cli": "0.7.17",
+    "@astryxdesign/cli": "0.7.18-canary.gfca8508",
     "@tailwindcss/postcss": "4.3.5",
     "@testing-library/jest-dom": "8.0.0",
     "@testing-library/react": "16.3.3",

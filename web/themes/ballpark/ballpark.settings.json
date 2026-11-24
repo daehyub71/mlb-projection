@@ -1,0 +1,99 @@
+{
+  "name": "ballpark",
+  "like": "neutral",
+  "mode": "dark-only",
+  "settings": [
+    {
+      "thing": "accent",
+      "value": "#E11D74",
+      "source": "dial"
+    },
+    {
+      "thing": "neutral",
+      "value": "#5B7B79",
+      "source": "dial"
+    },
+    {
+      "thing": "info",
+      "value": "#7C3AED",
+      "source": "dial"
+    },
+    {
+      "thing": "vibrancy",
+      "value": "60",
+      "source": "dial"
+    },
+    {
+      "thing": "corners",
+      "value": "small",
+      "source": "dial"
+    },
+    {
+      "thing": "surfaces",
+      "value": "outlined",
+      "source": "dial"
+    },
+    {
+      "thing": "buttons",
+      "value": "caps",
+      "source": "dial"
+    },
+    {
+      "thing": "type",
+      "value": "display",
+      "source": "dial"
+    },
+    {
+      "thing": "headings",
+      "value": "bold",
+      "source": "dial",
+      "axis": "weight"
+    },
+    {
+      "thing": "badges",
+      "value": "solid",
+      "source": "dial"
+    },
+    {
+      "thing": "font",
+      "value": "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif",
+      "source": "dial"
+    },
+    {
+      "thing": "background-color",
+      "value": "#ee7cae",
+      "source": "property",
+      "on": "progress-bar-fill",
+      "when": "variant:accent",
+      "mode": "dark"
+    },
+    {
+      "thing": "background-color",
+      "value": "#C8175F",
+      "source": "property",
+      "on": "button",
+      "when": "variant:primary",
+      "state": "hover",
+      "mode": "dark"
+    },
+    {
+      "thing": "background-color",
+      "value": "#C8175F",
+      "source": "property",
+      "on": "button",
+      "when": "variant:primary",
+      "state": "pressed",
+      "mode": "dark"
+    },
+    {
+      "thing": "color",
+      "value": "#FFD2CE",
+      "source": "property",
+      "on": "button",
+      "when": "variant:destructive",
+      "mode": "dark"
+    }
+  ],
+  "lifted": [],
+  "palette": "0cfe994e9198a45b52373b19926983b30d41aba488638f45532e73439030ff71"
+}

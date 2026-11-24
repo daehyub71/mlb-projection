@@ -3,7 +3,7 @@
 Project-specific guidance for AI coding agents.
 
 <!-- ASTRYX:START -->
-Astryx v0.7.17 · 174 components
+Astryx v0.7.18-canary.gfca8508 · 174 components
 CLI: run every command as `npx astryx <cmd>` (shown below as `astryx ...`).
 
 SETUP (once, in app entry e.g. main.tsx) — without these, components render unstyled:
@@ -16,6 +16,7 @@ WORKFLOW — start every page from a template, never from scratch:
 3. `astryx component <Name>` to read props before using one; `astryx template <Block>` prints a block example to read for a part it lacks. Astryx names differ from other libraries: buttons, badges, tokens and tabs take their text in `label` (Text, Heading and Link take children), booleans start with `is` or `has` (`isOpen`, `isDisabled`), and every input takes `value` and `onChange`.
 Changing an existing page? Keep it: skip step 2 and add components inside its sections; read a block example when it helps.
 Before you deliver a build, run `astryx doctor --built <dir>`; don't deliver it if it fails.
+When asked to share a page as one file, run `astryx experimental export <page.tsx>`: the file opens anywhere and its controls work; `--reverse` gets the source back.
 
 RULES:
 - No <div> — components handle all layout and spacing.

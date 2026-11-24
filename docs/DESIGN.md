@@ -56,10 +56,32 @@
 
 ---
 
-## 3. 테마 (T5-3) — 진행 예정
+## 3. 테마 (T5-3)
 
-방향(DS5): 짙은 청록-검정 바탕, 자홍 강조, 보라 보조, 흰 글자. 히어로 C·섹션 이미지와 같은 색 세계다.
-Astryx 기반 테마 1종을 고르고 사이트 전용 토큰(색·글꼴·모서리·간격)을 테마 편집기로 만든다(D18·D20). 화려한 톤(야간 경기장 조명, 큰 숫자)이되 표·숫자 영역은 명도 대비 4.5:1 이상(N10).
+사이트 전용 테마 **ballpark** — Astryx 테마 편집기(`npx astryx experimental theme editor`)로 neutral을 바탕으로 만들었다(D18). 설정은 `web/themes/ballpark/ballpark.settings.json`이 기준이고, 앱은 `web/src/astryx-themes.ts`(생성 파일)로 불러온다. Astryx core·theme-neutral·charts·cli는 같은 canary 빌드 `0.7.18-canary.gfca8508`로 고정했다(D26).
+
+| 설정 | 값 | 이유 |
+|---|---|---|
+| mode | dark-only | 야간 경기장 히어로(DS5)와 같은 세계. 밝은 모드는 두지 않는다 |
+| accent | `#E11D74` (자홍) | 히어로 C의 조명색. 버튼 기본 채움은 이 색 그대로, 링크·강조 글자는 읽히도록 편집기가 밝은 단계(`#ff91b1`)를 쓴다 |
+| neutral | `#5B7B79` (청록 기운 회색) | 히어로 C의 짙은 청록 밤하늘. 바탕·카드·테두리가 이 색조를 띤다 |
+| info | `#7C3AED` (보라) | 히어로 C의 보조 조명색 |
+| vibrancy | 60 | 기본(50)보다 조금 더 선명하게 (D20) |
+| corners | small (8px) | 중계 그래픽처럼 각진 느낌 |
+| surfaces | outlined | 숫자 표가 많아 그림자보다 1px 테두리가 깔끔하다 |
+| buttons | caps | 대문자·굵게·자간 — 중계 화면 느낌 |
+| type / headings | display / bold | 큰 숫자·큰 제목 (D20) |
+| badges | solid | 상태 배지를 색으로 분명히 |
+| font | `'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif` | 한글. 불러오는 방법은 결정 대기(아래) |
+
+명도 대비 조정 (N10, 편집기 검사 + 미리보기 그림을 직접 확인)
+
+- 진행 막대: 자홍 채움이 어두운 트랙 위 1.73:1 → 채움을 `#ee7cae`로(3:1 이상).
+- 기본 버튼 hover·pressed: 밝아진 채움 위 흰 글자 4.11~4.44:1 → 채움을 `#C8175F`로 고정(약 6.6:1).
+- 위험(destructive) 버튼 글자: 4.44:1 → `#FFD2CE`.
+- 남은 그림 문제 없음 (`show ballpark --png`, `pictureProblem: none`).
+
+남은 일: Noto Sans KR 불러오기 — Astryx 진단(`doctor --built`)은 설치된 글꼴 패키지만 인정한다. `@fontsource/noto-sans-kr` 설치(새 패키지, 확인 필요) 전까지 맥은 Apple SD Gothic Neo, 윈도우는 맑은 고딕으로 대신 그려진다.
 
 ## 4. 시안 (T5-4) — 예정
 

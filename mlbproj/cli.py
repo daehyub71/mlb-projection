@@ -1,6 +1,7 @@
 """명령줄 진입점 (PLAN §2-4). 명령은 마일스톤마다 붙인다."""
 
 import argparse
+import json
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -9,6 +10,7 @@ import pandas as pd
 
 from mlbproj import __version__
 from mlbproj import contracts as c
+from mlbproj.backtest import load_tables, run_backtest, summary
 from mlbproj.clean.batting import build_batting
 from mlbproj.clean.fielding import build_fielding
 from mlbproj.clean.pitching import build_pitching
@@ -18,6 +20,8 @@ from mlbproj.collect import savant, statsapi
 from mlbproj.collect.http import Fetcher, FetchError
 from mlbproj.collect.raw import CollectOutcome, Getter
 from mlbproj.interim import write_table
+from mlbproj.models.params import DEFAULT_PARAMS, Params, load_params, params_sha256, save_params
+from mlbproj.tune import tune
 from mlbproj.validate import (
     DEFAULT_LIMITS,
     ValidationError,
@@ -28,6 +32,7 @@ from mlbproj.validate import (
 
 # 정제·대상 표를 만드는 목표 시즌: 과거 검증(2024~2026)과 최종 예측(2027)
 BUILD_TARGETS: tuple[int, ...] = (*c.TUNE_TARGETS, c.FINAL_TEST_TARGET, c.TARGET_SEASON)
+TUNE_DEFAULT: str = ",".join(str(t) for t in c.TUNE_TARGETS)
 
 
 def parse_seasons(text: str) -> list[int]:
@@ -132,6 +137,51 @@ def run_build(raw_dir: Path, report: Path, out_dir: Path) -> dict[str, int]:
     return {spec.name: len(df) for spec, df in tables.items()}
 
 
+def reject_final_target(targets: Sequence[int]) -> None:
+    """과거 검증·조정 목표에 최종 검증 시즌(2026) 이후가 있으면 멈춘다 (SPEC F10).
+
+    Raises:
+        ValueError: 그런 목표가 있을 때.
+    """
+    late = [t for t in targets if t >= c.FINAL_TEST_TARGET]
+    if late:
+        raise ValueError(
+            f"{late}은 과거 검증·조정에 쓰지 않는다 — 최종 검증은 final-test로 한 번만 (SPEC F10)"
+        )
+
+
+def run_backtest_command(
+    params: Params, targets: Sequence[int], interim_dir: Path, raw_dir: Path, out_dir: Path
+) -> pd.DataFrame:
+    """과거 검증표를 `out_dir/backtest.csv`·`backtest.json`으로 쓰고 평가표를 돌려준다."""
+    reject_final_target(targets)
+    evaluations = run_backtest(load_tables(interim_dir, raw_dir), params, targets)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    evaluations.to_csv(out_dir / "backtest.csv", index=False, lineterminator="\n")
+    payload = {
+        "params_version": params.version,
+        "params_sha256": params_sha256(params),
+        "targets": list(targets),
+        "rows": json.loads(evaluations.to_json(orient="records")),
+    }
+    (out_dir / "backtest.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    return evaluations
+
+
+def run_tune_command(
+    targets: Sequence[int], interim_dir: Path, raw_dir: Path, out_dir: Path, params_out: Path
+) -> Params:
+    """격자 탐색 결과를 `out_dir/tune_report.csv`에, 고른 파라미터를 params_out에 쓴다."""
+    reject_final_target(targets)
+    chosen, report = tune(load_tables(interim_dir, raw_dir), targets)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report.to_csv(out_dir / "tune_report.csv", index=False, lineterminator="\n")
+    save_params(chosen, params_out)
+    return chosen
+
+
 def build_parser() -> argparse.ArgumentParser:
     """명령줄 파서를 만든다.
 
@@ -160,6 +210,22 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
     build.add_argument("--report", type=Path, default=c.VALIDATION_REPORT_PATH)
     build.add_argument("--out-dir", type=Path, default=c.INTERIM_DIR)
+
+    backtest = sub.add_parser("backtest", help="과거 검증표 (F10) — 2024·2025만, 2026은 final-test")
+    backtest.add_argument("--targets", type=parse_seasons, default=parse_seasons(TUNE_DEFAULT))
+    backtest.add_argument(
+        "--params", type=Path, default=c.PARAMS_PATH, help="없으면 기본값(v0)으로 돈다"
+    )
+    backtest.add_argument("--interim-dir", type=Path, default=c.INTERIM_DIR)
+    backtest.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
+    backtest.add_argument("--out-dir", type=Path, default=c.OUT_DIR)
+
+    tune_cmd = sub.add_parser("tune", help="파라미터 조정 (D10) — 2024·2025 격자 탐색")
+    tune_cmd.add_argument("--targets", type=parse_seasons, default=parse_seasons(TUNE_DEFAULT))
+    tune_cmd.add_argument("--interim-dir", type=Path, default=c.INTERIM_DIR)
+    tune_cmd.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
+    tune_cmd.add_argument("--out-dir", type=Path, default=c.OUT_DIR)
+    tune_cmd.add_argument("--params-out", type=Path, default=c.PARAMS_PATH)
     return parser
 
 
@@ -218,6 +284,32 @@ def main(argv: list[str] | None = None, *, getter: Getter | None = None) -> int:
         for name, rows in counts.items():
             print(f"{name}: {rows:,}행")
         print(f"→ {args.out_dir}")
+        return 0
+
+    if args.command == "backtest":
+        params = load_params(args.params) if args.params.exists() else DEFAULT_PARAMS
+        try:
+            evaluations = run_backtest_command(
+                params, args.targets, args.interim_dir, args.raw_dir, args.out_dir
+            )
+        except ValueError as exc:
+            print(f"과거 검증 중단: {exc}", file=sys.stderr)
+            return 1
+        print(f"파라미터 {params.version} (sha256 {params_sha256(params)[:12]})")
+        print(summary(evaluations).to_string())
+        print(f"→ {args.out_dir / 'backtest.csv'}, {args.out_dir / 'backtest.json'}")
+        return 0
+
+    if args.command == "tune":
+        try:
+            chosen = run_tune_command(
+                args.targets, args.interim_dir, args.raw_dir, args.out_dir, args.params_out
+            )
+        except ValueError as exc:
+            print(f"조정 중단: {exc}", file=sys.stderr)
+            return 1
+        print(f"고른 파라미터 → {args.params_out} (sha256 {params_sha256(chosen)})")
+        print(f"후보 결과 → {args.out_dir / 'tune_report.csv'}")
         return 0
 
     parser.error(f"알 수 없는 명령: {args.command}")

@@ -517,6 +517,7 @@ PREV_102_PIT: dict[str, Any] = {"season": 2026, "ip": 20.0, "era": 3.6, "k_bb_pc
 # 103 = 29 + (2027 − 2025) = 31. team_name = 그 역할 input_last 행 (103은 2025 결측 → null)
 SUMMARY_101: dict[str, Any] = {
     "player_id": 101,
+    "primary_position": "C",
     "name": "Alpha Catcher",
     "age": 27,
     "team_name": "Team A",
@@ -525,6 +526,7 @@ SUMMARY_101: dict[str, Any] = {
 }
 SUMMARY_102: dict[str, Any] = {
     "player_id": 102,
+    "primary_position": "TWP",
     "name": "Beta Twoway",
     "age": 33,
     "team_name": "Team B",
@@ -533,6 +535,7 @@ SUMMARY_102: dict[str, Any] = {
 }
 SUMMARY_103: dict[str, Any] = {
     "player_id": 103,
+    "primary_position": "P",
     "name": "Gamma Pitcher",
     "age": 31,
     "team_name": None,

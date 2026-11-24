@@ -13,7 +13,7 @@ validation.json(ValidationReport), players/{player_id}.json(PlayerDetail). 여�
   같은 입력이면 같은 바이트(N1).
 
 예측표 행 (BatRow·PitRow, 그 역할의 Y 대상 전원 = inp.projections[role]의 선수)
-- player(PlayerSummary): name·active·last_mlb_season은 players 표. age = `age.season_age(birth_date, Y)`,
+- player(PlayerSummary): name·primary_position·active·last_mlb_season은 players 표. age = `age.season_age(birth_date, Y)`,
   생년월일이 없으면 그 역할 정제 표의 input_last 행 `age` + (Y − input_last), 그것도 없으면 null.
   team_name = 그 역할 정제 표의 input_last 행 team_name.
 - window: 대상 표(cohorts, Y)의 input_first·input_last·n_seasons.
@@ -98,7 +98,15 @@ _BASELINE_KEYS: dict[Role, tuple[str, ...]] = {
 }
 
 # 웹 JSON 객체의 키 (스키마 정의의 필수 키 순서)
-_SUMMARY_KEYS = ("player_id", "name", "age", "team_name", "active", "last_mlb_season")
+_SUMMARY_KEYS = (
+    "player_id",
+    "name",
+    "primary_position",
+    "age",
+    "team_name",
+    "active",
+    "last_mlb_season",
+)
 _WINDOW_KEYS = ("input_first", "input_last", "n_seasons")
 _SAMPLE_KEYS: dict[Role, tuple[str, ...]] = {
     "bat": ("sample_pa",),

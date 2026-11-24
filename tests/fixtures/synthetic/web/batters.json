@@ -35,6 +35,7 @@
    "player": {
     "player_id": 1,
     "name": "Sample Batter",
+    "primary_position": "DH",
     "age": 29,
     "team_name": "Sample Team",
     "active": true,

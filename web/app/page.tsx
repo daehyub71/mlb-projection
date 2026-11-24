@@ -1,14 +1,20 @@
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
 import { VStack } from "@astryxdesign/core/VStack";
+import { SiteFooter } from "./components/SiteFooter";
+import { SiteHeader } from "./components/SiteHeader";
+import { SITE_TITLE } from "@/src/site";
 
-// M0 자리표시 — 화면은 DESIGN 시안 합의(M5) 뒤 M6에서 만든다
+// M6 계약 골격 — 레인 A가 table-page 템플릿에서 예측표(SA-1·SA-3, F13)로 바꾼다
 export default function HomePage() {
   return (
-    <VStack gap={3} padding={6}>
-      <Heading level={1}>재미로 보는 2027 MLB 선수 성적 예측</Heading>
-      <Text color="secondary">준비 중입니다. 재미로 보는 예측이며 실제 성적을 보장하지 않습니다.</Text>
-      <Text type="supporting">출처: MLB Stats API, Baseball Savant</Text>
+    <VStack gap={0}>
+      <SiteHeader active="projections" />
+      <VStack as="main" gap={3} padding={6}>
+        <Heading level={1}>{SITE_TITLE}</Heading>
+        <Text color="secondary">예측표를 준비하고 있습니다.</Text>
+      </VStack>
+      <SiteFooter />
     </VStack>
   );
 }

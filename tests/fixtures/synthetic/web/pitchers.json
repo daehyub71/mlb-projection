@@ -36,6 +36,7 @@
    "player": {
     "player_id": 2,
     "name": "Sample Pitcher",
+    "primary_position": "P",
     "age": 31,
     "team_name": null,
     "active": false,

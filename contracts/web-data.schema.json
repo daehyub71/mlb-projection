@@ -105,6 +105,7 @@
       "required": [
         "player_id",
         "name",
+        "primary_position",
         "age",
         "team_name",
         "active",
@@ -118,6 +119,13 @@
         "name": {
           "type": "string",
           "minLength": 1
+        },
+        "primary_position": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "MLB primary position (e.g. DH, SS, P, TWP)"
         },
         "age": {
           "type": [

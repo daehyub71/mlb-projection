@@ -204,5 +204,9 @@ def read_json(raw_dir: Path, rel: Path) -> Any:
 
 
 def read_csv(raw_dir: Path, rel: Path) -> pd.DataFrame:
-    """Savant CSV 원본을 읽는다. 첫 줄의 BOM을 떼고, 값은 pandas가 추론한다."""
-    return pd.read_csv(raw_dir / rel, encoding="utf-8-sig")
+    """Savant CSV 원본을 읽는다. 첫 줄의 BOM을 떼고, 값은 pandas가 추론한다.
+
+    결측은 **빈 칸만**이다. pandas 기본값은 "NA"·"null"·"None"·"n/a" 같은 글자도 조용히 결측으로
+    바꾸므로 끈다 (M2 리뷰 지적).
+    """
+    return pd.read_csv(raw_dir / rel, encoding="utf-8-sig", keep_default_na=False, na_values=[""])

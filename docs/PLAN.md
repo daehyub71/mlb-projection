@@ -1,6 +1,6 @@
 # PLAN.md — mlb-projection
 
-> **상태: v0.1 확정** (2026-11-24 사용자 확인). 기준 문서는 `docs/SPEC.md` v0.2.3이다. 문서끼리 다르면 SPEC이 기준이다.
+> **상태: v0.2** (2026-11-24). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. 기준 문서는 `docs/SPEC.md` v0.3이다. 문서끼리 다르면 SPEC이 기준이다.
 > 결정 P1~P4는 2026-11-23 사용자 답이다. 작업 항목과 진도는 `docs/TASKS.md`에 있다.
 
 ---
@@ -183,9 +183,9 @@ python -m mlbproj refresh                             # collect → … → expo
 |---|---|---|
 | Python 런타임 | `pandas` (numpy 포함) | HTTP는 표준 라이브러리 `urllib`. venv는 Homebrew Python 3.13 |
 | Python 개발 | `pytest`, `ruff`, `mypy`, `pandas-stubs` | `requirements-dev.txt` |
-| 웹 런타임 | `next@16`, `react@19`, `react-dom@19`, `@astryxdesign/core@0.7.17`(정확히 고정), `@astryxdesign/theme-*`(기반 테마 1종), `@stylexjs/stylex@^0.19` | 테마는 DESIGN에서 기반 1종을 골라 덮어쓴다 |
+| 웹 런타임 | `next@16`, `react@19`, `react-dom@19`, `@astryxdesign/core`·`@astryxdesign/theme-*`(기반 테마 1종)·`@astryxdesign/charts`를 **같은 canary 빌드로 정확히 고정**(D26, M0의 0.7.17에서 M6 시작 때 바꾼다), `@stylexjs/stylex@^0.19` | 테마는 DESIGN에서 기반 1종을 골라 덮어쓴다. charts는 d3-array·d3-scale·d3-shape를 끌어온다 |
 | 웹 개발 | `typescript`, `tailwindcss@4`, `@tailwindcss/postcss`, `@astryxdesign/cli`, `vitest`, `@testing-library/react`, `@testing-library/jest-dom`, `jsdom`, `eslint`, `eslint-config-next` | lockfile 커밋 |
-| 미정 | 차트 라이브러리 | SPEC O6, M5에서 정한다. 추가할 때 다시 확인받는다 |
+| 차트 | `@astryxdesign/charts` canary | SPEC D26 (2026-11-24 사용자 결정·설치 승인) |
 
 `astryx init`은 `AGENTS.md`/`CLAUDE.md`에 안내문을 쓴다(SPEC E14). M0에서 실행한 뒤 프로젝트 CLAUDE.md 변경분을 검토하고 필요한 부분만 남긴다.
 
@@ -198,7 +198,7 @@ python -m mlbproj refresh                             # collect → … → expo
 | R1 | python.org Python에서 HTTPS 인증서 실패(E17) | Homebrew Python으로 venv를 만든다. 윈도우는 별도 확인 |
 | R2 | Savant·API 형식 변경, 요청 제한 | 캐시·간격·재시도, live 테스트, 검증 단계에서 멈춤 |
 | R3 | MLBAM 이용 조건(E13) — 공개 저장소, 실제 픽스처(P4) | 원본 비커밋, 픽스처 소규모·출처 기록, 공개 화면은 예측과 필요한 과거 기록만, 출처 표기 |
-| R4 | Astryx 베타의 깨지는 변경 | 정확한 버전 고정 + lockfile. 올릴 때는 빌드·테스트 후 |
+| R4 | Astryx 베타·**canary**의 깨지는 변경 (D26 — core·theme·charts가 canary) | 하나의 canary 빌드로 정확히 고정 + lockfile. 올릴 때는 빌드·테스트·화면 확인 후. 고칠 수 없으면 차트만 직접 그린 SVG로 바꾼다 |
 | R5 | Next.js 16 정적 export와 Astryx(클라이언트 테마 공급자) 호환 | M0에서 화면 없는 빌드로 먼저 확인 |
 | R6 | ERA 예측력이 약함(E11) | 구성 지표 후보, 기준선 병기, 결과를 숨기지 않음(SPEC §7-2) |
 | R7 | 2024·2025에 과적합 | 2026은 고정 후 1회, 파라미터 해시 기록 |
@@ -207,3 +207,4 @@ python -m mlbproj refresh                             # collect → … → expo
 | R10 | 생성 이미지의 글자 깨짐·상표·인물 | 라벨은 짧은 영어, 넣기 전에 직접 확인(N9). UI 이미지는 글자 없이 |
 | R11 | Vercel 계정 2단계 인증 잠김(CLI 로그인 불가) | 깃허브 연동 자동 배포를 쓴다. 필요하면 기존 토큰을 사용자 승인 후 쓴다 |
 | R12 | 맥·윈도우 교차 작업 시 `data/raw`가 없음 | `refresh` 한 번으로 다시 받는다 |
+| R13 | 공식 선수 사진의 저작권 (D27, E13) | 복사하지 않고 MLB 서버에서 불러온다, "선수 사진 © MLB" 표기, 실패 시 이니셜 배지, 설정 하나로 끌 수 있게 한다. 요청을 받으면 바로 끈다 |

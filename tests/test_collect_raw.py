@@ -107,3 +107,14 @@ def test_collect_raw_readers_handle_bom(tmp_path: Path) -> None:
 def test_collect_raw_file_sha(tmp_path: Path) -> None:
     (tmp_path / "f").write_bytes(b"abc")
     assert raw.file_sha256(tmp_path / "f") == hashlib.sha256(b"abc").hexdigest()
+
+
+def test_collect_raw_read_csv_only_blank_is_missing(tmp_path: Path) -> None:
+    """pandas 기본 결측 글자("NA"·"null"·"None"·"n/a")를 결측으로 바꾸지 않는다."""
+    (tmp_path / "x.csv").write_text(
+        "player_id,name,v\n1,NA,\n2,null,1.5\n3,None,n/a\n", encoding="utf-8"
+    )
+    df = raw.read_csv(tmp_path, Path("x.csv"))
+    assert df["name"].tolist() == ["NA", "null", "None"]
+    assert df["v"].isna().tolist() == [True, False, False]
+    assert df["v"].tolist()[2] == "n/a"

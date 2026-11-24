@@ -5,12 +5,29 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+import pandas as pd
+
 from mlbproj import __version__
 from mlbproj import contracts as c
+from mlbproj.clean.batting import build_batting
+from mlbproj.clean.fielding import build_fielding
+from mlbproj.clean.pitching import build_pitching
+from mlbproj.clean.players import build_players, people_records
+from mlbproj.cohort import build_cohort
 from mlbproj.collect import savant, statsapi
 from mlbproj.collect.http import Fetcher, FetchError
 from mlbproj.collect.raw import CollectOutcome, Getter
-from mlbproj.validate import DEFAULT_LIMITS, validate_seasons, write_report
+from mlbproj.interim import write_table
+from mlbproj.validate import (
+    DEFAULT_LIMITS,
+    ValidationError,
+    assert_validated,
+    validate_seasons,
+    write_report,
+)
+
+# 정제·대상 표를 만드는 목표 시즌: 과거 검증(2024~2026)과 최종 예측(2027)
+BUILD_TARGETS: tuple[int, ...] = (*c.TUNE_TARGETS, c.FINAL_TEST_TARGET, c.TARGET_SEASON)
 
 
 def parse_seasons(text: str) -> list[int]:
@@ -74,6 +91,47 @@ def run_collect(
     return outcomes
 
 
+def run_build(raw_dir: Path, report: Path, out_dir: Path) -> dict[str, int]:
+    """검증을 통과한 원본으로 정제 표와 대상 표를 만든다 (F3~F5).
+
+    Args:
+        raw_dir: 원본 디렉토리.
+        report: 검증 보고서 경로 (`assert_validated`로 확인한다).
+        out_dir: 정제 표를 쓸 디렉토리.
+
+    Returns:
+        표 이름 → 행 수.
+
+    Raises:
+        ValidationError: 원본이 검증을 통과하지 않았거나 검증 뒤에 바뀌었을 때.
+    """
+    assert_validated(raw_dir, report, c.SEASONS)
+    batting = build_batting(raw_dir)
+    pitching = build_pitching(raw_dir)
+    tables = {
+        c.PLAYERS: build_players(raw_dir),
+        c.BATTING_SEASONS: batting,
+        c.PITCHING_SEASONS: pitching,
+        c.FIELDING_SEASONS: build_fielding(raw_dir),
+    }
+    seasons_by_role = {"bat": batting, "pit": pitching}
+    # 정제 표는 2019부터라 그 전 기록은 MLB 데뷔 연도로 보완한다 (F5, E21)
+    debuts = {
+        int(str(p["id"])): int(str(p["mlbDebutDate"])[:4])
+        for p in people_records(raw_dir)
+        if p.get("mlbDebutDate")
+    }
+    cohorts = [
+        build_cohort(seasons_by_role[role], role, target, debut_seasons=debuts)
+        for target in BUILD_TARGETS
+        for role in c.ROLES
+    ]
+    tables[c.COHORTS] = pd.concat(cohorts, ignore_index=True)
+    for spec, df in tables.items():
+        write_table(df, spec, c.interim_path(spec, out_dir))
+    return {spec.name: len(df) for spec, df in tables.items()}
+
+
 def build_parser() -> argparse.ArgumentParser:
     """명령줄 파서를 만든다.
 
@@ -97,6 +155,11 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--seasons", type=parse_seasons, default=parse_seasons(all_seasons))
     validate.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
     validate.add_argument("--report", type=Path, default=c.VALIDATION_REPORT_PATH)
+
+    build = sub.add_parser("build", help="정제 표·예측 대상 만들기 (F3~F5) — 검증 통과 원본만")
+    build.add_argument("--raw-dir", type=Path, default=c.RAW_DIR)
+    build.add_argument("--report", type=Path, default=c.VALIDATION_REPORT_PATH)
+    build.add_argument("--out-dir", type=Path, default=c.INTERIM_DIR)
     return parser
 
 
@@ -145,6 +208,17 @@ def main(argv: list[str] | None = None, *, getter: Getter | None = None) -> int:
             f"보고서: {args.report}" + (f" — 실패 시즌 {failed}" if failed else " — 전 시즌 통과")
         )
         return 1 if failed else 0
+
+    if args.command == "build":
+        try:
+            counts = run_build(args.raw_dir, args.report, args.out_dir)
+        except ValidationError as exc:
+            print(f"정제 중단 — 검증을 먼저 통과해야 한다: {exc}", file=sys.stderr)
+            return 1
+        for name, rows in counts.items():
+            print(f"{name}: {rows:,}행")
+        print(f"→ {args.out_dir}")
+        return 0
 
     parser.error(f"알 수 없는 명령: {args.command}")
     return 2

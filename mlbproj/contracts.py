@@ -335,6 +335,8 @@ PLAYERS = TableSpec(
         Column("primary_position", "str", nullable=True),
         Column("bats", "str", nullable=True),
         Column("throws", "str", nullable=True),
+        # 아래 두 열은 2026까지 모든 시즌을 본 값이다 — 화면 표시용(D23)이고, 과거 목표(2024~2026)의
+        # 모델·평가 입력으로 쓰면 미래 정보가 샌다(N2). 모델은 cohort·정제 시즌 표만 쓴다.
         Column("active", "bool"),  # 표시용 (D23, E16)
         Column("last_mlb_season", "int"),  # 역할 무관 마지막 MLB 기록 시즌
     ),

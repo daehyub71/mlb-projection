@@ -277,14 +277,19 @@ def _export_war_command(args: argparse.Namespace) -> int:
             final_test=record,
             war_params_sha256=war_params_sha256(war_params),
         )
-        size = write_war_json(build_war_web(inp), args.web_dir)
+        web = build_war_web(inp)
+        size = write_war_json(web, args.web_dir)
         write_war_csv(inp, args.out_dir / c.WAR_PROJECTION_CSV.name)
     except (ValueError, FileNotFoundError, WarTestError) as exc:
         print(f"WAR 내보내기 중단: {exc}", file=sys.stderr)
         return 1
     state = "기록 있음" if record is not None else "아직 안 돌림 (final_test = null)"
     print(f"2026 WAR 시험: {state}")
-    print(f"{WAR_WEB_FILE}: {size:,} bytes, 순위 {len(rankings):,}명 → {args.web_dir}")
+    shown = len(web["rows"])
+    print(
+        f"{WAR_WEB_FILE}: {size:,} bytes, 2026 출전 {shown:,}명 (순위 {len(rankings):,}명, D42)"
+        f" → {args.web_dir}"
+    )
     print(f"검토용 CSV → {args.out_dir / c.WAR_PROJECTION_CSV.name}")
     return 0
 

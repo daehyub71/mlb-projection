@@ -445,9 +445,11 @@ describe("주소 ?id=와 불러오기 상태", () => {
     expect(source).toMatch(/<Suspense[\s>]/);
   });
 
-  it("?id=의 선수 JSON 하나만 받는다", async () => {
+  it("?id=의 선수 JSON을 먼저 받고, 그 뒤 WAR 구역용 war.json 하나만 더 받는다 (v0.5 F22)", async () => {
     const { fetchMock } = await openPlayer(BATTER);
-    expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual(["/data/players/1.json"]);
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.map(([url]) => String(url))).toEqual(["/data/players/1.json", "/data/war.json"]),
+    );
   });
 
   it("받는 동안 불러오는 중임을 보여 준다", async () => {

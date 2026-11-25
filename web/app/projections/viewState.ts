@@ -1,5 +1,6 @@
 // 예측표 보기 상태 ↔ 주소 해시 (DESIGN §1-2) — 선수 상세에서 뒤로 가면 탭·검색·필터·정렬·쪽이 그대로 돌아온다.
 // 해시는 기본값과 다른 것만 적는다: "#role=pit&q=ohtani&all=1&rp=1&career=1-2&page=3&sort=hr-desc" (rp=1: 투수 100이닝 필터 끔)
+// WAR 순위 탭(v0.5 SA-6)은 "#role=war&wsort=full" — 풀타임 환산 정렬일 때만 wsort를 적는다
 // 순수 함수만 둔다. 주소를 읽고 쓰는 일은 ProjectionsHome이 한다.
 import type { CareerGroup, Role } from "@/src/data/types";
 import {
@@ -13,8 +14,13 @@ import {
   type SortEntry,
 } from "./rows";
 
+/** 예측표 탭 — 타자 · 투수 · WAR 순위 (계약의 Role은 바꾸지 않고 탭 전용으로 넓힌다) */
+export type ViewRole = Role | "war";
+/** WAR 순위 정렬 — 예측 WAR(기본) / 풀타임 환산 WAR (D35) */
+export type WarSort = "war" | "full";
+
 export interface ViewState {
-  role: Role;
+  role: ViewRole;
   query: string;
   /** "2026 출전 선수만" (DS3 — 켠 채 시작) */
   prevOnly: boolean;
@@ -25,6 +31,7 @@ export interface ViewState {
   page: number;
   batSort: SortEntry<BatSortKey>[];
   pitSort: SortEntry<PitSortKey>[];
+  warSort: WarSort;
 }
 
 /** 첫 화면 (DS2~DS4): 타자 탭, 2026 출전 선수만, 2027 OPS 높은 순, 1쪽 */
@@ -37,10 +44,11 @@ export const DEFAULT_VIEW: ViewState = {
   page: 1,
   batSort: DEFAULT_BAT_SORT,
   pitSort: DEFAULT_PIT_SORT,
+  warSort: "war",
 };
 
 const CAREER_CODE: Record<CareerGroup, string> = { seasons_1_2: "1-2", seasons_3_5: "3-5" };
-const VIEW_KEYS = ["role", "q", "all", "rp", "career", "page", "sort", "psort"] as const;
+const VIEW_KEYS = ["role", "q", "all", "rp", "career", "page", "sort", "psort", "wsort"] as const;
 
 function encodeSort(sort: readonly SortEntry[]): string {
   const s = sort[0];
@@ -52,6 +60,10 @@ function decodeSort<K extends string>(raw: string | null, keys: readonly K[]): S
   if (m === null) return null;
   const key = keys.find((k) => k === m[1]);
   return key === undefined ? null : [{ sortKey: key, direction: m[2] === "asc" ? "ascending" : "descending" }];
+}
+
+function decodeRole(raw: string | null): ViewRole {
+  return raw === "pit" || raw === "war" ? raw : "bat";
 }
 
 /** 보기 상태 → 해시 본문("#" 없이). 모두 기본값이면 빈 문자열 */
@@ -67,6 +79,7 @@ export function encodeView(view: ViewState): string {
   const pit = encodeSort(view.pitSort);
   if (bat !== encodeSort(DEFAULT_BAT_SORT)) params.set("sort", bat);
   if (pit !== encodeSort(DEFAULT_PIT_SORT)) params.set("psort", pit);
+  if (view.warSort === "full") params.set("wsort", "full");
   return params.toString();
 }
 
@@ -86,7 +99,7 @@ export function decodeView(hash: string): ViewState | null {
   const pageRaw = params.get("page");
   const page = pageRaw !== null && /^\d{1,4}$/.test(pageRaw) ? Number(pageRaw) : 1;
   return {
-    role: params.get("role") === "pit" ? "pit" : "bat",
+    role: decodeRole(params.get("role")),
     query: params.get("q") ?? "",
     prevOnly: params.get("all") !== "1",
     startersOnly: params.get("rp") !== "1",
@@ -94,5 +107,6 @@ export function decodeView(hash: string): ViewState | null {
     page: page >= 1 ? page : 1,
     batSort: decodeSort(params.get("sort"), BAT_SORT_KEYS) ?? DEFAULT_BAT_SORT,
     pitSort: decodeSort(params.get("psort"), PIT_SORT_KEYS) ?? DEFAULT_PIT_SORT,
+    warSort: params.get("wsort") === "full" ? "full" : "war",
   };
 }

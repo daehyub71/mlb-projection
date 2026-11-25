@@ -1,6 +1,6 @@
 "use client";
 
-// 검증 화면 (SA-4, SPEC F15·D13·D29·D31) — validation.json 하나만 읽는다 (DESIGN §1)
+// 검증 화면 (SA-4, SPEC F15·D13·D29·D31) — validation.json을 읽고, WAR 구역(SA-8)은 war.json을 읽는다 (DESIGN §1·§4-1)
 // 틀은 Astryx table-page 템플릿(Layout + LayoutContent padding 0 + VStack padding 4·gap 8)에서 왔다.
 // 머리글이 sticky라 문서 전체가 스크롤되도록 height="auto"로 두고, 폭은 시안(SA-4)의 1200 열을 따른다.
 import { useMemo, useState } from "react";
@@ -19,7 +19,7 @@ import { Table, type TableColumn } from "@astryxdesign/core/Table";
 import { Text } from "@astryxdesign/core/Text";
 import { Token } from "@astryxdesign/core/Token";
 import { VStack } from "@astryxdesign/core/VStack";
-import { loadValidation } from "@/src/data/load";
+import { loadValidation, loadWar } from "@/src/data/load";
 import type {
   BandMetric,
   BandRow,
@@ -37,6 +37,7 @@ import { DASH, fmtBand, fmtCount, fmtMae } from "@/src/format";
 import { CAREER_LABEL, RERUN_STORY } from "@/src/site";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { WarValidation } from "./WarValidation";
 
 // ---------------------------------------------------------------------------
 // 이름표 (계약 site.ts에 없어 이 화면에 둔다 — 시안 SA-4 문구)
@@ -532,6 +533,8 @@ function DetailSection({ rows }: { rows: EvalRow[] }) {
 
 export function ValidationView() {
   const state = useJson(() => loadValidation(), "validation");
+  // WAR 구역(SA-8)은 war.json을 따로 받는다 — validation.json과 나란히, 실패해도 기존 구역은 그대로
+  const warState = useJson(() => loadWar(), "war");
   const ranFinal = state.status !== "ok" || state.data.final_test !== null;
 
   return (
@@ -583,6 +586,7 @@ export function ValidationView() {
                   />
                   <BandSection bands={state.data.bands} />
                   <DetailSection rows={state.data.rows} />
+                  <WarValidation state={warState} />
                 </>
               )}
             </VStack>

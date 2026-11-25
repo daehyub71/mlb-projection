@@ -1,131 +1,147 @@
 {
- "meta": {
-  "schema_version": "1",
-  "generated_at": "2026-11-24T00:00:00Z",
-  "raw_collected_at": "2026-11-23T12:00:00Z",
-  "params_version": "v1",
-  "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "target_season": 2027,
-  "input_seasons": [
-   2022,
-   2023,
-   2024,
-   2025,
-   2026
-  ],
-  "sources": [
-   {
-    "name": "MLB Stats API",
-    "url": "https://statsapi.mlb.com"
-   },
-   {
-    "name": "Baseball Savant",
-    "url": "https://baseballsavant.mlb.com"
-   }
-  ],
-  "disclaimer": "재미로 보는 예측입니다.",
-  "counts": {
-   "bat": 1144,
-   "pit": 1490
-  }
- },
- "source": "MLB Stats API sabermetrics",
- "war_params_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
- "full_time": {
-  "pa": 600,
-  "sp_ip": 180,
-  "rp_ip": 65
- },
- "rows": [
-  {
-   "player": {
-    "player_id": 1,
-    "name": "Sample Batter",
-    "primary_position": "TWP",
-    "age": 29,
-    "team_name": "Sample Team",
-    "active": true,
-    "last_mlb_season": 2026
-   },
-   "roles": "both",
-   "played_prev": true,
-   "group": "seasons_3_5",
-   "slot": "sp",
-   "pa": 499.8,
-   "ip": 76.7,
-   "war_bat": 4.12,
-   "war_pit": 1.85,
-   "war": 5.97,
-   "war_full_bat": 4.95,
-   "war_full_pit": 4.34,
-   "war_full": 9.29,
-   "prev_war": 6.63,
-   "history": [
+  "meta": {
+    "schema_version": "1",
+    "generated_at": "2026-11-24T00:00:00Z",
+    "raw_collected_at": "2026-11-23T12:00:00Z",
+    "params_version": "v1",
+    "params_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "target_season": 2027,
+    "input_seasons": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "sources": [
+      {
+        "name": "MLB Stats API",
+        "url": "https://statsapi.mlb.com"
+      },
+      {
+        "name": "Baseball Savant",
+        "url": "https://baseballsavant.mlb.com"
+      }
+    ],
+    "disclaimer": "재미로 보는 예측입니다.",
+    "counts": {
+      "bat": 1144,
+      "pit": 1490
+    }
+  },
+  "source": "MLB Stats API sabermetrics",
+  "war_params_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "full_time": {
+    "pa": 600,
+    "sp_ip": 180,
+    "rp_ip": 65
+  },
+  "runs_per_win": {
+    "season": 2026,
+    "value": 9.82
+  },
+  "rows": [
     {
-     "season": 2025,
-     "war_bat": 7.45,
-     "war_pit": 1.92
+      "player": {
+        "player_id": 1,
+        "name": "Sample Batter",
+        "primary_position": "TWP",
+        "age": 29,
+        "team_name": "Sample Team",
+        "active": true,
+        "last_mlb_season": 2026
+      },
+      "roles": "both",
+      "played_prev": true,
+      "group": "seasons_3_5",
+      "slot": "sp",
+      "pa": 499.8,
+      "ip": 76.7,
+      "war_bat": 4.12,
+      "war_pit": 1.85,
+      "war": 5.97,
+      "war_full_bat": 4.95,
+      "war_full_pit": 4.34,
+      "war_full": 9.29,
+      "prev_war": 6.63,
+      "prev_bat_runs": {
+        "runs_batting": 29.2,
+        "runs_baserunning": 1.4,
+        "runs_fielding": 0.0,
+        "runs_positional": -14.5,
+        "runs_league": 1.3,
+        "runs_replacement": 18.8
+      },
+      "history": [
+        {
+          "season": 2025,
+          "war_bat": 7.45,
+          "war_pit": 1.92,
+          "war_pit_ra9": 1.53
+        },
+        {
+          "season": 2026,
+          "war_bat": 3.69,
+          "war_pit": 2.94,
+          "war_pit_ra9": 3.68
+        }
+      ]
     },
     {
-     "season": 2026,
-     "war_bat": 3.69,
-     "war_pit": 2.94
+      "player": {
+        "player_id": 2,
+        "name": "Sample Pitcher",
+        "primary_position": "P",
+        "age": 31,
+        "team_name": null,
+        "active": false,
+        "last_mlb_season": 2025
+      },
+      "roles": "pit",
+      "played_prev": true,
+      "group": "seasons_1_2",
+      "slot": "rp",
+      "pa": null,
+      "ip": 47.7,
+      "war_bat": null,
+      "war_pit": 0.61,
+      "war": 0.61,
+      "war_full_bat": null,
+      "war_full_pit": 0.83,
+      "war_full": 0.83,
+      "prev_war": null,
+      "prev_bat_runs": null,
+      "history": [
+        {
+          "season": 2026,
+          "war_bat": null,
+          "war_pit": 0.4,
+          "war_pit_ra9": -0.25
+        }
+      ]
     }
-   ]
-  },
-  {
-   "player": {
-    "player_id": 2,
-    "name": "Sample Pitcher",
-    "primary_position": "P",
-    "age": 31,
-    "team_name": null,
-    "active": false,
-    "last_mlb_season": 2025
-   },
-   "roles": "pit",
-   "played_prev": true,
-   "group": "seasons_1_2",
-   "slot": "rp",
-   "pa": null,
-   "ip": 47.7,
-   "war_bat": null,
-   "war_pit": 0.61,
-   "war": 0.61,
-   "war_full_bat": null,
-   "war_full_pit": 0.83,
-   "war_full": 0.83,
-   "prev_war": null,
-   "history": [
+  ],
+  "evaluations": [
     {
-     "season": 2026,
-     "war_bat": null,
-     "war_pit": 0.4
+      "target_season": 2024,
+      "role": "bat",
+      "metric": "war",
+      "group": "all",
+      "n": 1118,
+      "mae": 0.5,
+      "baseline_mae_prev": 0.591,
+      "baseline_mae_league": 0.575
+    },
+    {
+      "target_season": 2025,
+      "role": "pit",
+      "metric": "war_full",
+      "group": "regulars",
+      "n": 68,
+      "mae": 0.93,
+      "baseline_mae_prev": 1.128,
+      "baseline_mae_league": 1.311
     }
-   ]
-  }
- ],
- "evaluations": [
-  {
-   "target_season": 2024,
-   "role": "bat",
-   "metric": "war",
-   "group": "all",
-   "n": 1118,
-   "mae": 0.5,
-   "baseline_mae_prev": 0.591,
-   "baseline_mae_league": 0.575
-  },
-  {
-   "target_season": 2025,
-   "role": "pit",
-   "metric": "war_full",
-   "group": "regulars",
-   "n": 68,
-   "mae": 0.93,
-   "baseline_mae_prev": 1.128,
-   "baseline_mae_league": 1.311
-  }
- ],
- "final_test": null
+  ],
+  "final_test": null
 }

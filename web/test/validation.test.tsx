@@ -132,13 +132,17 @@ function handMadeReport(): ValidationReport {
 // 도우미
 // ---------------------------------------------------------------------------
 
-/** /data/validation.json에 body를 주는 가짜 fetch. 다른 주소는 404 */
+/**
+ * /data/validation.json에 body를 주는 가짜 fetch. 다른 주소는 404.
+ * /data/war.json(v0.5 WAR 구역)은 끝나지 않게 둔다 — WAR 구역은 validation-war.test.tsx가 본다.
+ */
 function serve(body: unknown, status = 200) {
-  const fetchMock = vi.fn(async (input: unknown) =>
-    String(input) === "/data/validation.json"
-      ? new Response(JSON.stringify(body), { status })
-      : new Response("not found", { status: 404 }),
-  );
+  const fetchMock = vi.fn(async (input: unknown): Promise<Response> => {
+    const url = String(input);
+    if (url === "/data/validation.json") return new Response(JSON.stringify(body), { status });
+    if (url === "/data/war.json") return new Promise<Response>(() => {});
+    return new Response("not found", { status: 404 });
+  });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
@@ -261,7 +265,7 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("검증 화면 — 공통·상태", () => {
-  it("헤더(검증 선택)·바닥글, 제목·리드, validation.json 한 번만 받는다", async () => {
+  it("헤더(검증 선택)·바닥글, 제목·리드, validation.json·war.json을 한 번씩만 받는다", async () => {
     const fetchMock = serve(handMadeReport());
     renderPage();
     await loaded();
@@ -270,7 +274,10 @@ describe("검증 화면 — 공통·상태", () => {
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("예측은 얼마나 맞았나");
     // 리드 (SA-4 문구): 2024·2025로 설정, 2026은 고정해 시험
     expectSentenceWith(["2024·2025 시즌만으로 정했", "2026 시즌을 시험"]);
-    expect(fetchMock.mock.calls.map((c) => String(c[0]))).toEqual(["/data/validation.json"]);
+    // v0.5: WAR 구역이 war.json을 따로 받는다 (SA-8)
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.map((c) => String(c[0])).sort()).toEqual(["/data/validation.json", "/data/war.json"]),
+    );
   });
 
   it("받는 동안 로딩 상태를 보여 준다", async () => {

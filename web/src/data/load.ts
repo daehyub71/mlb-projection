@@ -1,5 +1,5 @@
 // 웹 JSON 불러오기 — 정적 export라 브라우저에서 /data/*.json을 받는다 (파이프라인 `mlbproj export`가 쓴다)
-import type { BatTable, PitTable, PlayerDetail, ValidationReport } from "./types";
+import type { BatTable, PitTable, PlayerDetail, ValidationReport, WarFile } from "./types";
 
 export const DATA_BASE = "/data";
 
@@ -47,6 +47,20 @@ export async function loadPitchers(fetcher: Fetcher = fetch): Promise<PitTable> 
 
 export async function loadValidation(fetcher: Fetcher = fetch): Promise<ValidationReport> {
   return getJson<ValidationReport>("validation.json", fetcher);
+}
+
+const WAR_SOURCE = "MLB Stats API sabermetrics";
+
+/**
+ * WAR 순위·선수 상세 WAR·검증 WAR (v0.5). WAR 탭·WAR 구역을 열 때만 받는다 — 첫 화면에서 받지 않는다(N6).
+ * 출처가 MLB Stats API 세이버메트릭스가 아니거나 rows가 없으면 DataError (D33).
+ */
+export async function loadWar(fetcher: Fetcher = fetch): Promise<WarFile> {
+  const war = await getJson<WarFile>("war.json", fetcher);
+  if (war.source !== WAR_SOURCE || !Array.isArray(war.rows)) {
+    throw new DataError(`war.json의 모양이 다릅니다 (source: ${String(war.source)})`);
+  }
+  return war;
 }
 
 /** 선수 상세 (`/player/?id=` — DESIGN DS1). id가 양의 정수가 아니면 DataError. 없으면 status 404. */

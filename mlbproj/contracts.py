@@ -690,6 +690,15 @@ WEB_ROUND: Final[dict[str, int]] = {
     "war_full_bat": 2,
     "war_full_pit": 2,
     "prev_war": 2,
+    # v0.5.2 (D40 · E29)
+    "war_pit_ra9": 2,
+    "runs_batting": 1,
+    "runs_baserunning": 1,
+    "runs_fielding": 1,
+    "runs_positional": 1,
+    "runs_league": 1,
+    "runs_replacement": 1,
+    "runs_per_win": 2,
 }
 
 # 2027 예측 CSV (검토용, F11). 최종 모델 행만.
@@ -922,3 +931,12 @@ TUNE_WAR_CSV: Final = OUT_DIR / "tune_war_report.csv"
 FINAL_TEST_WAR_PATH: Final = OUT_DIR / "final_test_2026_war.json"  # WAR만 한 번 (D36)
 WAR_PROJECTION_CSV: Final = OUT_DIR / "projections_2027_war.csv"  # WAR_RANKINGS 열 그대로 + 이름
 WAR_SOURCE: Final = "MLB Stats API sabermetrics"  # 화면 표기 "WAR(MLB Stats API 기준)" (D33)
+# war.json 타자 WAR 구성 항목(점, E29): 웹 키 → WAR_SEASONS 열. 2026 출전 선수만 싣는다(D42)
+WAR_BAT_RUNS: Final[tuple[tuple[str, str], ...]] = (
+    ("runs_batting", "war_batting"),
+    ("runs_baserunning", "war_baserunning"),
+    ("runs_fielding", "war_fielding"),
+    ("runs_positional", "war_positional"),
+    ("runs_league", "war_league"),
+    ("runs_replacement", "war_replacement"),
+)

@@ -129,8 +129,22 @@ def _pit(pid: int, season: int, outs: int, g: int = 20, gs: int = 0) -> dict[str
     return {"player_id": pid, "season": season, "outs": outs, "bf": outs + 10, "g": g, "gs": gs}
 
 
-def _war(pid: int, season: int, role: Role, war: float) -> dict[str, Any]:
-    return {"player_id": pid, "season": season, "role": role, "war": war}
+def _war(
+    pid: int,
+    season: int,
+    role: Role,
+    war: float,
+    *,
+    ra9: float | None = None,
+    runs: Sequence[float] | None = None,
+) -> dict[str, Any]:
+    """WAR 시즌 행. runs = 타자 구성 항목(점) 6개 — c.WAR_BAT_RUNS 순서."""
+    row: dict[str, Any] = {"player_id": pid, "season": season, "role": role, "war": war}
+    if ra9 is not None:
+        row["war_ra9"] = ra9
+    if runs is not None:
+        row.update({col: v for (_, col), v in zip(c.WAR_BAT_RUNS, runs, strict=True)})
+    return row
 
 
 BAT_ROWS = [
@@ -1461,7 +1475,7 @@ def _record() -> dict[str, Any]:
 
 
 def _export_input(final_test: dict[str, Any] | None) -> WarExportInput:
-    """war.json 입력 — 선수 660(투타), 2(투수), 4(타자 2시즌), 3(타자, 2026 미출전).
+    """war.json 입력 — 선수 660(투타), 2(투수), 4(타자 2시즌), 3(타자, 2026 미출전 — 싣지 않는다, D42).
 
     rankings는 war 내림차순(player_id 순이 아니다)이다. 평가표의 2026 행은 시험 기록이 있을 때만
     기록의 rows 그대로 넣는다(D36 — 2026은 final-test-war 기록으로만 공개한다).
@@ -1521,17 +1535,19 @@ def _export_input(final_test: dict[str, Any] | None) -> WarExportInput:
             _war(660, 2021, "bat", 5.02),  # 입력 기간(2022~2026) 밖
             _war(660, 2023, "bat", 3.111),
             _war(660, 2024, "bat", 7.4467),
-            _war(660, 2024, "pit", 0.5),
-            _war(660, 2025, "pit", 1.9212),
-            _war(660, 2026, "pit", 2.9433),
-            _war(2, 2026, "pit", 0.4),
+            _war(660, 2024, "pit", 0.5, ra9=0.8),
+            _war(660, 2025, "pit", 1.9212, ra9=1.5333),
+            _war(660, 2026, "pit", 2.9433, ra9=3.6804),
+            _war(2, 2026, "pit", 0.4, ra9=-0.25),
             _war(3, 2022, "bat", 1.0),
             _war(3, 2023, "bat", 0.8),
             _war(3, 2024, "bat", 0.25),
             _war(3, 2025, "bat", -0.1234),
-            _war(4, 2025, "bat", 0.3),
-            _war(4, 2026, "bat", 0.0),
-            _war(999, 2026, "bat", 3.0),  # 순위에 없는 선수
+            # 2025는 Y−1이 아니라 구성 항목을 싣지 않는다
+            _war(4, 2025, "bat", 0.3, runs=(1.0, 0.0, 0.5, -1.0, 0.2, 2.3)),
+            _war(4, 2026, "bat", 0.0, runs=(-2.04, 0.26, 1.57, -2.33, 0.11, 2.43)),  # 합 0
+            # 순위에 없는 선수 — 리그 점/승 비율에는 들어간다: (0 + 29.46) / (0 + 3) = 9.82
+            _war(999, 2026, "bat", 3.0, runs=(20.0, 1.0, 2.0, -3.0, 0.5, 8.96)),
         ],
     )
     past = [
@@ -1571,11 +1587,12 @@ EXPECTED_ROWS: list[dict[str, Any]] = [
         "war_full_pit": 4.34,
         "war_full": 9.29,
         "prev_war": 2.94,
+        "prev_bat_runs": None,  # 2026 타자 행이 없다
         "history": [
-            {"season": 2023, "war_bat": 3.11, "war_pit": None},
-            {"season": 2024, "war_bat": 7.45, "war_pit": 0.5},
-            {"season": 2025, "war_bat": None, "war_pit": 1.92},
-            {"season": 2026, "war_bat": None, "war_pit": 2.94},
+            {"season": 2023, "war_bat": 3.11, "war_pit": None, "war_pit_ra9": None},
+            {"season": 2024, "war_bat": 7.45, "war_pit": 0.5, "war_pit_ra9": 0.8},
+            {"season": 2025, "war_bat": None, "war_pit": 1.92, "war_pit_ra9": 1.53},
+            {"season": 2026, "war_bat": None, "war_pit": 2.94, "war_pit_ra9": 3.68},
         ],
     },
     {
@@ -1593,7 +1610,8 @@ EXPECTED_ROWS: list[dict[str, Any]] = [
         "war_full_pit": 0.83,
         "war_full": 0.83,
         "prev_war": 0.4,
-        "history": [{"season": 2026, "war_bat": None, "war_pit": 0.4}],
+        "prev_bat_runs": None,
+        "history": [{"season": 2026, "war_bat": None, "war_pit": 0.4, "war_pit_ra9": -0.25}],
     },
     {
         "player": SUMMARIES[4],
@@ -1610,31 +1628,17 @@ EXPECTED_ROWS: list[dict[str, Any]] = [
         "war_full_pit": None,
         "war_full": 1.54,
         "prev_war": 0.0,
+        "prev_bat_runs": {
+            "runs_batting": -2.0,
+            "runs_baserunning": 0.3,
+            "runs_fielding": 1.6,
+            "runs_positional": -2.3,
+            "runs_league": 0.1,
+            "runs_replacement": 2.4,
+        },
         "history": [
-            {"season": 2025, "war_bat": 0.3, "war_pit": None},
-            {"season": 2026, "war_bat": 0.0, "war_pit": None},
-        ],
-    },
-    {
-        "player": SUMMARIES[3],
-        "roles": "bat",
-        "played_prev": False,
-        "group": "seasons_3_5",
-        "slot": None,
-        "pa": 120.1,
-        "ip": None,
-        "war_bat": -0.35,
-        "war_pit": None,
-        "war": -0.35,
-        "war_full_bat": -1.73,
-        "war_full_pit": None,
-        "war_full": -1.73,
-        "prev_war": None,
-        "history": [
-            {"season": 2022, "war_bat": 1.0, "war_pit": None},
-            {"season": 2023, "war_bat": 0.8, "war_pit": None},
-            {"season": 2024, "war_bat": 0.25, "war_pit": None},
-            {"season": 2025, "war_bat": -0.12, "war_pit": None},
+            {"season": 2025, "war_bat": 0.3, "war_pit": None, "war_pit_ra9": None},
+            {"season": 2026, "war_bat": 0.0, "war_pit": None, "war_pit_ra9": None},
         ],
     },
 ]
@@ -1666,12 +1670,41 @@ def test_war_eval_build_war_web_header() -> None:
     assert out["full_time"] == {"pa": 600, "sp_ip": 180, "rp_ip": 65}
     assert all(type(v) is int for v in out["full_time"].values())
     assert out["final_test"] is None
+    # 2026 타자 행 전체(순위에 없는 선수 포함)의 Σ구성 ÷ ΣWAR (E29)
+    assert out["runs_per_win"] == {"season": 2026, "value": 9.82}
 
 
 def test_war_eval_build_war_web_rows_follow_rankings() -> None:
     out = war_eval.build_war_web(_export_input(None))
-    assert [row["player"]["player_id"] for row in out["rows"]] == [660, 2, 4, 3]
+    # 순위 표 순서 그대로, 2026 미출전 선수 3은 싣지 않는다(D42)
+    assert [row["player"]["player_id"] for row in out["rows"]] == [660, 2, 4]
     assert out["rows"] == EXPECTED_ROWS
+    assert all(row["played_prev"] is True for row in out["rows"])
+
+
+def test_war_eval_build_war_web_still_checks_unplayed_players() -> None:
+    # 싣지 않는 선수도 계약 검사는 그대로 받는다
+    inp = _export_input(None)
+    summaries = {pid: s for pid, s in inp.player_summaries.items() if pid != 3}
+    with pytest.raises(ValueError, match="선수 3의 요약"):
+        war_eval.build_war_web(replace(inp, player_summaries=summaries))
+
+
+def test_war_eval_build_war_web_requires_prev_bat_runs() -> None:
+    inp = _export_input(None)
+    seasons = inp.war_seasons.copy()
+    hole = (seasons["player_id"] == 999) & (seasons["season"] == 2026)
+    seasons.loc[hole, "war_batting"] = None
+    with pytest.raises(ValueError, match="구성 항목"):
+        war_eval.build_war_web(replace(inp, war_seasons=seasons))
+
+
+def test_war_eval_build_war_web_rejects_nonpositive_league_war() -> None:
+    inp = _export_input(None)
+    seasons = inp.war_seasons.copy()
+    seasons.loc[(seasons["player_id"] == 999) & (seasons["season"] == 2026), "war"] = 0.0
+    with pytest.raises(ValueError, match="점/승"):
+        war_eval.build_war_web(replace(inp, war_seasons=seasons))
 
 
 def test_war_eval_build_war_web_two_way_row() -> None:

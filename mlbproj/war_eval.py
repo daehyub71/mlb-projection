@@ -47,6 +47,7 @@ from mlbproj.contracts import (
     FULL_TIME_UNITS,
     ROLES,
     TUNE_TARGETS,
+    WAR_BAT_RUNS,
     WAR_EVALUATIONS,
     WAR_PROJECTIONS,
     WAR_RANKINGS,
@@ -608,32 +609,71 @@ def _records_by_player(
 
 
 def _war_history(war_seasons: pd.DataFrame, seasons: range) -> dict[int, list[dict[str, Any]]]:
-    """선수 → 입력 기간 시즌별 WAR(F22) — {season, war_bat, war_pit}, 시즌 오름차순.
+    """선수 → 입력 기간 시즌별 WAR(F22) — {season, war_bat, war_pit, war_pit_ra9}, 시즌 오름차순.
+
+    war_pit은 FIP 기반(예측에 쓴다), war_pit_ra9는 실점 기반(참고, D40)이다.
 
     Raises:
         ValueError: 같은 선수·시즌·역할 행이 두 번 있거나 역할이 bat·pit이 아닐 때.
     """
     mine = war_seasons[war_seasons["season"].isin(list(seasons))]
-    found: dict[int, dict[int, dict[str, float]]] = {}
-    for record in mine[["player_id", "season", "role", "war"]].to_dict(orient="records"):
+    found: dict[int, dict[int, dict[str, Mapping[Hashable, Any]]]] = {}
+    for record in mine[["player_id", "season", "role", "war", "war_ra9"]].to_dict(orient="records"):
         pid, season, role = int(record["player_id"]), int(record["season"]), str(record["role"])
         if role not in ROLES:
             raise ValueError(f"WAR 시즌 표에 모르는 역할 {role!r}이 있다 (선수 {pid}, {season})")
         slot = found.setdefault(pid, {}).setdefault(season, {})
         if role in slot:
             raise ValueError(f"WAR 시즌 표에 선수 {pid}의 {season} {role} 행이 두 번 있다")
-        slot[role] = float(record["war"])
+        slot[role] = record
+
+    def value(by_role: dict[str, Mapping[Hashable, Any]], role: Role, column: str, key: str) -> Any:
+        record = by_role.get(role)
+        if record is None or pd.isna(record[column]):
+            return None
+        return _json_value(float(record[column]), key)
+
     return {
         pid: [
             {
                 "season": season,
-                "war_bat": _json_value(by_role.get("bat"), "war_bat"),
-                "war_pit": _json_value(by_role.get("pit"), "war_pit"),
+                "war_bat": value(by_role, "bat", "war", "war_bat"),
+                "war_pit": value(by_role, "pit", "war", "war_pit"),
+                "war_pit_ra9": value(by_role, "pit", "war_ra9", "war_pit_ra9"),
             }
             for season, by_role in sorted(by_season.items())
         ]
         for pid, by_season in found.items()
     }
+
+
+def _prev_bat_runs(
+    war_seasons: pd.DataFrame, season: int
+) -> tuple[dict[int, dict[str, Any]], float]:
+    """Y−1 타자 WAR 구성 항목(점, F22·E29)과 그 시즌 리그 점/승 비율(Σ구성 ÷ ΣWAR).
+
+    비율은 순위에 없는 선수까지 그 시즌 타자 행 전체로 낸다. 선수마다 구성 합이 WAR에 정확히
+    비례하지 않으므로(E29) 화면은 이 리그 비율로만 점 → 승을 설명한다.
+
+    Raises:
+        ValueError: 그 시즌 타자 행에 구성 항목이 비었거나, 타자 행이 없거나 ΣWAR이 0 이하일 때.
+    """
+    columns = [column for _, column in WAR_BAT_RUNS]
+    rows = war_seasons[(war_seasons["season"] == season) & (war_seasons["role"] == "bat")]
+    holes = sorted({int(pid) for pid in rows.loc[rows[columns].isna().any(axis=1), "player_id"]})
+    if holes:
+        raise ValueError(f"{season} 타자 WAR 구성 항목이 빈 선수가 있다: {holes[:_SHOW_MAX]}")
+    total_war = float(rows["war"].sum())
+    if rows.empty or not total_war > 0:
+        raise ValueError(f"{season} 타자 ΣWAR이 {total_war!r}라 점/승 비율을 낼 수 없다")
+    runs_per_win = float(rows[columns].to_numpy().sum()) / total_war
+    by_player = {
+        int(record["player_id"]): {
+            key: _json_value(float(record[column]), key) for key, column in WAR_BAT_RUNS
+        }
+        for record in rows.to_dict(orient="records")
+    }
+    return by_player, runs_per_win
 
 
 def _final_test_summary(inp: WarExportInput) -> dict[str, Any] | None:
@@ -758,7 +798,10 @@ def build_war_web(inp: WarExportInput) -> dict[str, Any]:
 
     - pa = 타자 pt, ip = 투수 pt / 3(소수 이닝), slot = 투수 slot(투수 역할이 없으면 null).
     - group = 두 역할 n_seasons 중 큰 값으로 seasons_1_2(≤2) / seasons_3_5. played_prev = 어느 역할이든 Y−1 기록.
-    - history = 입력 기간(2022~2026) 시즌 중 그 선수 WAR 행이 있는 시즌, 오름차순 {season, war_bat, war_pit}.
+    - rows는 Y−1에 MLB 기록이 있는 선수(played_prev)만 싣는다(D42). 싣지 않는 선수도 계약 검사는 받는다.
+    - history = 입력 기간(2022~2026) 시즌 중 그 선수 WAR 행이 있는 시즌, 오름차순
+      {season, war_bat, war_pit, war_pit_ra9}(D40).
+    - prev_bat_runs = Y−1 타자 구성 항목(점), runs_per_win = Y−1 리그 Σ구성 ÷ ΣWAR(E29).
     - final_test = 기록이 있으면 {"target_season", "ran_at", "war_params_sha256", "reruns": [{"ran_at", "reason"}]}.
     - full_time = {"pa": 600, "sp_ip": 180, "rp_ip": 65}, source = `WAR_SOURCE`.
 
@@ -790,6 +833,7 @@ def build_war_web(inp: WarExportInput) -> dict[str, Any]:
     if unranked:
         raise ValueError(f"WAR 예측 표의 선수가 순위 표에 없다: {unranked[:_SHOW_MAX]}")
     history = _war_history(inp.war_seasons, range(target - WINDOW, target))
+    bat_runs, runs_per_win = _prev_bat_runs(inp.war_seasons, target - 1)
 
     rows: list[dict[str, Any]] = []
     for record in rankings.to_dict(orient="records"):
@@ -817,11 +861,13 @@ def build_war_web(inp: WarExportInput) -> dict[str, Any]:
             if slot not in _PIT_SLOTS:
                 raise ValueError(f"선수 {pid}의 투수 자리가 sp·rp가 아니다: {slot!r}")
         n_seasons = max(int(cohort[role][pid]["n_seasons"]) for role in roles)
+        if not any(bool(cohort[role][pid]["played_prev"]) for role in roles):
+            continue  # D42 — 2026에 뛰지 않은 선수는 싣지 않는다
         rows.append(
             {
                 "player": dict(summary),
                 "roles": str(record["roles"]),
-                "played_prev": any(bool(cohort[role][pid]["played_prev"]) for role in roles),
+                "played_prev": True,
                 "group": "seasons_1_2" if n_seasons <= _SHORT_CAREER_MAX else "seasons_3_5",
                 "slot": slot,
                 "pa": None if bat is None else _json_value(float(bat["pt"]), "pa"),
@@ -829,6 +875,7 @@ def build_war_web(inp: WarExportInput) -> dict[str, Any]:
                     None if pit is None else _json_value(float(pit["pt"]) / _OUTS_PER_INNING, "ip")
                 ),
                 **{key: _json_value(record[key], key) for key in _RANKING_VALUES},
+                "prev_bat_runs": bat_runs.get(pid) if "bat" in roles else None,
                 "history": history.get(pid, []),
             }
         )
@@ -841,6 +888,10 @@ def build_war_web(inp: WarExportInput) -> dict[str, Any]:
             "pa": round(FULL_TIME_UNITS["bat"]),
             "sp_ip": round(FULL_TIME_UNITS["sp"] / _OUTS_PER_INNING),
             "rp_ip": round(FULL_TIME_UNITS["rp"] / _OUTS_PER_INNING),
+        },
+        "runs_per_win": {
+            "season": target - 1,
+            "value": _json_value(runs_per_win, "runs_per_win"),
         },
         "rows": rows,
         "evaluations": evaluations,

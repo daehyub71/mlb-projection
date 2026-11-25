@@ -1,6 +1,6 @@
 "use client";
 
-// 선수 상세 본문 (F14, SA-2) — 주소 ?id=를 읽어 players/{id}.json 하나만 받는다 (DS1, 정적 export)
+// 선수 상세 본문 (F14, SA-2) — 주소 ?id=를 읽어 players/{id}.json을 받고, 그 뒤 WAR 구역이 war.json을 받는다 (DS1 · F22, 정적 export)
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRightIcon, ExclamationTriangleIcon, InformationCircleIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -24,6 +24,7 @@ import { PlayerBand } from "./PlayerBand";
 import { BatSeasonTable, PitSeasonTable, recentSeasons } from "./SeasonTable";
 import { chartMetric, errorSummary, METRIC_LABEL, projectionCards, type RoleDetail } from "./text";
 import { TrendChart } from "./TrendChart";
+import { WarSection } from "./WarSection";
 
 // ---------------------------------------------------------------------------
 // 불러오기·오류 상태 — 모두 <main> 안에 안내와 예측표 링크를 둔다
@@ -224,6 +225,8 @@ function PlayerView({ detail }: { detail: PlayerDetailData }) {
       <VStack hAlign="center">
         <VStack gap={8} paddingBlock={8} paddingInline={6} width="100%" maxWidth={1200}>
           <ErrorNotes current={current} />
+          {/* v0.5 WAR 구역 (F22, SA-7) — 예측 카드·오차 안내 아래, 역할 전환과 무관하게 한 번만 받는다 */}
+          <WarSection detail={detail} />
           <TrendSection current={current} targetSeason={targetSeason} />
           <SeasonSection current={current} />
           <FieldingSection detail={detail} meta={detail.meta} />

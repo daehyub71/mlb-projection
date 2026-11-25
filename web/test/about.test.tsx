@@ -144,6 +144,23 @@ describe("소개 화면 — 검증·데이터·알아 두실 점·고지", () =>
     expectSentenceWith(["2026 시즌 종료 기준"]);
   });
 
+  it("데이터: WAR 한 줄(v0.5, SPEC D33·D40) — 기존 항목과 같은 모양의 목록 항목, 데이터 절 안", () => {
+    renderPage();
+    const line =
+      "WAR — MLB Stats API 세이버메트릭스(2019~2026). 타자는 fWAR 틀(타격·주루·수비·포지션·리그·대체 수준), 투수는 FIP 기반(실점 기반은 참고).";
+    const items = within(screen.getByRole("main"))
+      .getAllByRole("listitem")
+      .filter((li) => (li.textContent ?? "").trim() === line);
+    expect(items, "WAR 목록 항목 하나").toHaveLength(1);
+    const dataHeading = screen.getByRole("heading", { level: 2, name: "데이터" });
+    const caveatsHeading = screen.getByRole("heading", { level: 2, name: "알아 두실 점" });
+    expect(dataHeading.compareDocumentPosition(items[0]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(items[0]!.compareDocumentPosition(caveatsHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // 데이터 절의 목록은 기존 4 + WAR 1
+    const dataSection = dataHeading.closest("section")!;
+    expect(within(dataSection).getAllByRole("listitem")).toHaveLength(5);
+  });
+
   it("알아 두실 점 4가지: 출전량 보수적(D30) · 범위가 넓음(D29) · 신인 없음 · 팀 이동 미반영", () => {
     renderPage();
     expectSentenceWith(["출전량(PA·IP)과 HR", "보수적 예상"]);
@@ -158,7 +175,7 @@ describe("소개 화면 — 검증·데이터·알아 두실 점·고지", () =>
     // 휴대폰 폭에서 데이터·알아 두실 점 문장이 "…"로 끊겼다 — 문장 전체가 Text(.astryx-text) 하나에 들어 있어야 줄바꿈된다.
     renderPage();
     const items = within(screen.getByRole("main")).getAllByRole("listitem");
-    expect(items.length, "검증 3 + 데이터 4 + 알아 두실 점 4").toBe(11);
+    expect(items.length, "검증 3 + 데이터 5(WAR 한 줄 포함) + 알아 두실 점 4").toBe(12);
     for (const li of items) {
       const full = (li.textContent ?? "").trim();
       const wrapped = Array.from(li.querySelectorAll(".astryx-text")).some(

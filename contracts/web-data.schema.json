@@ -1283,13 +1283,14 @@
       }
     },
     "WarSeason": {
-      "description": "one past season of MLB Stats API WAR for a player (SPEC F22). null = no row in that role",
+      "description": "one past season of MLB Stats API WAR for a player (SPEC F22). null = no row in that role. war_pit is FIP-based (used for the projection), war_pit_ra9 is runs-allowed based (reference only, SPEC D40)",
       "type": "object",
       "additionalProperties": false,
       "required": [
         "season",
         "war_bat",
-        "war_pit"
+        "war_pit",
+        "war_pit_ra9"
       ],
       "properties": {
         "season": {
@@ -1306,11 +1307,50 @@
             "number",
             "null"
           ]
+        },
+        "war_pit_ra9": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+    "WarBatRuns": {
+      "description": "batter WAR components of the season before the target, in runs as the source gives them (SPEC F22·E29). They are not exactly proportional to WAR for every player — explain runs → wins only with the league runs_per_win",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runs_batting",
+        "runs_baserunning",
+        "runs_fielding",
+        "runs_positional",
+        "runs_league",
+        "runs_replacement"
+      ],
+      "properties": {
+        "runs_batting": {
+          "type": "number"
+        },
+        "runs_baserunning": {
+          "type": "number"
+        },
+        "runs_fielding": {
+          "type": "number"
+        },
+        "runs_positional": {
+          "type": "number"
+        },
+        "runs_league": {
+          "type": "number"
+        },
+        "runs_replacement": {
+          "type": "number"
         }
       }
     },
     "WarRow": {
-      "description": "one row of the two-way WAR ranking (SPEC D34·D35·F21). war = war_bat + war_pit (null counts as 0)",
+      "description": "one row of the two-way WAR ranking (SPEC D34·D35·F21). war = war_bat + war_pit (null counts as 0). Only players with an MLB row in the season before the target are exported (SPEC D42)",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -1328,6 +1368,7 @@
         "war_full_pit",
         "war_full",
         "prev_war",
+        "prev_bat_runs",
         "history"
       ],
       "properties": {
@@ -1342,8 +1383,8 @@
           ]
         },
         "played_prev": {
-          "type": "boolean",
-          "description": "has any MLB row in the season before the target"
+          "const": true,
+          "description": "always true — war.json carries only players who played in the season before the target (SPEC D42)"
         },
         "group": {
           "enum": [
@@ -1416,6 +1457,17 @@
             "null"
           ],
           "description": "actual WAR (bat + pit) in the season before the target"
+        },
+        "prev_bat_runs": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WarBatRuns"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "batter WAR components in the season before the target; null when the player has no batting row that season"
         },
         "history": {
           "type": "array",
@@ -1544,6 +1596,7 @@
         "source",
         "war_params_sha256",
         "full_time",
+        "runs_per_win",
         "rows",
         "evaluations",
         "final_test"
@@ -1576,6 +1629,24 @@
             },
             "rp_ip": {
               "const": 65
+            }
+          }
+        },
+        "runs_per_win": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "season",
+            "value"
+          ],
+          "description": "league batter runs per WAR in the season before the target: Σ components ÷ Σ WAR over all batting rows (SPEC E29)",
+          "properties": {
+            "season": {
+              "type": "integer"
+            },
+            "value": {
+              "type": "number",
+              "minimum": 1
             }
           }
         },

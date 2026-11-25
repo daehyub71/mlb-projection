@@ -6,9 +6,25 @@ import { describe, expect, it } from "vitest";
 import { SiteFooter } from "@/app/components/SiteFooter";
 import { SiteHeader } from "@/app/components/SiteHeader";
 import { Providers } from "@/app/providers";
-import { DATA_BASE, DataError, loadBatters, loadPitchers, loadPlayer, loadValidation, parsePlayerId } from "@/src/data/load";
+import { DATA_BASE, DataError, loadBatters, loadPitchers, loadPlayer, loadValidation, loadWar, parsePlayerId } from "@/src/data/load";
 import { NESTED_SCHEMA_KEYS, SCHEMA_KEYS } from "@/src/data/types";
-import { fmtBand, fmtCount, fmtDiff, fmtEra, fmtIp, fmtMae, fmtMetric, fmtPct, fmtRate } from "@/src/format";
+import {
+  fmtBand,
+  fmtCount,
+  fmtDiff,
+  fmtEra,
+  fmtIp,
+  fmtMae,
+  fmtMetric,
+  fmtPct,
+  fmtRate,
+  fmtRuns,
+  fmtWar,
+  fmtWar2,
+  fmtWarMae,
+  fmtWarSplit,
+  warRoleLabel,
+} from "@/src/format";
 import { initials, playerPhotoUrl } from "@/src/photo";
 import { careerGroup, playerHref } from "@/src/site";
 
@@ -121,6 +137,100 @@ describe("숫자 표기", () => {
     expect(fmtMae("k_bb_pct", 3.6156)).toBe("3.62");
     expect(fmtMae("pa", 72.3687)).toBe("72.4");
     expect(fmtMae("hr", 2.6104)).toBe("2.61");
+  });
+});
+
+describe("WAR 계약 (v0.5, SPEC D33~D42)", () => {
+  it("war.json을 /data에서 받는다 — 2026 출전 선수만, 투수 실점 기반 · 타자 구성 항목 포함", async () => {
+    const { fetcher, calls } = fakeFetch({ [`${DATA_BASE}/war.json`]: sample("war.json") });
+    const war = await loadWar(fetcher);
+    expect(calls).toEqual(["/data/war.json"]);
+    expect(war.source).toBe("MLB Stats API sabermetrics");
+    expect(war.full_time).toEqual({ pa: 600, sp_ip: 180, rp_ip: 65 });
+    expect(war.runs_per_win).toEqual({ season: 2026, value: 9.82 });
+    expect(war.rows.every((row) => row.played_prev)).toBe(true);
+    const twoWay = war.rows.find((row) => row.roles === "both")!;
+    expect(twoWay.prev_bat_runs?.runs_positional).toBe(-14.5);
+    expect(twoWay.history.at(-1)).toEqual({ season: 2026, war_bat: 3.69, war_pit: 2.94, war_pit_ra9: 3.68 });
+    expect(war.rows.find((row) => row.roles === "pit")!.prev_bat_runs).toBeNull();
+  });
+
+  it("모양이 틀린 war.json은 거부한다", async () => {
+    const bad = { ...(sample("war.json") as object), source: "FanGraphs" };
+    const { fetcher } = fakeFetch({ [`${DATA_BASE}/war.json`]: bad });
+    await expect(loadWar(fetcher)).rejects.toBeInstanceOf(DataError);
+    const { fetcher: missing } = fakeFetch({});
+    await expect(loadWar(missing)).rejects.toMatchObject({ name: "DataError", status: 404 });
+  });
+
+  it("WAR 표기 — 소수 1자리, 음수는 −", () => {
+    expect(fmtWar(6.18)).toBe("6.2");
+    expect(fmtWar(10.03)).toBe("10.0");
+    expect(fmtWar(-0.35)).toBe("−0.3");
+    expect(fmtWar(-0.04)).toBe("0.0"); // −0.0은 쓰지 않는다
+    expect(fmtWar(null)).toBe("—");
+    expect(fmtWar2(5.59)).toBe("5.59");
+    expect(fmtWar2(3.6878)).toBe("3.69");
+    expect(fmtWar2(-0.25)).toBe("−0.25");
+    expect(fmtWar2(-0.001)).toBe("0.00");
+    expect(fmtWar2(undefined)).toBe("—");
+  });
+
+  it("투타 분해는 두 역할이 다 있을 때만", () => {
+    expect(fmtWarSplit(3.9, 2.28)).toBe("타 3.9 + 투 2.3");
+    expect(fmtWarSplit(3.9, -0.2)).toBe("타 3.9 + 투 −0.2");
+    expect(fmtWarSplit(6.56, null)).toBe("");
+    expect(fmtWarSplit(null, 4.26)).toBe("");
+  });
+
+  it("구성 항목(점)은 부호를 붙인다", () => {
+    expect(fmtRuns(29.2)).toBe("+29.2");
+    expect(fmtRuns(-14.5)).toBe("−14.5");
+    expect(fmtRuns(0)).toBe("0.0");
+    expect(fmtRuns(-0.02)).toBe("0.0");
+    expect(fmtRuns(undefined)).toBe("—");
+  });
+
+  it("WAR 평균 오차 — 1 미만은 .457, 1 이상은 1.48 (DESIGN SA-8)", () => {
+    expect(fmtWarMae(0.4567)).toBe(".457");
+    expect(fmtWarMae(0.31)).toBe(".310");
+    expect(fmtWarMae(1.4801)).toBe("1.48");
+    expect(fmtWarMae(2.2)).toBe("2.20");
+    expect(fmtWarMae(null)).toBe("—");
+  });
+
+  it("그룹 평균 오차는 목표 시즌 전체 단순 평균 (기존 group_error와 같은 규칙)", async () => {
+    const { warGroupMae, findWarRow } = await import("@/src/war");
+    const ev = (target_season: number, mae: number | null, group: "seasons_3_5" | "seasons_1_2" = "seasons_3_5") => ({
+      target_season,
+      role: "bat" as const,
+      metric: "war" as const,
+      group,
+      n: 10,
+      mae,
+      baseline_mae_prev: null,
+      baseline_mae_league: null,
+    });
+    const rows = [ev(2024, 0.6079), ev(2025, 0.6116), ev(2026, 0.6252), ev(2024, null), ev(2025, 0.3, "seasons_1_2")];
+    expect(warGroupMae(rows, "bat", "seasons_3_5")).toBeCloseTo(0.6149, 4);
+    expect(warGroupMae(rows, "pit", "seasons_3_5")).toBeNull();
+    expect(warGroupMae(rows, "bat", "seasons_3_5", "war_full")).toBeNull();
+    const war = sample("war.json") as import("@/src/data/types").WarFile;
+    const first = war.rows[0]!;
+    expect(findWarRow(war, first.player.player_id)).toBe(first);
+    expect(findWarRow(war, 999999)).toBeNull();
+  });
+
+  it("공통 문구 — 기준 출전량과 점 → 승", async () => {
+    const { fullTimeBasis, runsPerWinNote } = await import("@/src/warText");
+    expect(fullTimeBasis({ pa: 600, sp_ip: 180, rp_ip: 65 })).toBe("타자 600타석 · 선발 180이닝 · 불펜 65이닝 기준");
+    expect(runsPerWinNote({ season: 2026, value: 9.82 })).toBe("2026년은 약 9.8점이 1승");
+  });
+
+  it("역할 배지 글자", () => {
+    expect(warRoleLabel("bat")).toBe("타");
+    expect(warRoleLabel("pit")).toBe("투");
+    expect(warRoleLabel("both")).toBe("투타");
   });
 });
 

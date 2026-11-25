@@ -256,6 +256,82 @@ export interface ValidationReport {
 }
 
 // ---------------------------------------------------------------------------
+// v0.5 WAR — war.json (SPEC D33~D42 · F21 · F22)
+// ---------------------------------------------------------------------------
+
+export type WarRoles = "bat" | "pit" | "both";
+export type WarSlot = "sp" | "rp";
+export type WarMetric = "war" | "war_full";
+export type WarGroup = "all" | "seasons_1_2" | "seasons_3_5" | "war2plus" | "regulars";
+
+/** 지난 시즌 WAR 한 줄. 그 역할 행이 없으면 null. war_pit은 FIP 기반(예측에 씀), war_pit_ra9는 실점 기반(참고, D40) */
+export interface WarSeason {
+  season: number;
+  war_bat: number | null;
+  war_pit: number | null;
+  war_pit_ra9: number | null;
+}
+
+/** 목표 직전 시즌(2026) 타자 WAR 구성 항목 — 점(runs), 원본 그대로 (E29) */
+export interface WarBatRuns {
+  runs_batting: number;
+  runs_baserunning: number;
+  runs_fielding: number;
+  runs_positional: number;
+  runs_league: number;
+  runs_replacement: number;
+}
+
+/** WAR 순위 한 줄 — war = war_bat + war_pit (null은 0으로) */
+export interface WarRow {
+  player: PlayerSummary;
+  roles: WarRoles;
+  played_prev: true; // war.json은 2026 출전 선수만 싣는다 (D42)
+  group: CareerGroup;
+  slot: WarSlot | null; // 투수 역할이 없으면 null
+  pa: number | null; // 예측 타석 (보수적, D30)
+  ip: number | null; // 예측 이닝 (소수 이닝)
+  war_bat: number | null;
+  war_pit: number | null;
+  war: number;
+  war_full_bat: number | null;
+  war_full_pit: number | null;
+  war_full: number;
+  prev_war: number | null; // 2026 실제 WAR (투타 합)
+  prev_bat_runs: WarBatRuns | null; // 2026 타자 행이 없으면 null
+  history: WarSeason[];
+}
+
+export interface WarEvalRow {
+  target_season: number;
+  role: Role;
+  metric: WarMetric;
+  group: WarGroup;
+  n: number;
+  mae: number | null;
+  baseline_mae_prev: number | null;
+  baseline_mae_league: number | null;
+}
+
+export interface WarFinalTest {
+  target_season: number;
+  ran_at: string;
+  war_params_sha256: string;
+  reruns: Rerun[];
+}
+
+export interface WarFile {
+  meta: Meta;
+  source: "MLB Stats API sabermetrics";
+  war_params_sha256: string;
+  full_time: { pa: 600; sp_ip: 180; rp_ip: 65 };
+  runs_per_win: { season: number; value: number }; // 그 시즌 리그 Σ구성 ÷ ΣWAR (E29)
+  rows: WarRow[];
+  evaluations: WarEvalRow[];
+  final_test: WarFinalTest | null;
+}
+
+// ---------------------------------------------------------------------------
 // 스키마 대조용 키 목록 — `satisfies`로 인터페이스 키와 빠짐없이 같게 묶는다
 // ---------------------------------------------------------------------------
 
@@ -396,6 +472,54 @@ export const SCHEMA_KEYS = {
   } satisfies Keys<EvalRow>,
   BandRow: { role: true, metric: true, group: true, n: true, q80: true, targets: true } satisfies Keys<BandRow>,
   ValidationReport: { meta: true, final_test: true, rows: true, bands: true } satisfies Keys<ValidationReport>,
+  WarSeason: { season: true, war_bat: true, war_pit: true, war_pit_ra9: true } satisfies Keys<WarSeason>,
+  WarBatRuns: {
+    runs_batting: true,
+    runs_baserunning: true,
+    runs_fielding: true,
+    runs_positional: true,
+    runs_league: true,
+    runs_replacement: true,
+  } satisfies Keys<WarBatRuns>,
+  WarRow: {
+    player: true,
+    roles: true,
+    played_prev: true,
+    group: true,
+    slot: true,
+    pa: true,
+    ip: true,
+    war_bat: true,
+    war_pit: true,
+    war: true,
+    war_full_bat: true,
+    war_full_pit: true,
+    war_full: true,
+    prev_war: true,
+    prev_bat_runs: true,
+    history: true,
+  } satisfies Keys<WarRow>,
+  WarEvalRow: {
+    target_season: true,
+    role: true,
+    metric: true,
+    group: true,
+    n: true,
+    mae: true,
+    baseline_mae_prev: true,
+    baseline_mae_league: true,
+  } satisfies Keys<WarEvalRow>,
+  WarFinalTest: { target_season: true, ran_at: true, war_params_sha256: true, reruns: true } satisfies Keys<WarFinalTest>,
+  WarFile: {
+    meta: true,
+    source: true,
+    war_params_sha256: true,
+    full_time: true,
+    runs_per_win: true,
+    rows: true,
+    evaluations: true,
+    final_test: true,
+  } satisfies Keys<WarFile>,
 } as const;
 
 /** 스키마 속성 객체 안쪽의 키 목록 (def 이름 → 경로 → 키) */
@@ -417,4 +541,6 @@ export const NESTED_SCHEMA_KEYS = {
     reruns: true,
     first_run: true,
   } satisfies Keys<FinalTest>,
+  "WarFile.full_time": { pa: true, sp_ip: true, rp_ip: true } satisfies Keys<WarFile["full_time"]>,
+  "WarFile.runs_per_win": { season: true, value: true } satisfies Keys<WarFile["runs_per_win"]>,
 } as const;

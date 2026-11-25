@@ -1,0 +1,314 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 6,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 3.32912,
+      "xfip": 3.40526,
+      "fipMinus": 78.9927,
+      "ra9War": 3.0248,
+      "rar": 39.64,
+      "war": 4.18993,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.965849,
+      "inli": 0.938897,
+      "gmli": 0.874512,
+      "exli": 1.01169,
+      "eraMinus": 88.4157
+     },
+     "team": {
+      "id": 134,
+      "name": "Pittsburgh Pirates",
+      "link": "/api/v1/teams/134"
+     },
+     "player": {
+      "id": 694973,
+      "fullName": "Paul Skenes",
+      "link": "/api/v1/people/694973",
+      "firstName": "Paul",
+      "lastName": "Skenes",
+      "nameSlug": "paul-skenes-694973"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 14,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 2.6094,
+      "xfip": 3.23609,
+      "fipMinus": 60.7003,
+      "ra9War": 3.68045,
+      "rar": 26.481,
+      "war": 2.94026,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.991838,
+      "inli": 0.938472,
+      "gmli": 0.874057,
+      "exli": 1.06571,
+      "eraMinus": 42.691
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 34,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 3.92645,
+      "xfip": 3.6717,
+      "fipMinus": 92.7101,
+      "ra9War": 2.79039,
+      "rar": 20.6245,
+      "war": 2.14725,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.8895,
+      "inli": 0.875448,
+      "gmli": 0.855127,
+      "exli": 1.07077,
+      "eraMinus": 87.1413
+     },
+     "team": {
+      "id": 147,
+      "name": "New York Yankees",
+      "link": "/api/v1/teams/147"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 74,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 4.86774,
+      "xfip": 3.86382,
+      "fipMinus": 112.586,
+      "ra9War": 2.0295,
+      "rar": 13.1106,
+      "war": 1.29635,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.917989,
+      "inli": 0.892689,
+      "gmli": 0.859624,
+      "exli": 1.08778,
+      "eraMinus": 107.867
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 141,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 3.16634,
+      "xfip": 3.45163,
+      "fipMinus": 76.2591,
+      "ra9War": 1.4684,
+      "rar": 11.1786,
+      "war": 1.14106,
+      "sd": 25.0,
+      "md": 5.0,
+      "pli": 1.95937,
+      "inli": 1.6163,
+      "gmli": 1.60871,
+      "exli": 3.17214,
+      "eraMinus": 60.7659
+     },
+     "team": {
+      "id": 144,
+      "name": "Atlanta Braves",
+      "link": "/api/v1/teams/144"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 157,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "fip": 3.09968,
+      "xfip": 9.13888,
+      "fipMinus": 72.1216,
+      "ra9War": 0.0276439,
+      "rar": 0.0678537,
+      "war": 0.00692262,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.0,
+      "inli": 0.0,
+      "gmli": 0.0,
+      "exli": 0.0,
+      "eraMinus": 0.0
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 517,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

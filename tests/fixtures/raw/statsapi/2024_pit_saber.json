@@ -1,0 +1,265 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2024",
+     "stat": {
+      "fip": 2.44468,
+      "xfip": 2.53587,
+      "fipMinus": 60.8592,
+      "ra9War": 5.74148,
+      "rar": 38.4254,
+      "war": 4.29663,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.960322,
+      "inli": 0.935141,
+      "gmli": 0.872174,
+      "exli": 1.03593,
+      "eraMinus": 46.1977
+     },
+     "team": {
+      "id": 134,
+      "name": "Pittsburgh Pirates",
+      "link": "/api/v1/teams/134"
+     },
+     "player": {
+      "id": 694973,
+      "fullName": "Paul Skenes",
+      "link": "/api/v1/people/694973",
+      "firstName": "Paul",
+      "lastName": "Skenes",
+      "nameSlug": "paul-skenes-694973"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 10,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "fip": 3.94407,
+      "xfip": 3.44393,
+      "fipMinus": 94.6046,
+      "ra9War": 4.63947,
+      "rar": 30.692,
+      "war": 3.21087,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.931906,
+      "inli": 0.929917,
+      "gmli": 0.870412,
+      "exli": 1.11556,
+      "eraMinus": 83.7825
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 31,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "fip": 3.6928,
+      "xfip": 3.98603,
+      "fipMinus": 88.0444,
+      "ra9War": 1.99876,
+      "rar": 17.0175,
+      "war": 1.79825,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 1.00034,
+      "inli": 0.943535,
+      "gmli": 0.875506,
+      "exli": 0.679588,
+      "eraMinus": 84.8177
+     },
+     "team": {
+      "id": 147,
+      "name": "New York Yankees",
+      "link": "/api/v1/teams/147"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 88,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "fip": 2.64725,
+      "xfip": 3.38018,
+      "fipMinus": 66.7458,
+      "ra9War": 2.29167,
+      "rar": 15.2747,
+      "war": 1.59682,
+      "sd": 27.0,
+      "md": 6.0,
+      "pli": 1.68876,
+      "inli": 1.61101,
+      "gmli": 1.49966,
+      "exli": 2.07716,
+      "eraMinus": 47.1962
+     },
+     "team": {
+      "id": 144,
+      "name": "Atlanta Braves",
+      "link": "/api/v1/teams/144"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 105,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "fip": 3.16648,
+      "xfip": 5.60897,
+      "fipMinus": 76.7873,
+      "ra9War": 0.0129269,
+      "rar": 0.360309,
+      "war": 0.0376494,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.0,
+      "inli": 0.0,
+      "gmli": 0.0,
+      "exli": 0.0,
+      "eraMinus": 100.996
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 493,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

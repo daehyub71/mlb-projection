@@ -632,6 +632,7 @@ WEB_FILES: Final[dict[str, str]] = {
     "batters.json": "BatTable",
     "pitchers.json": "PitTable",
     "validation.json": "ValidationReport",
+    "war.json": "WarFile",  # v0.5 (SPEC F21·F22) — 예측표·선수 상세·검증 화면이 함께 읽는다
 }
 WEB_PLAYER_DEF: Final = "PlayerDetail"  # players/{player_id}.json
 WEB_FIRST_SCREEN_MAX_BYTES: Final = 1_000_000  # N6 — batters.json·pitchers.json 각각
@@ -681,6 +682,14 @@ WEB_ROUND: Final[dict[str, int]] = {
     "mae_weighted": 4,
     "baseline_mae_league": 4,
     "baseline_mae_prev": 4,
+    # v0.5 WAR (war.json)
+    "war": 2,
+    "war_bat": 2,
+    "war_pit": 2,
+    "war_full": 2,
+    "war_full_bat": 2,
+    "war_full_pit": 2,
+    "prev_war": 2,
 }
 
 # 2027 예측 CSV (검토용, F11). 최종 모델 행만.
@@ -742,3 +751,174 @@ def check_frame(df: pd.DataFrame, spec: TableSpec) -> list[str]:
     if bool(df.duplicated(list(spec.keys)).any()):
         problems.append(f"{spec.name}: 키 {spec.keys} 중복")
     return problems
+
+
+# ===========================================================================
+# v0.5 WAR (SPEC E26·E27·D33~D39·F1 ⑤·F2 ⑦·F18~F22, PLAN v0.3 M8)
+# 기존 표·모델·파라미터·채택표·2026 기록은 건드리지 않는다 — WAR은 새 표·새 파일로만 얹는다(PLAN R16).
+# ===========================================================================
+
+
+def raw_saber_path(season: int, role: Role) -> Path:
+    """API 세이버메트릭스(WAR) 원본의 상대 경로 (F1 ⑤)."""
+    return Path("statsapi") / f"{season}_{role}_saber.json"
+
+
+def statsapi_saber_url(season: int, role: Role) -> str:
+    """API 세이버메트릭스 URL (E26). 시즌 기록과 같은 선수 풀·limit이고 `stats=sabermetrics`만 다르다."""
+    group = "hitting" if role == "bat" else "pitching"
+    return (
+        f"{STATSAPI_BASE}/stats?stats=sabermetrics&group={group}&season={season}"
+        "&sportId=1&playerPool=ALL&limit=3000"
+    )
+
+
+# split의 최상위 필드와 stat 필수 필드 (F2 ⑦). 타자는 WAR 구성 항목까지, 투수는 FIP 기반 war와 ra9War.
+SABER_SPLIT_FIELDS: Final[tuple[str, ...]] = ("season", "player", "position", "stat")
+SABER_STAT_FIELDS: Final[dict[Role, tuple[str, ...]]] = {
+    "bat": ("war", "batting", "baseRunning", "fielding", "positional", "wLeague", "replacement"),
+    "pit": ("war", "ra9War"),
+}
+# 원본 stat 필드 → war_seasons 열 (F3)
+SABER_COLUMN_MAP: Final[dict[Role, tuple[tuple[str, str], ...]]] = {
+    "bat": (
+        ("war", "war"),
+        ("batting", "war_batting"),
+        ("baseRunning", "war_baserunning"),
+        ("fielding", "war_fielding"),
+        ("positional", "war_positional"),
+        ("wLeague", "war_league"),
+        ("replacement", "war_replacement"),
+    ),
+    "pit": (("war", "war"), ("ra9War", "war_ra9")),
+}
+
+# 시즌 WAR 합 항등식 (E26): 원본 파일 전체 행의 war 합 = LEAGUE_WAR[role] × 경기 수 / 162 (±허용치).
+# 역할 규칙(D8)으로 거르기 전, 원본 그대로의 합이다.
+LEAGUE_WAR: Final[dict[Role, float]] = {"bat": 570.0, "pit": 430.0}
+LEAGUE_WAR_TOLERANCE: Final = 1.0
+FULL_SEASON_GAMES: Final = 162
+SEASON_GAMES: Final[dict[int, int]] = {SHORT_SEASON: 60}
+
+
+def season_games(season: int) -> int:
+    """정규 시즌 경기 수 (2020 = 60, 나머지 162)."""
+    return SEASON_GAMES.get(season, FULL_SEASON_GAMES)
+
+
+# F2 ⑦ 검사 이름 (순서 고정) — 시즌마다 두 역할 원본을 함께 본다
+WAR_CHECK_NAMES: Final[tuple[str, ...]] = (
+    "saber_complete",  # 두 원본이 있고 JSON 형식·totalSplits = 행 수·필수 필드
+    "saber_war_present",  # 모든 행의 stat.war가 숫자(결측 0)
+    "saber_covers_roles",  # 시즌 기록의 역할 행(D8: 타자 = P 아닌 타격, 투수 = P·TWP 투구)이 모두 세이버메트릭스에 있다
+    "saber_league_sum",  # 역할별 원본 war 합 = LEAGUE_WAR × 경기 수/162 ± 허용치
+)
+WAR_VALIDATION_REPORT_PATH: Final = INTERIM_DIR / "war_validation_report.json"
+
+# 정제 표 (F3) — 역할 행(D8)마다 한 줄. 시즌 기록의 역할 행 중 WAR이 없는 행은 만들지 않고 오류다(⑦이 막는다).
+WAR_SEASONS = TableSpec(
+    name="war_seasons",
+    keys=("player_id", "season", "league", "role"),
+    columns=(
+        *_SEASON_KEYS,
+        Column("role", "str"),  # "bat" | "pit"
+        Column("war", "float"),
+        *_cols(
+            "float",
+            (
+                "war_batting",
+                "war_baserunning",
+                "war_fielding",
+                "war_positional",
+                "war_league",
+                "war_replacement",
+            ),
+            nullable=True,  # 타자 행만 값이 있다
+        ),
+        Column("war_ra9", "float", nullable=True),  # 투수 행만
+    ),
+)
+
+# 모델 (F18·F19, D35)
+WAR_PARAMS_PATH: Final = Path("config/war_v1.json")
+WAR_UNIT: Final[dict[Role, str]] = {"bat": "pa", "pit": "outs"}  # WAR 비율의 분모(시즌 표 열)
+WAR_TUNE_GRID: Final[dict[Role, tuple[float, ...]]] = {
+    "bat": (300.0, 600.0, 1200.0, 2400.0, 4800.0),  # 회귀 표본 R (타석)
+    "pit": (150.0, 300.0, 600.0, 1200.0, 2400.0),  # 회귀 표본 R (아웃)
+}
+WAR_SLOTS: Final[tuple[str, ...]] = ("bat", "sp", "rp")  # 풀타임 기준을 정하는 자리
+FULL_TIME_UNITS: Final[dict[str, float]] = {
+    "bat": 600.0,
+    "sp": 540.0,
+    "rp": 195.0,
+}  # 600타석 · 180 · 65이닝
+STARTER_SHARE_MIN: Final = 0.5  # 입력 기간 Σw·GS / Σw·G ≥ 이 값이면 선발(sp)
+
+WAR_PROJECTIONS = TableSpec(
+    name="war_projections",
+    keys=("player_id", "role", "target_season"),
+    columns=(
+        Column("player_id", "int"),
+        Column("role", "str"),
+        Column("target_season", "int"),
+        Column("n_seasons", "int"),  # cohort 그대로
+        Column("slot", "str"),  # WAR_SLOTS
+        Column("war_rate", "float"),  # 타석당(타자) · 아웃당(투수) WAR (F18)
+        Column("pt", "float"),  # 예측 출전량 — 타자 PA, 투수 아웃(= IP × 3)
+        Column("war", "float"),  # war_rate × pt
+        Column("full_units", "float"),  # FULL_TIME_UNITS[slot]
+        Column("war_full", "float"),  # war_rate × full_units
+    ),
+)
+
+WAR_RANKINGS = TableSpec(
+    name="war_rankings",
+    keys=("player_id", "target_season"),
+    columns=(
+        Column("player_id", "int"),
+        Column("target_season", "int"),
+        Column("roles", "str"),  # "bat" | "pit" | "both" (D34)
+        *_cols("float", ("war_bat", "war_pit"), nullable=True),  # 그 역할 예측이 없으면 결측
+        Column("war", "float"),  # war_bat + war_pit (결측은 0으로 더한다)
+        *_cols("float", ("war_full_bat", "war_full_pit"), nullable=True),
+        Column("war_full", "float"),
+        Column(
+            "prev_war", "float", nullable=True
+        ),  # Y−1 실제 WAR 투타 합, Y−1 역할 행이 하나도 없으면 결측
+    ),
+)
+
+# 검증 (F20, D36)
+WAR_METRICS: Final[tuple[str, ...]] = ("war", "war_full")
+WAR_GROUPS: Final[tuple[str, ...]] = ("all", "seasons_1_2", "seasons_3_5", "war2plus", "regulars")
+WAR_STAR_MIN: Final = 2.0  # "war2plus": 목표 시즌 실제 WAR ≥ 이 값
+WAR_REGULAR_MIN: Final[dict[Role, int]] = {
+    "bat": 500,
+    "pit": 450,
+}  # "regulars": 목표 시즌 PA · 아웃 ≥ 이 값
+WAR_EVALUATIONS = TableSpec(
+    name="war_evaluations",
+    keys=("target_season", "role", "metric", "group"),
+    columns=(
+        Column("target_season", "int"),
+        Column("role", "str"),
+        Column(
+            "metric", "str"
+        ),  # "war": 예측 WAR · 그룹 all/1~2/3~5/war2plus, "war_full": 풀타임 비율 · regulars
+        Column("group", "str"),
+        Column("n", "int"),
+        *_cols("float", ("mae", "baseline_mae_prev", "baseline_mae_league"), nullable=True),
+    ),
+)
+WAR_TABLES: Final[tuple[TableSpec, ...]] = (
+    WAR_SEASONS,
+    WAR_PROJECTIONS,
+    WAR_RANKINGS,
+    WAR_EVALUATIONS,
+)
+
+BACKTEST_WAR_CSV: Final = OUT_DIR / "backtest_war.csv"
+TUNE_WAR_CSV: Final = OUT_DIR / "tune_war_report.csv"
+FINAL_TEST_WAR_PATH: Final = OUT_DIR / "final_test_2026_war.json"  # WAR만 한 번 (D36)
+WAR_PROJECTION_CSV: Final = OUT_DIR / "projections_2027_war.csv"  # WAR_RANKINGS 열 그대로 + 이름
+WAR_SOURCE: Final = "MLB Stats API sabermetrics"  # 화면 표기 "WAR(MLB Stats API 기준)" (D33)

@@ -223,3 +223,28 @@ def _people_paths(raw_dir: Path, *, first: int) -> list[Path]:
         if number.isdecimal() and int(number) >= first and raw_people_path(int(number)) == rel:
             stale.append(rel)
     return sorted(stale)
+
+
+# ---------------------------------------------------------------------------
+# v0.5 세이버메트릭스(WAR) — SPEC F1 ⑤·E26. 레인 A가 구현한다.
+# ---------------------------------------------------------------------------
+
+
+def saber_splits(raw_dir: Path, season: int, role: Role) -> list[dict[str, Any]]:
+    """저장된 세이버메트릭스 원본(`contracts.raw_saber_path`)의 splits를 읽는다.
+
+    Raises:
+        FileNotFoundError: 원본이 없을 때.
+    """
+    raise NotImplementedError
+
+
+def collect_saber(
+    getter: Getter, raw_dir: Path, season: int, role: Role, *, force: bool = False
+) -> CollectOutcome:
+    """세이버메트릭스 하나를 받는다 (`contracts.statsapi_saber_url` → `contracts.raw_saber_path`).
+
+    `collect_season_stats`와 같은 규칙이다 — 캐시가 있으면 요청하지 않고(force면 다시), 응답은
+    `check_stats_body`(형식·totalSplits = 행 수)로 검사한 뒤 저장한다.
+    """
+    raise NotImplementedError

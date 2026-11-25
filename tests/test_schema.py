@@ -119,6 +119,7 @@ def test_schema_file_refs_and_defs_exist() -> None:
         ("validation.json", "ValidationReport"),
         ("player_bat.json", "PlayerDetail"),
         ("player_pit.json", "PlayerDetail"),
+        ("war.json", "WarFile"),
     ],
 )
 def test_schema_synthetic_samples_pass(sample: str, def_name: str) -> None:

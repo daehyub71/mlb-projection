@@ -1,0 +1,280 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2025",
+     "stat": {
+      "woba": 0.417822,
+      "wRaa": 61.839,
+      "wRc": 147.74,
+      "wRcPlus": 172.069,
+      "rar": 72.8271,
+      "war": 7.45112,
+      "batting": 62.0982,
+      "fielding": 0.0,
+      "baseRunning": 3.63297,
+      "positional": -17.0679,
+      "wLeague": 2.02232,
+      "replacement": 22.1415,
+      "spd": 7.13303,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.387603
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 4,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "woba": 0.365206,
+      "wRaa": 30.867,
+      "wRc": 117.004,
+      "wRcPlus": 136.24810699588477,
+      "rar": 33.3993,
+      "war": 3.41716,
+      "batting": 31.2151,
+      "fielding": -0.188971,
+      "baseRunning": -5.80358,
+      "positional": -16.48662,
+      "wLeague": 2.46093,
+      "replacement": 22.2024,
+      "spd": 1.57397,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -1.483641
+     },
+     "team": {
+      "id": 137,
+      "name": "San Francisco Giants",
+      "link": "/api/v1/teams/137"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 2,
+     "rank": 55,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "woba": 0.331197,
+      "wRaa": 7.11439,
+      "wRc": 64.1846,
+      "wRcPlus": 116.533,
+      "rar": 29.6885,
+      "war": 3.03751,
+      "batting": 9.46458,
+      "fielding": 0.531964,
+      "baseRunning": 1.92121,
+      "positional": 1.71696,
+      "wLeague": 1.34357,
+      "replacement": 14.7103,
+      "spd": 4.25817,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -1.31221
+     },
+     "team": {
+      "id": 135,
+      "name": "San Diego Padres",
+      "link": "/api/v1/teams/135"
+     },
+     "player": {
+      "id": 701538,
+      "fullName": "Jackson Merrill",
+      "link": "/api/v1/people/701538",
+      "firstName": "Jackson",
+      "lastName": "Merrill",
+      "nameSlug": "jackson-merrill-701538"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 76,
+     "position": {
+      "code": "8",
+      "name": "Outfielder",
+      "type": "Outfielder",
+      "abbreviation": "CF"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "woba": 0.306589,
+      "wRaa": -2.8874,
+      "wRc": 62.0993,
+      "wRcPlus": 92.3919,
+      "rar": 19.3436,
+      "war": 1.97909,
+      "batting": -4.95947,
+      "fielding": 2.55362,
+      "baseRunning": 0.675848,
+      "positional": 9.7628,
+      "wLeague": 1.52995,
+      "replacement": 16.7508,
+      "spd": 4.00959,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.0970573
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 130,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "woba": 0.268337,
+      "wRaa": -9.29457,
+      "wRc": 20.9538,
+      "wRcPlus": 69.6674,
+      "rar": -1.56388,
+      "war": -0.16,
+      "batting": -9.20329,
+      "fielding": 2.00451,
+      "baseRunning": -1.38848,
+      "positional": -1.48548,
+      "wLeague": 0.712122,
+      "replacement": 7.79674,
+      "spd": 1.79058,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.310279
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 587,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

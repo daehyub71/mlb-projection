@@ -1,6 +1,7 @@
 # PLAN.md — mlb-projection
 
-> **상태: v0.2.3** (2026-11-25). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. v0.2.1은 M3에서 정한 조정 순서(§2-3, SPEC D28)와 M4 확장 모델·채택표·웹 데이터 커밋 보류를 적었다. v0.2.3은 배포 방식을 로컬 빌드 직접 업로드로 바꿨다(SPEC D32). v0.2.2는 내보내기에 과거 오차 80% 범위(SPEC D29, `data/out/bands.csv`·웹 JSON `bands`)를 더했다. 기준 문서는 `docs/SPEC.md` v0.4다. 문서끼리 다르면 SPEC이 기준이다.
+> **상태: v0.3** (2026-11-25) — **SPEC v0.5 WAR 추가**를 반영해 모듈(§2-2 · §2-3 · §2-4)과 마일스톤 M8~M10(§3)을 더했다. 아래는 v0.2.3까지의 기록이다.
+> v0.2.3 (2026-11-25). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. v0.2.1은 M3에서 정한 조정 순서(§2-3, SPEC D28)와 M4 확장 모델·채택표·웹 데이터 커밋 보류를 적었다. v0.2.3은 배포 방식을 로컬 빌드 직접 업로드로 바꿨다(SPEC D32). v0.2.2는 내보내기에 과거 오차 80% 범위(SPEC D29, `data/out/bands.csv`·웹 JSON `bands`)를 더했다. 기준 문서는 `docs/SPEC.md` v0.5다. 문서끼리 다르면 SPEC이 기준이다.
 > 결정 P1~P4는 2026-11-23 사용자 답이다. 작업 항목과 진도는 `docs/TASKS.md`에 있다.
 
 ---
@@ -33,7 +34,7 @@ mlb-projection/
 │   ├── validate.py            # F2 완전성 검사
 │   ├── clean/    players.py · batting.py · pitching.py · fielding.py
 │   ├── cohort.py              # F4 예측 대상, F5 사용 기간
-│   ├── models/   league.py · baseline.py · weighted.py · playing_time.py · extended.py
+│   ├── models/   league.py · baseline.py · weighted.py · playing_time.py · extended.py · war.py(v0.5)
 │   ├── evaluate.py            # F10 MAE·그룹·기준선
 │   ├── tune.py                # 2024·2025로 파라미터 조정
 │   ├── export.py              # CSV + 웹 JSON
@@ -69,6 +70,11 @@ mlb-projection/
 | `models.extended` | 위 + 나이·Statcast | 확장 예측(F9), ERA 구성 지표 모델(D11) | weighted, playing_time |
 | `evaluate` | 예측, 실제 | MAE 표(모델 × 지표 × 그룹, 기준선, 제외 건수) | models |
 | `export` | 예측, 검증, 과거 기록 | `data/out/*.csv`, `web/public/data/*.json` | contracts |
+| `collect.statsapi` (v0.5) | 시즌, 그룹 | `data/raw/statsapi/{season}_{bat\|pit}_saber.json` (SPEC F1 ⑤) | http |
+| `validate` (v0.5) | 세이버메트릭스 한 시즌 | F2 ⑦ — `totalSplits` = 행 수, `war` 결측 0, 역할 행 포함, 리그 WAR 합 570 · 430 × 경기 비율 ±1 | contracts |
+| `clean.batting` · `clean.pitching` (v0.5) | 통과한 세이버메트릭스 | 정제 표에 `war`·구성 열(SPEC §6) | validate |
+| `models.war` (v0.5) | cohort, 정제 표, 예측 출전량, war params | 역할별 WAR 비율(F18) · 예측 WAR · 풀타임 환산 · 선발/불펜 · 투타 합산(F19) | weighted, playing_time |
+| `evaluate_war` (v0.5) | WAR 예측, 실제 | WAR MAE(전원 · 그룹 · WAR 2 이상 · 주전급 풀타임 비율) + 기준선 두 개(F20) | models.war |
 
 **계약 고정 방식.** 메인 세션이 마일스톤을 시작하기 전에 다음을 커밋한다.
 1. `contracts.py`의 열 이름·타입
@@ -91,6 +97,13 @@ mlb-projection/
 
 **확장 모델과 채택표 (M4).** 확장 모델(F9)은 가중 예측 위에 지표별 선형 잔차 보정을 얹는다. 특성은 나이·K%·Statcast(`contracts.EXT_FEATURES`)이고, 계수는 목표 이전 시즌들(2021~Y−1, 출전량은 2023~)의 "실제 − 가중 예측"으로만 맞춘다(N2). 지표마다 2024·2025 평균 MAE가 가중 모델보다 낮을 때만 채택한다. 순서는 타자 PA → HR → OPS, 투수 IP → ERA → K−BB%이며, 출전량을 먼저 정해야 HR을 평가할 수 있기 때문이다. 채택표는 `config/extended_v1.json`으로 커밋하고, `final-test`는 파라미터와 채택표가 **둘 다** 커밋된 상태에서만 돈다. 역할마다 채택한 지표가 하나라도 있으면 그 역할의 최종 모델은 "extended", 없으면 "weighted"다.
 
+**WAR 모델 (v0.5, SPEC F18~F20·D35·D36).** 기존 여섯 지표 모델 위에 **얹기만** 한다 — `config/params_v1.json`·`config/extended_v1.json`은 그대로 두고(해시 확인), WAR 파라미터는 `config/war_v1.json` 하나에 둔다.
+- 비율 = `(Σw·WAR + R·리그 비율) / (Σw·출전 + R)`, w = params_v1의 시즌 가중치, 출전은 타자 PA · 투수 아웃. 리그 비율은 Y−1 역할 행의 WAR 합 / 출전 합.
+- 예측 WAR = 비율 × 기존 최종 모델의 예측 출전량(PA, IP × 3). 풀타임 = 비율 × (600 PA · 선발 540 · 불펜 195 아웃). 선발은 입력 기간 `Σw·GS / Σw·G ≥ 0.5`.
+- 조정(`tune-war`)은 목표 2024·2025만, R 격자(타자 300~4800 PA · 투수 150~2400 아웃)를 두 해 평균 MAE(대상 전원)로 고른다. 주전급 풀타임 비율 MAE를 함께 보고하되 선택 기준은 하나로 둔다.
+- `final-test-war --target 2026`은 `config/war_v1.json`이 커밋된 상태에서만 돌고 `data/out/final_test_2026_war.json`에 남긴다. 다시 돌리려면 `--rerun` 사유(D31과 같은 장치). 기존 `final_test_2026.json`은 건드리지 않는다.
+- 투타 겸업(F12)은 역할 행을 따로 계산해 `war_rankings`에서 합친다. 2027 예측 대상 중 두 역할 대상은 오타니 · Brett Phillips(E9) — Phillips는 투구 영향이 0.003이닝 이하(TASKS 이슈)라 합산해도 거의 같다.
+
 **웹 데이터 커밋 (정함 → 넣지 않는다, SPEC D32).** `export`가 쓰는 `web/public/data/`(선수별 과거 기록 약 2,500개 포함)는 M4에서 커밋하지 않는다(`.gitignore`). 공개 저장소에 선수별 시즌 기록을 통째로 올리는 것이 MLBAM 고지의 "non-bulk"(SPEC E13)에 맞는지, 배포 방식과 함께 M7 전에 정한다(TASKS 미해소 이슈 ⑥).
 
 ### 2-4. CLI (SPEC D25 수동 갱신)
@@ -103,6 +116,9 @@ python -m mlbproj tune      --targets 2024,2025      # 파라미터 → config/p
 python -m mlbproj adopt     --targets 2024,2025      # 확장 모델 채택표 → config/extended_v1.json (F9)
 python -m mlbproj backtest  --targets 2024,2025      # F10 과거 검증표 (2026은 거부)
 python -m mlbproj final-test --target 2026            # 파라미터·채택표 커밋 뒤 1회
+python -m mlbproj tune-war  --targets 2024,2025      # (v0.5) WAR 회귀 표본 → config/war_v1.json
+python -m mlbproj backtest-war --targets 2024,2025   # (v0.5) WAR 과거 검증 (2026은 거부)
+python -m mlbproj final-test-war --target 2026        # (v0.5) war_v1.json 커밋 뒤 1회
 python -m mlbproj export                              # 2027 예측(F11) → 검토용 CSV + 웹 JSON
 python -m mlbproj refresh                             # collect → … → export 한 번에 (수동 갱신)
 ```
@@ -124,6 +140,9 @@ python -m mlbproj refresh                             # collect → … → expo
 | **M4 확장·최종 예측** | F9·F11·D11·N1·N6. 모듈 A `models.extended`, B `export`(스키마 검사·크기 1MB), C `cli refresh`+재현성 테스트 → 메인이 **2026 최종 검증 1회** → 2027 예측 | Workflow + 메인 | v0.1 완료 기준 1·2(SPEC §7). 2026 결과를 그대로 사용자에게 보고 |
 | **M5 DESIGN** (M1 이후 병행) | IA → 와이어프레임 → Astryx 전용 테마 토큰 → Claude Design 디자인 시스템·캔버스 시안(예측표·선수 상세·검증·소개) → Codex 이미지(히어로·섹션·OG, D19) → O6 차트·O7 사진 결정 → **사용자 합의** | 메인 + Codex | `docs/DESIGN.md`에 합의 기록, 이미지 목록·프롬프트 기록 |
 | **M6 웹 구현** | F13~F17, N6·N9·N10. 메인이 앱 골격·테마·데이터 로더·스키마 타입을 고정한 뒤 모듈 A 예측표, B 선수 상세(차트·수비), C 검증·소개·공통(고지·출처·이미지·OG) | Workflow | 웹 lint·test·build 통과, 시안 대비 화면 확인(스크린샷), 명도 대비 검사 |
+| **M8 WAR 데이터·모델 (v0.5)** | SPEC F1 ⑤·F2 ⑦·F3·F18~F20·D33~D36. 메인 계약(열 · 스키마 · 스텁 · 세이버메트릭스 픽스처) → 레인 A `collect.statsapi` 세이버메트릭스 + `validate` ⑦ + `clean` WAR 열, B `models.war`(비율 · 예측 · 풀타임 · 선발 판정 · 투타 합산) + `tune-war`, C `evaluate_war` + `backtest-war` + `final-test-war`(봉인 · 사유) + `export` WAR 필드 → 메인이 실수집(16회) · 조정 · 커밋 → **2026 WAR 시험 1회** → 2027 WAR 예측 | Workflow + 메인 | SPEC §7-1 1~4. 기존 파라미터 · 채택표 · 2026 기록 해시 그대로. 2026 WAR 결과를 그대로 보고 |
+| **M9 WAR 화면 (v0.5)** | SPEC F21·F22·D34·D35·D39. DESIGN 시안(WAR 순위 탭 · 선수 상세 WAR 카드 · 검증 WAR) → **사용자 합의** → 레인 A WAR 순위 표, B 상세 WAR, C 검증 · 소개 · 공통 | 메인(시안) + Workflow | 웹 lint · test · build, 시안 대비 화면 · 명도 대비 확인 |
+| **M10 WAR 배포 (v0.5)** | SPEC N7·D32. 보안 점검 → 로컬 빌드 직접 업로드 → README 2종 갱신 | 메인 | 공개 URL에서 WAR 화면 동작, 워크스페이스 표 갱신 |
 | **M7 배포** | SPEC N7·D32. 보안 리뷰·시크릿·`data/raw` 미추적 확인, 공개 저장소 산출물 점검, Vercel 배포(로컬 빌드 `web/out`을 기존 토큰으로 직접 업로드 — 웹 JSON은 저장소에 넣지 않는다), README 2종 완성(스크린샷) | 메인 | 공개 URL 동작, 워크스페이스 프로젝트 표 갱신 |
 
 ---
@@ -214,3 +233,6 @@ python -m mlbproj refresh                             # collect → … → expo
 | R11 | Vercel 계정 2단계 인증 잠김(CLI 로그인 불가) | 기존 `VERCEL_TOKEN`을 사용자 승인 후 쓴다(2026-11-25 승인, 값은 출력하지 않고 명령에만). 토큰이 만료되면 배포가 막힌다 — 2FA 복구가 근본 해결 |
 | R12 | 맥·윈도우 교차 작업 시 `data/raw`가 없음 | `refresh` 한 번으로 다시 받는다 |
 | R13 | 공식 선수 사진의 저작권 (D27, E13) | 복사하지 않고 MLB 서버에서 불러온다, "선수 사진 © MLB" 표기, 실패 시 이니셜 배지, 설정 하나로 끌 수 있게 한다. 요청을 받으면 바로 끈다 |
+| R14 | (v0.5) MLB Stats API WAR은 fWAR · bWAR과 값이 다르고, 산식이 공개 문서로 확인되지 않는다 | "WAR(MLB Stats API 기준)" 표기와 설명. 리그 합 항등식(F2 ⑦)으로 형식이 바뀌면 멈춘다 |
+| R15 | (v0.5) 예측 WAR이 출전량 보수성(E24)을 그대로 물려받아 주전급 순위가 낮게 나온다(E27) | 풀타임 환산을 나란히 보여주고 정렬을 고르게 한다(D35). 출전량 모델 개선은 별도 과제 |
+| R16 | (v0.5) WAR 추가가 기존 2026 기록 · 파라미터 · 채택표를 건드림 | 별도 파일(`config/war_v1.json`, `final_test_2026_war.json`), 기존 해시를 테스트로 고정 |

@@ -1,0 +1,590 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 11,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.376926,
+      "wRaa": 34.5817,
+      "wRc": 122.906,
+      "wRcPlus": 132.326,
+      "rar": 66.5693,
+      "war": 6.46572,
+      "batting": 29.0037,
+      "fielding": 11.6705,
+      "baseRunning": -1.71164,
+      "positional": 2.22222,
+      "wLeague": 3.30577,
+      "replacement": 22.0787,
+      "spd": 4.93079,
+      "ubr": 2.79999995231628,
+      "wGdp": 1.7,
+      "wSb": -2.22214
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 7,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.339729,
+      "wRaa": 10.1451,
+      "wRc": 84.755,
+      "wRcPlus": 107.351,
+      "rar": 60.8449,
+      "war": 5.90972,
+      "batting": 5.75156,
+      "fielding": 13.3489,
+      "baseRunning": 5.33989,
+      "positional": 9.47988,
+      "wLeague": 0.284109,
+      "replacement": 18.6505,
+      "spd": 5.47461,
+      "ubr": 4.00000017881393,
+      "wGdp": 0.3,
+      "wSb": 1.08584
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 14,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.352326,
+      "wRaa": 11.8989,
+      "wRc": 65.3714,
+      "wRcPlus": 119.682,
+      "rar": 16.8394,
+      "war": 1.63557,
+      "batting": 10.6913,
+      "fielding": 0.0,
+      "baseRunning": 0.718278,
+      "positional": -9.93827,
+      "wLeague": 2.00136,
+      "replacement": 13.3667,
+      "spd": 6.19683,
+      "ubr": -0.899999976158142,
+      "wGdp": 1.4,
+      "wSb": 0.8741
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 156,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.343294,
+      "wRaa": 10.1758,
+      "wRc": 73.5879,
+      "wRcPlus": 114.824,
+      "rar": 10.8325,
+      "war": 1.05214,
+      "batting": 9.54926,
+      "fielding": -10.4792,
+      "baseRunning": -0.620471,
+      "positional": -5.84191,
+      "wLeague": 2.37337,
+      "replacement": 15.8514,
+      "spd": 2.43318,
+      "ubr": 1.69999998807907,
+      "wGdp": 0.3,
+      "wSb": -0.235304
+     },
+     "team": {
+      "id": 145,
+      "name": "Chicago White Sox",
+      "link": "/api/v1/teams/145"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 209,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.301442,
+      "wRaa": -7.35434,
+      "wRc": 50.5218,
+      "wRcPlus": 86.2703,
+      "rar": 8.37288,
+      "war": 0.81324,
+      "batting": -8.33267,
+      "fielding": -1.07157,
+      "baseRunning": 2.19756,
+      "positional": 0.891632,
+      "wLeague": 0.220388,
+      "replacement": 14.4675,
+      "spd": 4.09999,
+      "ubr": 1.10000003874302,
+      "wGdp": -0.2,
+      "wSb": 0.582126
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 240,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.176955,
+      "wRaa": -7.29212,
+      "wRc": 0.131118,
+      "wRcPlus": 5.98492,
+      "rar": 1.81481,
+      "war": 0.17627,
+      "batting": -7.31838,
+      "fielding": 0.0,
+      "baseRunning": -0.00422262,
+      "positional": 7.25353,
+      "wLeague": 0.0282671,
+      "replacement": 1.85562,
+      "spd": 2.64286,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.0152512
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 355,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.168048,
+      "wRaa": -9.19061,
+      "wRc": -0.38338,
+      "wRcPlus": -5.12884,
+      "rar": 0.712909,
+      "war": 0.06924,
+      "batting": -9.70925,
+      "fielding": 0.0,
+      "baseRunning": -0.41885,
+      "positional": 8.60589,
+      "wLeague": 0.0335373,
+      "replacement": 2.20158,
+      "spd": 2.40247,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.0239662
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 405,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "wRaa": 0.0,
+      "wRc": 0.0,
+      "rar": 0.0,
+      "war": 0.0,
+      "batting": 0.0,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.0,
+      "wLeague": 0.0,
+      "replacement": 0.0,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 137,
+      "name": "San Francisco Giants",
+      "link": "/api/v1/teams/137"
+     },
+     "player": {
+      "id": 519381,
+      "fullName": "Pat Venditte",
+      "link": "/api/v1/people/519381",
+      "firstName": "Pat",
+      "lastName": "Venditte",
+      "nameSlug": "pat-venditte-519381"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 488,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.0,
+      "wRaa": -0.553115,
+      "wRc": -0.301479,
+      "wRcPlus": -100.0,
+      "rar": -0.267996,
+      "war": -0.02603,
+      "batting": -0.577739,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.245883,
+      "wLeague": 0.000958208,
+      "replacement": 0.0629023,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 113,
+      "name": "Cincinnati Reds",
+      "link": "/api/v1/teams/113"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 929,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.0,
+      "wRaa": -1.9359,
+      "wRc": -1.05518,
+      "wRcPlus": -100.0,
+      "rar": -0.816098,
+      "war": -0.07927,
+      "batting": -1.92981,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.860589,
+      "wLeague": 0.0329635,
+      "replacement": 0.220158,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 117,
+      "name": "Houston Astros",
+      "link": "/api/v1/teams/117"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 1024,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "woba": 0.31841,
+      "wRaa": -0.72476,
+      "wRc": 68.3491,
+      "wRcPlus": 96.9873,
+      "rar": -2.82859,
+      "war": -0.27473,
+      "batting": -2.11392,
+      "fielding": -2.55603,
+      "baseRunning": -4.57439,
+      "positional": -13.4362,
+      "wLeague": 2.58528,
+      "replacement": 17.2667,
+      "spd": 0.553571,
+      "ubr": -5.0,
+      "wGdp": -1.0,
+      "wSb": -0.333348
+     },
+     "team": {
+      "id": 116,
+      "name": "Detroit Tigers",
+      "link": "/api/v1/teams/116"
+     },
+     "player": {
+      "id": 408234,
+      "fullName": "Miguel Cabrera",
+      "link": "/api/v1/people/408234",
+      "firstName": "Miguel",
+      "lastName": "Cabrera",
+      "nameSlug": "miguel-cabrera-408234"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 1146,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

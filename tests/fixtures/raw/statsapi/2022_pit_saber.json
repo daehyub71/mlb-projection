@@ -1,0 +1,265 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2022",
+     "stat": {
+      "fip": 2.58072,
+      "xfip": 2.76956,
+      "fipMinus": 63.7125,
+      "ra9War": 5.45783,
+      "rar": 55.5711,
+      "war": 6.29522,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.854314,
+      "inli": 0.872702,
+      "gmli": 0.874825,
+      "exli": 0.933567,
+      "eraMinus": 80.1672
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 1,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "fip": 2.40159,
+      "xfip": 2.6518,
+      "fipMinus": 58.7885,
+      "ra9War": 6.1667,
+      "rar": 48.5355,
+      "war": 5.59268,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.997979,
+      "inli": 0.959382,
+      "gmli": 0.857414,
+      "exli": 0.87455,
+      "eraMinus": 58.8664
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 5,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "fip": 3.46625,
+      "xfip": 2.77432,
+      "fipMinus": 85.2311,
+      "ra9War": 3.62984,
+      "rar": 31.8449,
+      "war": 3.42232,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.928675,
+      "inli": 0.916593,
+      "gmli": 0.878218,
+      "exli": 1.08028,
+      "eraMinus": 89.8554
+     },
+     "team": {
+      "id": 147,
+      "name": "New York Yankees",
+      "link": "/api/v1/teams/147"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 31,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "fip": 3.66026,
+      "xfip": 4.0966,
+      "fipMinus": 93.3635,
+      "ra9War": 3.64773,
+      "rar": 27.4,
+      "war": 2.88704,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.899638,
+      "inli": 0.814787,
+      "gmli": 0.8639,
+      "exli": 0.836916,
+      "eraMinus": 93.5046
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 45,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "fip": 2.4672703225806454,
+      "xfip": 2.9947610752688174,
+      "fipMinus": 61.79635376344086,
+      "ra9War": 1.440998,
+      "rar": 14.43902,
+      "war": 1.536354,
+      "sd": 24.0,
+      "md": 9.0,
+      "pli": 1.3848205376344087,
+      "inli": 1.329402634408602,
+      "gmli": 1.3938741935483872,
+      "exli": 3.2934287096774195,
+      "eraMinus": 62.205833870967744
+     },
+     "team": {
+      "id": 144,
+      "name": "Atlanta Braves",
+      "link": "/api/v1/teams/144"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 2,
+     "rank": 104,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

@@ -1,0 +1,332 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 6,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.353998,
+      "wRaa": 19.7572,
+      "wRc": 84.0199,
+      "wRcPlus": 128.702,
+      "rar": 63.3773,
+      "war": 6.65439,
+      "batting": 18.7411,
+      "fielding": 11.4744,
+      "baseRunning": 3.46855,
+      "positional": 9.3267,
+      "wLeague": 2.54782,
+      "replacement": 16.7587,
+      "spd": 6.87688,
+      "ubr": 3.09999984502792,
+      "wGdp": 0.3,
+      "wSb": 3.23163
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 7,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.372789,
+      "wRaa": 30.7514,
+      "wRc": 100.96,
+      "wRcPlus": 140.105,
+      "rar": 47.8684,
+      "war": 5.02601,
+      "batting": 27.7097,
+      "fielding": -0.236527,
+      "baseRunning": -0.70277,
+      "positional": 1.70953,
+      "wLeague": 1.07914,
+      "replacement": 18.3094,
+      "spd": 3.09404,
+      "ubr": 0.199999988079071,
+      "wGdp": -1.0,
+      "wSb": -0.372512
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 25,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.369625,
+      "wRaa": 31.6815,
+      "wRc": 107.836,
+      "wRcPlus": 141.87,
+      "rar": 34.3304,
+      "war": 3.60457,
+      "batting": 31.3794,
+      "fielding": 0.0,
+      "baseRunning": -1.65976,
+      "positional": -16.4198,
+      "wLeague": 1.17053,
+      "replacement": 19.86,
+      "spd": 4.72767,
+      "ubr": 0.200000047683716,
+      "wGdp": 2.1,
+      "wSb": -2.0079
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 54,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.370026,
+      "wRaa": 15.6597,
+      "wRc": 53.051,
+      "wRcPlus": 143.407,
+      "rar": 15.6664,
+      "war": 1.64491,
+      "batting": 15.9724,
+      "fielding": -2.47608,
+      "baseRunning": -1.56287,
+      "positional": -6.59294,
+      "wLeague": 0.57472,
+      "replacement": 9.75108,
+      "spd": 1.04847,
+      "ubr": -0.199999988079071,
+      "wGdp": -0.8,
+      "wSb": -0.368378
+     },
+     "team": {
+      "id": 145,
+      "name": "Chicago White Sox",
+      "link": "/api/v1/teams/145"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 147,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.279796,
+      "wRaa": -9.56494,
+      "wRc": 36.4023,
+      "wRcPlus": 74.4537,
+      "rar": 2.54594,
+      "war": 0.26731,
+      "batting": -11.5564,
+      "fielding": -1.24133,
+      "baseRunning": 1.12349,
+      "positional": 1.52606,
+      "wLeague": 0.706536,
+      "replacement": 11.9876,
+      "spd": 2.35664,
+      "ubr": 1.5,
+      "wGdp": -1.0,
+      "wSb": -1.15446
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 331,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    },
+    {
+     "season": "2022",
+     "stat": {
+      "woba": 0.275268,
+      "wRaa": -11.8601,
+      "wRc": 37.6519,
+      "wRcPlus": 78.2009,
+      "rar": -12.4876,
+      "war": -1.31115,
+      "batting": -10.6217,
+      "fielding": 0.0,
+      "baseRunning": -3.76421,
+      "positional": -11.7747,
+      "wLeague": 0.761021,
+      "replacement": 12.912,
+      "spd": 1.33254,
+      "ubr": -3.40000033378601,
+      "wGdp": -1.7,
+      "wSb": -0.271855
+     },
+     "team": {
+      "id": 116,
+      "name": "Detroit Tigers",
+      "link": "/api/v1/teams/116"
+     },
+     "player": {
+      "id": 408234,
+      "fullName": "Miguel Cabrera",
+      "link": "/api/v1/people/408234",
+      "firstName": "Miguel",
+      "lastName": "Cabrera",
+      "nameSlug": "miguel-cabrera-408234"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 790,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

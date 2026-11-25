@@ -1,0 +1,432 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 8,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.360737,
+      "wRaa": 6.74139,
+      "wRc": 31.2065,
+      "wRcPlus": 124.498,
+      "rar": 19.087,
+      "war": 1.85634,
+      "batting": 6.10372,
+      "fielding": 2.09169,
+      "baseRunning": 1.88036,
+      "positional": 1.45348,
+      "wLeague": -1.0126,
+      "replacement": 6.35038,
+      "spd": 4.6808,
+      "ubr": 1.39999994635582,
+      "wGdp": 0.4,
+      "wSb": 0.20351
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 33,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.373076,
+      "wRaa": 10.1658,
+      "wRc": 38.5203,
+      "wRcPlus": 137.793,
+      "rar": 14.9643,
+      "war": 1.45537,
+      "batting": 10.5221,
+      "fielding": -2.68612,
+      "baseRunning": -0.315319,
+      "positional": -2.4417,
+      "wLeague": 2.52534,
+      "replacement": 7.35992,
+      "spd": 0.747365,
+      "ubr": 0.600000023841858,
+      "wGdp": 0.0,
+      "wSb": -0.149185
+     },
+     "team": {
+      "id": 145,
+      "name": "Chicago White Sox",
+      "link": "/api/v1/teams/145"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 59,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.33682,
+      "wRaa": 3.56917,
+      "wRc": 34.6838,
+      "wRcPlus": 107.875,
+      "rar": 7.91352,
+      "war": 0.76964,
+      "batting": 2.40596,
+      "fielding": -2.81324,
+      "baseRunning": 0.717775,
+      "positional": 0.814472,
+      "wLeague": -1.28782,
+      "replacement": 8.07638,
+      "spd": 2.60119,
+      "ubr": 1.70000004768372,
+      "wGdp": -0.6,
+      "wSb": -0.155533
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 141,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.322601,
+      "wRaa": 0.553292,
+      "wRc": 29.5351,
+      "wRcPlus": 105.041,
+      "rar": 2.84681,
+      "war": 0.27687,
+      "batting": 1.43442,
+      "fielding": 0.0,
+      "baseRunning": -2.64218,
+      "positional": -6.04938,
+      "wLeague": 2.58121,
+      "replacement": 7.52275,
+      "spd": 2.47915,
+      "ubr": -2.49999991059303,
+      "wGdp": 0.4,
+      "wSb": 0.00637748
+     },
+     "team": {
+      "id": 116,
+      "name": "Detroit Tigers",
+      "link": "/api/v1/teams/116"
+     },
+     "player": {
+      "id": 408234,
+      "fullName": "Miguel Cabrera",
+      "link": "/api/v1/people/408234",
+      "firstName": "Miguel",
+      "lastName": "Cabrera",
+      "nameSlug": "miguel-cabrera-408234"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 234,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.289823,
+      "wRaa": -3.73843,
+      "wRc": 14.83,
+      "wRcPlus": 80.7866,
+      "rar": 2.68539,
+      "war": 0.26117,
+      "batting": -3.63319,
+      "fielding": 1.4572,
+      "baseRunning": -0.425341,
+      "positional": -0.172611,
+      "wLeague": 0.639572,
+      "replacement": 4.81977,
+      "spd": 4.19492,
+      "ubr": -0.100000023841858,
+      "wGdp": -0.5,
+      "wSb": -0.517136
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 242,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "wRaa": 0.0,
+      "wRc": 0.0,
+      "rar": 0.0,
+      "war": 0.0,
+      "batting": 0.0,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.0,
+      "wLeague": 0.0,
+      "replacement": 0.0,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 113,
+      "name": "Cincinnati Reds",
+      "link": "/api/v1/teams/113"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 358,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "wRaa": 0.0,
+      "wRc": 0.0,
+      "rar": 0.0,
+      "war": 0.0,
+      "batting": 0.0,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.0,
+      "wLeague": 0.0,
+      "replacement": 0.0,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 358,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "woba": 0.290153,
+      "wRaa": -4.37172,
+      "wRc": 17.5842,
+      "wRcPlus": 79.7318,
+      "rar": -0.372669,
+      "war": -0.03624,
+      "batting": -4.36953,
+      "fielding": 0.0,
+      "baseRunning": 1.86254,
+      "positional": -4.32099,
+      "wLeague": 0.756251,
+      "replacement": 5.69906,
+      "spd": 5.20757,
+      "ubr": 0.799999952316284,
+      "wGdp": 0.5,
+      "wSb": 0.844774
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 419,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

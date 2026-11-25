@@ -1,0 +1,265 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2021",
+     "stat": {
+      "fip": 2.92187,
+      "xfip": 2.93321,
+      "fipMinus": 67.8299,
+      "ra9War": 4.68926,
+      "rar": 48.4192,
+      "war": 5.18989,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.97228,
+      "inli": 0.945546,
+      "gmli": 0.87576,
+      "exli": 1.19189,
+      "eraMinus": 76.1411
+     },
+     "team": {
+      "id": 147,
+      "name": "New York Yankees",
+      "link": "/api/v1/teams/147"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 6,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2021",
+     "stat": {
+      "fip": 3.3693,
+      "xfip": 3.37349,
+      "fipMinus": 77.2687,
+      "ra9War": 1.95354,
+      "rar": 42.103,
+      "war": 4.42289,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.978769,
+      "inli": 0.941906,
+      "gmli": 0.879775,
+      "exli": 1.10395,
+      "eraMinus": 109.811
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 14,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2021",
+     "stat": {
+      "fip": 3.66438,
+      "xfip": 3.87191,
+      "fipMinus": 87.5697,
+      "ra9War": 6.14211,
+      "rar": 37.9082,
+      "war": 3.90563,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.981281,
+      "inli": 0.925796,
+      "gmli": 0.879687,
+      "exli": 1.31574,
+      "eraMinus": 74.5357
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 25,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2021",
+     "stat": {
+      "fip": 3.5153,
+      "xfip": 3.54885,
+      "fipMinus": 80.2414,
+      "ra9War": 3.90854,
+      "rar": 28.3933,
+      "war": 2.95952,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 1.08827,
+      "inli": 1.03849,
+      "gmli": 0.877843,
+      "exli": 1.49267,
+      "eraMinus": 72.088
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 44,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2021",
+     "stat": {
+      "fip": 2.82718,
+      "xfip": 2.29663,
+      "fipMinus": 64.7195,
+      "ra9War": 2.01957,
+      "rar": 19.8051,
+      "war": 2.01208,
+      "sd": 30.0,
+      "md": 7.0,
+      "pli": 1.85628,
+      "inli": 1.82258,
+      "gmli": 1.86302,
+      "exli": 2.35413,
+      "eraMinus": 58.357
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 75,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

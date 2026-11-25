@@ -1,0 +1,314 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 6,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 3.19142,
+      "xfip": 2.7947,
+      "fipMinus": 70.4798,
+      "ra9War": 1.67482,
+      "rar": 19.0394,
+      "war": 1.96529,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.807846,
+      "inli": 0.773257,
+      "gmli": 0.894167,
+      "exli": 0.94238,
+      "eraMinus": 72.6374
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 15,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 3.89005,
+      "xfip": 3.37801,
+      "fipMinus": 86.5002,
+      "ra9War": 2.12197,
+      "rar": 14.0489,
+      "war": 1.40753,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.722593,
+      "inli": 0.788272,
+      "gmli": 0.9,
+      "exli": 0.37078,
+      "eraMinus": 64.5809
+     },
+     "team": {
+      "id": 147,
+      "name": "New York Yankees",
+      "link": "/api/v1/teams/147"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 36,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 1.84359,
+      "xfip": 2.8713,
+      "fipMinus": 39.7496,
+      "ra9War": 0.399995,
+      "rar": 11.4808,
+      "war": 1.13983,
+      "sd": 12.0,
+      "md": 3.0,
+      "pli": 1.99189,
+      "inli": 1.85,
+      "gmli": 2.00794,
+      "exli": 1.4116,
+      "eraMinus": 57.4181
+     },
+     "team": {
+      "id": 113,
+      "name": "Cincinnati Reds",
+      "link": "/api/v1/teams/113"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 46,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 4.10512,
+      "xfip": 4.2321,
+      "fipMinus": 94.5546,
+      "ra9War": 1.78685,
+      "rar": 10.4491,
+      "war": 1.0258,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 1.01052,
+      "inli": 0.98343,
+      "gmli": 0.88344,
+      "exli": 1.2475,
+      "eraMinus": 73.4291
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 60,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 2.26834,
+      "xfip": 4.0483,
+      "fipMinus": 52.256,
+      "ra9War": 0.170863,
+      "rar": 0.897532,
+      "war": 0.0896371,
+      "sd": 1.0,
+      "md": 0.0,
+      "pli": 0.441613,
+      "inli": 0.42276,
+      "gmli": 0.366867,
+      "exli": 0.7032,
+      "eraMinus": 0.0
+     },
+     "team": {
+      "id": 146,
+      "name": "Miami Marlins",
+      "link": "/api/v1/teams/146"
+     },
+     "player": {
+      "id": 519381,
+      "fullName": "Pat Venditte",
+      "link": "/api/v1/people/519381",
+      "firstName": "Pat",
+      "lastName": "Venditte",
+      "nameSlug": "pat-venditte-519381"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 335,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2020",
+     "stat": {
+      "fip": 13.9912,
+      "xfip": 15.1481,
+      "fipMinus": 306.044,
+      "ra9War": -0.461931,
+      "rar": -1.51264,
+      "war": -0.138586,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 1.56709,
+      "inli": 0.89,
+      "gmli": 0.87,
+      "exli": 1.3557,
+      "eraMinus": 839.083
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 593,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

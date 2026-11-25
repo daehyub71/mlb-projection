@@ -1,0 +1,265 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2025",
+     "stat": {
+      "fip": 2.36249,
+      "xfip": 3.02996,
+      "fipMinus": 57.9315,
+      "ra9War": 8.22494,
+      "rar": 58.1172,
+      "war": 6.53143,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.983496,
+      "inli": 0.97652,
+      "gmli": 0.872981,
+      "exli": 1.06657,
+      "eraMinus": 45.3588
+     },
+     "team": {
+      "id": 134,
+      "name": "Pittsburgh Pirates",
+      "link": "/api/v1/teams/134"
+     },
+     "player": {
+      "id": 694973,
+      "fullName": "Paul Skenes",
+      "link": "/api/v1/people/694973",
+      "firstName": "Paul",
+      "lastName": "Skenes",
+      "nameSlug": "paul-skenes-694973"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 2,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "fip": 1.90109,
+      "xfip": 2.44903,
+      "fipMinus": 46.0987,
+      "ra9War": 1.53229,
+      "rar": 17.4565,
+      "war": 1.91503,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.934519,
+      "inli": 0.935825,
+      "gmli": 0.867229,
+      "exli": 1.12927,
+      "eraMinus": 68.4352
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 78,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "fip": 3.31335,
+      "xfip": 3.78375,
+      "fipMinus": 81.6591,
+      "ra9War": 1.45186,
+      "rar": 9.8573,
+      "war": 1.01679,
+      "sd": 29.0,
+      "md": 11.0,
+      "pli": 1.64915,
+      "inli": 1.5909,
+      "gmli": 1.6325,
+      "exli": 2.48208,
+      "eraMinus": 76.1957
+     },
+     "team": {
+      "id": 144,
+      "name": "Atlanta Braves",
+      "link": "/api/v1/teams/144"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 176,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "fip": 4.57683,
+      "xfip": 3.71428,
+      "fipMinus": 107.538,
+      "ra9War": -0.248869,
+      "rar": 9.53017,
+      "war": 0.966101,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.91233,
+      "inli": 0.865412,
+      "gmli": 0.875294,
+      "exli": 1.01361,
+      "eraMinus": 138.348
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 183,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2025",
+     "stat": {
+      "fip": 9.69764,
+      "xfip": 10.1509,
+      "fipMinus": 227.136,
+      "ra9War": -0.372573,
+      "rar": -1.46006,
+      "war": -0.14298,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.00656316,
+      "inli": 0.00107143,
+      "gmli": 0.002,
+      "exli": 0.0647,
+      "eraMinus": 361.854
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 713,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

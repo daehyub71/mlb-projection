@@ -1,0 +1,265 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "pitching"
+   },
+   "totalSplits": 5,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2019",
+     "stat": {
+      "fip": 2.63944,
+      "xfip": 2.47528,
+      "fipMinus": 58.4651,
+      "ra9War": 7.98074,
+      "rar": 70.1034,
+      "war": 7.47367,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.899057,
+      "inli": 0.888469,
+      "gmli": 0.876364,
+      "exli": 0.875152,
+      "eraMinus": 55.4273
+     },
+     "team": {
+      "id": 117,
+      "name": "Houston Astros",
+      "link": "/api/v1/teams/117"
+     },
+     "player": {
+      "id": 543037,
+      "fullName": "Gerrit Cole",
+      "link": "/api/v1/people/543037",
+      "firstName": "Gerrit",
+      "lastName": "Cole",
+      "nameSlug": "gerrit-cole-543037"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 1,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "fip": 4.03444,
+      "xfip": 3.82353,
+      "fipMinus": 88.5969,
+      "ra9War": 4.07317,
+      "rar": 34.5075,
+      "war": 3.43851,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 1.02739,
+      "inli": 0.941708,
+      "gmli": 0.866112,
+      "exli": 1.39546,
+      "eraMinus": 87.1723
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 605400,
+      "fullName": "Aaron Nola",
+      "link": "/api/v1/people/605400",
+      "firstName": "Aaron",
+      "lastName": "Nola",
+      "nameSlug": "aaron-nola-605400"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 33,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "fip": 4.35576,
+      "xfip": 4.39312,
+      "fipMinus": 101.3,
+      "ra9War": 2.619,
+      "rar": 21.2937,
+      "war": 2.07688,
+      "sd": 0.0,
+      "md": 0.0,
+      "pli": 0.95202,
+      "inli": 0.873905,
+      "gmli": 0.873252,
+      "exli": 0.95551,
+      "eraMinus": 99.9542
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 77,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "fip": 3.9155,
+      "xfip": 3.7248,
+      "fipMinus": 84.9029,
+      "ra9War": 1.10061,
+      "rar": 12.2709,
+      "war": 1.20977,
+      "sd": 34.0,
+      "md": 17.0,
+      "pli": 1.9304,
+      "inli": 1.90143,
+      "gmli": 1.96731,
+      "exli": 2.59117,
+      "eraMinus": 90.3183
+     },
+     "team": {
+      "id": 113,
+      "name": "Cincinnati Reds",
+      "link": "/api/v1/teams/113"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 142,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2019",
+     "stat": {
+      "fip": 10.4141,
+      "xfip": 10.0946,
+      "fipMinus": 247.929,
+      "ra9War": -0.196024,
+      "rar": -1.11658,
+      "war": -0.101129,
+      "sd": 0.0,
+      "md": 1.0,
+      "pli": 0.188231,
+      "inli": 0.1211,
+      "gmli": 0.0588,
+      "exli": 0.0392,
+      "eraMinus": 382.42
+     },
+     "team": {
+      "id": 137,
+      "name": "San Francisco Giants",
+      "link": "/api/v1/teams/137"
+     },
+     "player": {
+      "id": 519381,
+      "fullName": "Pat Venditte",
+      "link": "/api/v1/people/519381",
+      "firstName": "Pat",
+      "lastName": "Venditte",
+      "nameSlug": "pat-venditte-519381"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 609,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

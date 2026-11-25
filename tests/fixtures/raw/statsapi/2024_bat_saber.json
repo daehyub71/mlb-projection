@@ -1,0 +1,332 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 6,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.430549,
+      "wRaa": 70.8202,
+      "wRc": 156.331,
+      "wRcPlus": 179.437,
+      "rar": 86.4327,
+      "war": 8.92657,
+      "batting": 69.4384,
+      "fielding": 0.0,
+      "baseRunning": 9.76339,
+      "positional": -17.1759,
+      "wLeague": 2.30366,
+      "replacement": 22.1032,
+      "spd": 8.10565,
+      "ubr": 1.89999985694885,
+      "wGdp": 2.2,
+      "wSb": 8.7988
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 3,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.351508,
+      "wRaa": 19.7255,
+      "wRc": 89.0935,
+      "wRcPlus": 129.97,
+      "rar": 51.9168,
+      "war": 5.36185,
+      "batting": 21.2518,
+      "fielding": 4.85734,
+      "baseRunning": 3.7393,
+      "positional": 2.26909,
+      "wLeague": 1.86877,
+      "replacement": 17.9305,
+      "spd": 6.1325,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.958966
+     },
+     "team": {
+      "id": 135,
+      "name": "San Diego Padres",
+      "link": "/api/v1/teams/135"
+     },
+     "player": {
+      "id": 701538,
+      "fullName": "Jackson Merrill",
+      "link": "/api/v1/people/701538",
+      "firstName": "Jackson",
+      "lastName": "Merrill",
+      "nameSlug": "jackson-merrill-701538"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 14,
+     "position": {
+      "code": "8",
+      "name": "Outfielder",
+      "type": "Outfielder",
+      "abbreviation": "CF"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.364028,
+      "wRaa": 26.0478,
+      "wRc": 96.3516,
+      "wRcPlus": 137.294,
+      "rar": 41.3114,
+      "war": 4.26655,
+      "batting": 25.6457,
+      "fielding": -4.26419,
+      "baseRunning": -0.908004,
+      "positional": 1.08768,
+      "wLeague": 1.57778,
+      "replacement": 18.1724,
+      "spd": 4.66739,
+      "ubr": -1.29999995231628,
+      "wGdp": -0.5,
+      "wSb": -0.4418
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 27,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.326066,
+      "wRaa": 5.28093,
+      "wRc": 53.5929,
+      "wRcPlus": 105.698,
+      "rar": 18.2505,
+      "war": 1.88487,
+      "batting": 2.81404,
+      "fielding": 2.15622,
+      "baseRunning": -0.469469,
+      "positional": 7.47028,
+      "wLeague": 1.30152,
+      "replacement": 12.4879,
+      "spd": 2.88638,
+      "ubr": -1.49999995529652,
+      "wGdp": 0.2,
+      "wSb": -1.19136
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 140,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.28512,
+      "wRaa": -7.92639,
+      "wRc": 38.046,
+      "wRcPlus": 81.5528,
+      "rar": 5.95135,
+      "war": 0.61464,
+      "batting": -8.6693,
+      "fielding": 1.00279,
+      "baseRunning": 0.480805,
+      "positional": 0.0154317,
+      "wLeague": 1.23849,
+      "replacement": 11.8831,
+      "spd": 1.55867,
+      "ubr": 3.29999995231628,
+      "wGdp": -1.0,
+      "wSb": -0.647179
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 255,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    },
+    {
+     "season": "2024",
+     "stat": {
+      "woba": 0.275967,
+      "wRaa": -9.61018,
+      "wRc": 31.21518,
+      "wRcPlus": 78.95945272206303,
+      "rar": -8.8358,
+      "war": -0.91255,
+      "batting": -8.4021,
+      "fielding": -0.0279668,
+      "baseRunning": -2.543386,
+      "positional": -9.33127,
+      "wLeague": 0.916216,
+      "replacement": 10.55271,
+      "spd": 1.99373,
+      "ubr": -3.39999985694885,
+      "wGdp": -1.8,
+      "wSb": -0.031394
+     },
+     "team": {
+      "id": 110,
+      "name": "Baltimore Orioles",
+      "link": "/api/v1/teams/110"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 2,
+     "rank": 722,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

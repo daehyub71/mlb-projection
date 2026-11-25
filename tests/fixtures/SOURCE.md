@@ -12,11 +12,13 @@ MLB 자료 고지(SPEC E13): "Only individual, non-commercial, non-bulk use of t
 | `raw/statsapi/people_000.json`(타자 8명)·`people_001.json`(투수 6명) | `contracts.statsapi_people_url(ids)` 1회 | 2026-11-24 08:09 KST |
 | `raw/savant/{season}_{batter\|pitcher}.csv` (2019~2026) | `contracts.savant_leaderboard_url(season, role)` | 2026-11-24 08:06~08:08 KST |
 | `raw/savant/{season}_{oaa\|frv}.csv` (2022~2026) | `contracts.savant_oaa_url`·`savant_frv_url` | 2026-11-24 08:06~08:08 KST |
+| `raw/statsapi/{season}_{bat\|pit}_saber.json` (2019~2026, v0.5 WAR) | `contracts.statsapi_saber_url(season, role)` | 2026-11-25 17:32~17:33 KST |
 
 ## 잘라 낸 방법
 
 - **API JSON**: `stats[0].splits`에서 아래 선수의 행만 남겼다. `totalSplits`는 남긴 행 수로 바꿨다. 나머지 필드는 원형 그대로다.
 - **Savant CSV**: 첫 줄(BOM 포함 머리글)과 아래 선수의 줄을 **원문 그대로** 남겼다. 값의 따옴표 표기(`".274"` 등)도 원본과 같다.
+- **세이버메트릭스(v0.5)**: 같은 시즌 `{season}_{role}.json` 픽스처에 있는 선수의 행만 남기고 `totalSplits`를 남긴 행 수로 바꿨다(모든 시즌에서 빠진 선수 0). 잘라 냈으므로 리그 WAR 합 항등식(F2 ⑦)은 성립하지 않는다 — 테스트는 기준값을 인자로 준다.
 - **선수 정보**: 14명을 한 번에 받아 타자·투수 두 파일로 나눴다(파일당 12명 이하).
 - 잘라 낸 뒤에도 F2 ③(타자 Savant = API PA>0)과 ④(Savant 투수 ⊆ API 투수)가 모든 시즌에서 성립하는 것을 확인했다.
 

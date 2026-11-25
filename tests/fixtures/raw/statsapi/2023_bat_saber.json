@@ -1,0 +1,384 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 7,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.433482,
+      "wRaa": 57.2628,
+      "wRc": 130.248,
+      "wRcPlus": 180.221,
+      "rar": 65.9734,
+      "war": 6.5787,
+      "batting": 57.5767,
+      "fielding": 0.0,
+      "baseRunning": 2.4749,
+      "positional": -14.4753,
+      "wLeague": 1.79902,
+      "replacement": 18.598,
+      "spd": 6.61315,
+      "ubr": 1.69999992847443,
+      "wGdp": 1.4,
+      "wSb": 0.342584
+     },
+     "team": {
+      "id": 108,
+      "name": "Los Angeles Angels",
+      "link": "/api/v1/teams/108"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 5,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.359171,
+      "wRaa": 22.2262,
+      "wRc": 102.156,
+      "wRcPlus": 125.653,
+      "rar": 35.1748,
+      "war": 3.50755,
+      "batting": 20.1638,
+      "fielding": -6.1463,
+      "baseRunning": -3.1868,
+      "positional": 2.00617,
+      "wLeague": 1.97021,
+      "replacement": 20.3678,
+      "spd": 3.03212,
+      "ubr": -2.0,
+      "wGdp": -1.2,
+      "wSb": -0.600962
+     },
+     "team": {
+      "id": 111,
+      "name": "Boston Red Sox",
+      "link": "/api/v1/teams/111"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 54,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.323985,
+      "wRaa": 2.51615,
+      "wRc": 68.312,
+      "wRcPlus": 100.865,
+      "rar": 20.4068,
+      "war": 2.03492,
+      "batting": 0.578436,
+      "fielding": 4.25206,
+      "baseRunning": -0.401834,
+      "positional": 9.79081,
+      "wLeague": 1.59117,
+      "replacement": 16.7662,
+      "spd": 6.41159,
+      "ubr": -2.70000004768372,
+      "wGdp": 1.0,
+      "wSb": 0.234341
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 126,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.324727,
+      "wRaa": 2.57979,
+      "wRc": 62.1616,
+      "wRcPlus": 105.774,
+      "rar": 5.83961,
+      "war": 0.58231,
+      "batting": 3.38337,
+      "fielding": -1.01928,
+      "baseRunning": -1.26911,
+      "positional": -11.9067,
+      "wLeague": 1.46865,
+      "replacement": 15.1827,
+      "spd": 0.988445,
+      "ubr": -0.5,
+      "wGdp": -1.3,
+      "wSb": -0.862974
+     },
+     "team": {
+      "id": 145,
+      "name": "Chicago White Sox",
+      "link": "/api/v1/teams/145"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 261,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.0,
+      "wRaa": -0.528823,
+      "wRc": -0.285135,
+      "wRcPlus": -100.0,
+      "rar": -0.566848,
+      "war": -0.05652,
+      "batting": -0.526813,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": -0.108025,
+      "wLeague": 0.00589324,
+      "replacement": 0.0620969,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 138,
+      "name": "St. Louis Cardinals",
+      "link": "/api/v1/teams/138"
+     },
+     "player": {
+      "id": 425794,
+      "fullName": "Adam Wainwright",
+      "link": "/api/v1/people/425794",
+      "firstName": "Adam",
+      "lastName": "Wainwright",
+      "nameSlug": "adam-wainwright-425794"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 548,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.29901,
+      "wRaa": -5.95036,
+      "wRc": 39.132,
+      "wRcPlus": 87.9562,
+      "rar": -7.16177,
+      "war": -0.71415,
+      "batting": -5.33945,
+      "fielding": 0.13664,
+      "baseRunning": -4.18491,
+      "positional": -10.3732,
+      "wLeague": 1.11125,
+      "replacement": 11.4879,
+      "spd": 0.458123,
+      "ubr": -2.59999978542328,
+      "wGdp": -1.6,
+      "wSb": -0.731987
+     },
+     "team": {
+      "id": 116,
+      "name": "Detroit Tigers",
+      "link": "/api/v1/teams/116"
+     },
+     "player": {
+      "id": 408234,
+      "fullName": "Miguel Cabrera",
+      "link": "/api/v1/people/408234",
+      "firstName": "Miguel",
+      "lastName": "Cabrera",
+      "nameSlug": "miguel-cabrera-408234"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 738,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2023",
+     "stat": {
+      "woba": 0.281846,
+      "wRaa": -15.41135,
+      "wRc": 46.4855,
+      "wRcPlus": 72.78367736220473,
+      "rar": -11.41398,
+      "war": -1.13818,
+      "batting": -16.61144,
+      "fielding": -14.0334,
+      "baseRunning": -0.925076,
+      "positional": 2.86808235,
+      "wLeague": 1.515214,
+      "replacement": 15.77267,
+      "spd": 3.171095,
+      "ubr": -0.200000047683716,
+      "wGdp": -2.4,
+      "wSb": -0.485052
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 2,
+     "rank": 763,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

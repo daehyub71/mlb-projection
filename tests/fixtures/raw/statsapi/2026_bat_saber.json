@@ -1,0 +1,434 @@
+{
+ "copyright": "Copyright 2026 MLB Advanced Media, L.P.  Use of any content on this page acknowledges agreement to the terms posted here http://gdx.mlb.com/components/copyright.txt",
+ "stats": [
+  {
+   "type": {
+    "displayName": "sabermetrics"
+   },
+   "group": {
+    "displayName": "hitting"
+   },
+   "totalSplits": 8,
+   "exemptions": [],
+   "splits": [
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.357151,
+      "wRaa": 23.2618,
+      "wRc": 106.976,
+      "wRcPlus": 129.27,
+      "rar": 52.9759,
+      "war": 5.39369,
+      "batting": 24.0693,
+      "fielding": -2.7258,
+      "baseRunning": 2.54562,
+      "positional": 4.03978,
+      "wLeague": 3.52652,
+      "replacement": 21.5204,
+      "spd": 4.82477,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.475079
+     },
+     "team": {
+      "id": 116,
+      "name": "Detroit Tigers",
+      "link": "/api/v1/teams/116"
+     },
+     "player": {
+      "id": 805808,
+      "fullName": "Kevin McGonigle",
+      "link": "/api/v1/people/805808",
+      "firstName": "Kevin",
+      "lastName": "McGonigle",
+      "nameSlug": "kevin-mcgonigle-805808"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 10,
+     "position": {
+      "code": "6",
+      "name": "Shortstop",
+      "type": "Infielder",
+      "abbreviation": "SS"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.320428,
+      "wRaa": 2.14802,
+      "wRc": 80.7711,
+      "wRcPlus": 105.341,
+      "rar": 41.1891,
+      "war": 4.19363,
+      "batting": 4.2716,
+      "fielding": 6.4322,
+      "baseRunning": 6.66421,
+      "positional": 2.22794,
+      "wLeague": 1.3816,
+      "replacement": 20.2115,
+      "spd": 6.66116,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 2.95514
+     },
+     "team": {
+      "id": 135,
+      "name": "San Diego Padres",
+      "link": "/api/v1/teams/135"
+     },
+     "player": {
+      "id": 701538,
+      "fullName": "Jackson Merrill",
+      "link": "/api/v1/people/701538",
+      "firstName": "Jackson",
+      "lastName": "Merrill",
+      "nameSlug": "jackson-merrill-701538"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 29,
+     "position": {
+      "code": "8",
+      "name": "Outfielder",
+      "type": "Outfielder",
+      "abbreviation": "CF"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.37653,
+      "wRaa": 30.0087,
+      "wRc": 103.185,
+      "wRcPlus": 139.217,
+      "rar": 36.2212,
+      "war": 3.68783,
+      "batting": 29.1926,
+      "fielding": 0.0,
+      "baseRunning": 1.40669,
+      "positional": -14.4753,
+      "wLeague": 1.28588,
+      "replacement": 18.8113,
+      "spd": 5.12788,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0695036
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 660271,
+      "fullName": "Shohei Ohtani",
+      "link": "/api/v1/people/660271",
+      "firstName": "Shohei",
+      "lastName": "Ohtani",
+      "nameSlug": "shohei-ohtani-660271"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 40,
+     "position": {
+      "code": "Y",
+      "name": "Two-Way Player",
+      "type": "Two-Way Player",
+      "abbreviation": "TWP"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.367236,
+      "wRaa": 25.9842,
+      "wRc": 100.937,
+      "wRcPlus": 135.504,
+      "rar": 33.913,
+      "war": 3.45283,
+      "batting": 27.0701,
+      "fielding": -0.476791,
+      "baseRunning": -0.581246,
+      "positional": -12.684,
+      "wLeague": 1.31709,
+      "replacement": 19.2679,
+      "spd": 1.82894,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.768659
+     },
+     "team": {
+      "id": 137,
+      "name": "San Francisco Giants",
+      "link": "/api/v1/teams/137"
+     },
+     "player": {
+      "id": 646240,
+      "fullName": "Rafael Devers",
+      "link": "/api/v1/people/646240",
+      "firstName": "Rafael",
+      "lastName": "Devers",
+      "nameSlug": "rafael-devers-646240"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 52,
+     "position": {
+      "code": "3",
+      "name": "First Base",
+      "type": "Infielder",
+      "abbreviation": "1B"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.275357,
+      "wRaa": -15.4933,
+      "wRc": 39.8034,
+      "wRcPlus": 67.929,
+      "rar": 6.66819,
+      "war": 0.67892,
+      "batting": -18.04,
+      "fielding": 0.348009,
+      "baseRunning": 1.21706,
+      "positional": 9.07636,
+      "wLeague": 0.971694,
+      "replacement": 14.215,
+      "spd": 3.48591,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0149011
+     },
+     "team": {
+      "id": 143,
+      "name": "Philadelphia Phillies",
+      "link": "/api/v1/teams/143"
+     },
+     "player": {
+      "id": 592663,
+      "fullName": "J.T. Realmuto",
+      "link": "/api/v1/people/592663",
+      "firstName": "J.T.",
+      "lastName": "Realmuto",
+      "nameSlug": "j-t-realmuto-592663"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 261,
+     "position": {
+      "code": "2",
+      "name": "Catcher",
+      "type": "Catcher",
+      "abbreviation": "C"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "wRaa": 0.0,
+      "wRc": 0.0,
+      "rar": 0.0,
+      "war": 0.0,
+      "batting": 0.0,
+      "fielding": 0.0,
+      "baseRunning": 0.0,
+      "positional": 0.0,
+      "wLeague": 0.0,
+      "replacement": 0.0,
+      "spd": 0.142857,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": 0.0
+     },
+     "team": {
+      "id": 144,
+      "name": "Atlanta Braves",
+      "link": "/api/v1/teams/144"
+     },
+     "player": {
+      "id": 628452,
+      "fullName": "Raisel Iglesias",
+      "link": "/api/v1/people/628452",
+      "firstName": "Raisel",
+      "lastName": "Iglesias",
+      "nameSlug": "raisel-iglesias-628452"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 423,
+     "position": {
+      "code": "1",
+      "name": "Pitcher",
+      "type": "Pitcher",
+      "abbreviation": "P"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.288728,
+      "wRaa": -0.783103,
+      "wRc": 3.36119,
+      "wRcPlus": 82.9961,
+      "rar": -0.906462,
+      "war": -0.09229,
+      "batting": -0.692205,
+      "fielding": 0.0,
+      "baseRunning": -0.481982,
+      "positional": -0.972222,
+      "wLeague": 0.17458,
+      "replacement": 1.06537,
+      "spd": 0.559524,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.0688352
+     },
+     "team": {
+      "id": 141,
+      "name": "Toronto Blue Jays",
+      "link": "/api/v1/teams/141"
+     },
+     "player": {
+      "id": 650391,
+      "fullName": "Eloy Jiménez",
+      "link": "/api/v1/people/650391",
+      "firstName": "Eloy",
+      "lastName": "Jiménez",
+      "nameSlug": "eloy-jimenez-650391"
+     },
+     "league": {
+      "id": 103,
+      "name": "American League",
+      "link": "/api/v1/league/103"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 564,
+     "position": {
+      "code": "10",
+      "name": "Designated Hitter",
+      "type": "Hitter",
+      "abbreviation": "DH"
+     }
+    },
+    {
+     "season": "2026",
+     "stat": {
+      "woba": 0.292852,
+      "wRaa": -1.82809,
+      "wRc": 9.5391,
+      "wRcPlus": 83.094,
+      "rar": -1.30324,
+      "war": -0.13269,
+      "batting": -1.95488,
+      "fielding": -0.841644,
+      "baseRunning": -1.03305,
+      "positional": -0.595565,
+      "wLeague": 0.199749,
+      "replacement": 2.92215,
+      "spd": 1.79058,
+      "ubr": 0.0,
+      "wGdp": 0.0,
+      "wSb": -0.103253
+     },
+     "team": {
+      "id": 119,
+      "name": "Los Angeles Dodgers",
+      "link": "/api/v1/teams/119"
+     },
+     "player": {
+      "id": 571771,
+      "fullName": "Enrique Hernández",
+      "link": "/api/v1/people/571771",
+      "firstName": "Enrique",
+      "lastName": "Hernández",
+      "nameSlug": "enrique-hernandez-571771"
+     },
+     "league": {
+      "id": 104,
+      "name": "National League",
+      "link": "/api/v1/league/104"
+     },
+     "sport": {
+      "id": 1,
+      "link": "/api/v1/sports/1",
+      "name": "Major League Baseball"
+     },
+     "numTeams": 1,
+     "rank": 584,
+     "position": {
+      "code": "5",
+      "name": "Third Base",
+      "type": "Infielder",
+      "abbreviation": "3B"
+     }
+    }
+   ],
+   "splitsTiedWithOffset": [],
+   "splitsTiedWithLimit": [],
+   "playerPool": "ALL"
+  }
+ ]
+}

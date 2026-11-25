@@ -2,7 +2,9 @@
 
 **English** | [한국어](README_KO.md)
 
-> Work in progress. These are fan-made projections for fun. They are not betting advice and come with no guarantee.
+**Live site: https://mlb-projection.vercel.app**
+
+> Fan-made projections for fun. They are not betting advice and come with no guarantee.
 
 Projects the 2027 season for every MLB player who appeared in the last five seasons (2022–2026):
 
@@ -16,8 +18,20 @@ Every projection is shown next to a league-average baseline. The models are also
 | Milestone | Scope | Status |
 |---|---|---|
 | M0–M4 | Setup, collection, cleaning, models, backtests, 2027 projections | done |
-| M5 | Design (theme and mockups) | in progress |
-| M6–M7 | Web app, deployment | planned |
+| M5–M6 | Design (theme, mockups) and web app | done |
+| M7 | Deployment | done — https://mlb-projection.vercel.app |
+
+## Screenshots
+
+| Projections table | Player detail |
+|---|---|
+| ![Projections table: hero, filters and the 2027 OPS ranking with ±ranges](docs/images/screenshot-home.jpg) | ![Player detail: projection cards, error notes and a season chart with the 2027 range](docs/images/screenshot-player.jpg) |
+
+| Backtest | Mobile |
+|---|---|
+| ![Validation page: 2026 final-test cards for six metrics, the rerun note and the ±range table](docs/images/screenshot-validation.jpg) | ![Mobile projections: player cards](docs/images/screenshot-mobile.jpg) |
+
+Screenshots are taken with player photos turned off (initials instead); the live site loads official photos from the MLB image server.
 
 ## Backtest results
 
@@ -64,6 +78,17 @@ venv/bin/python -m mlbproj export       # 2027 projections -> data/out CSV + web
 
 cd web && npm ci && npm run lint && npm test && npm run build
 ```
+
+### Deployment
+
+The static build is uploaded to Vercel directly; the web JSON (per-player records) is never committed to any repository.
+
+```bash
+venv/bin/python -m mlbproj export
+VERCEL_TOKEN=... web/scripts/deploy.sh   # lint, tests, build, Astryx doctor, then upload
+```
+
+Set `NEXT_PUBLIC_PLAYER_PHOTOS=off` at build time to switch player photos off.
 
 ## Structure
 

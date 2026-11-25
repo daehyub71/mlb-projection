@@ -2,7 +2,9 @@
 
 [English](README.md) | **한국어**
 
-> 만드는 중입니다. 재미로 보는 팬 예측이고, 실제 성적을 보장하지 않습니다. 베팅 조언이 아닙니다.
+**사이트: https://mlb-projection.vercel.app**
+
+> 재미로 보는 팬 예측이고, 실제 성적을 보장하지 않습니다. 베팅 조언이 아닙니다.
 
 최근 5시즌(2022~2026)에 MLB 기록이 있는 선수 전원의 2027 성적을 예측합니다.
 
@@ -16,8 +18,20 @@
 | 마일스톤 | 범위 | 상태 |
 |---|---|---|
 | M0~M4 | 기반 설정, 수집, 정제, 모델, 과거 검증, 2027 예측 | 완료 |
-| M5 | 디자인(테마·시안) | 진행 중 |
-| M6~M7 | 웹, 배포 | 예정 |
+| M5~M6 | 디자인(테마·시안), 웹 | 완료 |
+| M7 | 배포 | 완료 — https://mlb-projection.vercel.app |
+
+## 화면
+
+| 예측표 | 선수 상세 |
+|---|---|
+| ![예측표: 히어로, 필터, ±범위가 붙은 2027 OPS 순위](docs/images/screenshot-home.jpg) | ![선수 상세: 예측 카드, 오차 안내, 2027 범위가 있는 시즌별 차트](docs/images/screenshot-player.jpg) |
+
+| 검증 | 모바일 |
+|---|---|
+| ![검증: 2026 최종 검증 카드 6개, 다시 돌린 이유, ±범위 표](docs/images/screenshot-validation.jpg) | ![모바일 예측표: 선수 카드](docs/images/screenshot-mobile.jpg) |
+
+화면 캡처는 선수 사진을 끈 상태(이니셜)로 찍었습니다. 실제 사이트는 MLB 이미지 서버에서 공식 사진을 불러옵니다.
 
 ## 과거 검증 결과
 
@@ -64,6 +78,17 @@ venv/bin/python -m mlbproj export       # 2027 예측 → data/out CSV + 웹 JSO
 
 cd web && npm ci && npm run lint && npm test && npm run build
 ```
+
+### 배포
+
+정적 빌드를 Vercel에 직접 올립니다. 웹 JSON(선수별 기록)은 어느 저장소에도 넣지 않습니다.
+
+```bash
+venv/bin/python -m mlbproj export
+VERCEL_TOKEN=... web/scripts/deploy.sh   # 린트·테스트·빌드·Astryx 진단 뒤 업로드
+```
+
+빌드할 때 `NEXT_PUBLIC_PLAYER_PHOTOS=off`를 주면 선수 사진을 끕니다.
 
 ## 구조
 

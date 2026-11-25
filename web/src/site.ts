@@ -14,6 +14,8 @@ export const SITE_DESCRIPTION = "최근 5시즌 기록으로 만든 2027 MLB 타
 export const DISCLAIMER_SHORT = "재미로 보는 예측 — 실제 성적을 보장하지 않습니다";
 export const SOURCES_LINE = "출처: MLB Stats API, Baseball Savant";
 export const REPO_URL = "https://github.com/daehyub71/mlb-projection";
+/** 배포 주소 (M7, SPEC D32) — 공유 미리보기 이미지 주소의 기준(metadataBase) */
+export const SITE_URL = "https://mlb-projection.vercel.app";
 
 /** 예측표 한 쪽의 행 수 (DS4) */
 export const PAGE_SIZE = 50;

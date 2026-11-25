@@ -182,3 +182,12 @@ describe("시즌 나이 (mlbproj/age.py와 같은 경우)", () => {
     expect(seasonAge("07/05/1994", 2027)).toBeNull();
   });
 });
+
+describe("배포 주소 (M7)", () => {
+  it("공유 미리보기 주소의 기준(metadataBase)이 배포 주소다 — localhost가 아니다", async () => {
+    const { SITE_URL } = await import("@/src/site");
+    const { metadata } = await import("@/app/layout");
+    expect(SITE_URL).toBe("https://mlb-projection.vercel.app");
+    expect(String(metadata.metadataBase)).toBe(`${SITE_URL}/`);
+  });
+});

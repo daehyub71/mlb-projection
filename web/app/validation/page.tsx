@@ -1,19 +1,9 @@
-import { Heading } from "@astryxdesign/core/Heading";
-import { Text } from "@astryxdesign/core/Text";
-import { VStack } from "@astryxdesign/core/VStack";
-import { SiteFooter } from "../components/SiteFooter";
-import { SiteHeader } from "../components/SiteHeader";
+// 검증 (SA-4, SPEC F15) — 서버 쪽 껍데기. 화면 제목(metadata)만 내보내고, 데이터를 읽는 화면은 클라이언트 보기가 그린다.
+import type { Metadata } from "next";
+import { ValidationView } from "./ValidationView";
 
-// M6 계약 골격 — 레인 C가 검증(SA-4, F15)으로 바꾼다
+export const metadata: Metadata = { title: "검증" };
+
 export default function ValidationPage() {
-  return (
-    <VStack gap={0}>
-      <SiteHeader active="validation" />
-      <VStack as="main" gap={3} padding={6}>
-        <Heading level={1}>예측은 얼마나 맞았나</Heading>
-        <Text color="secondary">검증 화면을 준비하고 있습니다.</Text>
-      </VStack>
-      <SiteFooter />
-    </VStack>
-  );
+  return <ValidationView />;
 }

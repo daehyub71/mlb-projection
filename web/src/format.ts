@@ -119,7 +119,9 @@ export function fmtRuns(v: number | null | undefined): string {
 /** WAR 평균 오차(승): 1 미만은 ".457", 1 이상은 "1.48" (DESIGN SA-8) */
 export function fmtWarMae(v: number | null | undefined): string {
   if (v == null || !Number.isFinite(v)) return DASH;
-  return v < 1 ? v.toFixed(3).replace(/^0\./, ".") : v.toFixed(2);
+  // JSON은 4자리로 반올림돼 있다(0.30953 → 0.3095) — 2진수 오차로 0.3095가 .309로 내려가지 않게 반올림 전에 아주 작은 값을 더한다
+  const nudged = v + 1e-9;
+  return v < 1 ? nudged.toFixed(3).replace(/^0\./, ".") : nudged.toFixed(2);
 }
 
 const WAR_ROLE_LABEL: Record<WarRoles, string> = { bat: "타", pit: "투", both: "투타" };

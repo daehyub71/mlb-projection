@@ -194,6 +194,8 @@ describe("WAR 계약 (v0.5, SPEC D33~D42)", () => {
   it("WAR 평균 오차 — 1 미만은 .457, 1 이상은 1.48 (DESIGN SA-8)", () => {
     expect(fmtWarMae(0.4567)).toBe(".457");
     expect(fmtWarMae(0.31)).toBe(".310");
+    expect(fmtWarMae(0.3095)).toBe(".310"); // 원본 0.30953 → JSON 0.3095 → .310 (이중 반올림으로 .309가 되지 않는다)
+    expect(fmtWarMae(1.0815)).toBe("1.08");
     expect(fmtWarMae(1.4801)).toBe("1.48");
     expect(fmtWarMae(2.2)).toBe("2.20");
     expect(fmtWarMae(null)).toBe("—");

@@ -77,7 +77,7 @@ function warColumns(seasons: { target: number; prev: number }): TableColumn<WarV
     {
       key: "name",
       header: "선수",
-      width: proportional(3, { minWidth: 190 }),
+      width: proportional(3, { minWidth: 178 }),
       renderCell: (v) => <WarPlayerCell view={v} />,
     },
     {
@@ -102,7 +102,7 @@ function warColumns(seasons: { target: number; prev: number }): TableColumn<WarV
     {
       key: "prevWar",
       header: `${seasons.prev} WAR`,
-      width: pixel(88),
+      width: pixel(100),
       align: "end",
       renderCell: (v) => <Figure isMuted>{fmtWar(v.prevWar)}</Figure>,
     },

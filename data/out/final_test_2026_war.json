@@ -1,0 +1,110 @@
+{
+ "target_season": 2026,
+ "ran_at": "2026-11-25T11:21:34Z",
+ "params_sha256": "b23d3ca916cf887227df5c383855d3eca870172dafca6a332728ce263a2d2664",
+ "war_params_sha256": "30394cc567630412ddd2d75be9d0933f3407b7ec885d01d1019659d11234195f",
+ "commit": "e84f1a98ebe3e5f9eac47b56bfa399543d41a883",
+ "reruns": [],
+ "rows": [
+  {
+   "target_season": 2026,
+   "role": "bat",
+   "metric": "war",
+   "group": "all",
+   "n": 1160,
+   "mae": 0.45655195995636455,
+   "baseline_mae_prev": 0.5635407500000001,
+   "baseline_mae_league": 0.512963282261668
+  },
+  {
+   "target_season": 2026,
+   "role": "bat",
+   "metric": "war",
+   "group": "seasons_1_2",
+   "n": 535,
+   "mae": 0.25956411117315403,
+   "baseline_mae_prev": 0.29098542056074767,
+   "baseline_mae_league": 0.2984335021865008
+  },
+  {
+   "target_season": 2026,
+   "role": "bat",
+   "metric": "war",
+   "group": "seasons_3_5",
+   "n": 625,
+   "mae": 0.6251735585147928,
+   "baseline_mae_prev": 0.7968481119999999,
+   "baseline_mae_league": 0.6966007740060112
+  },
+  {
+   "target_season": 2026,
+   "role": "bat",
+   "metric": "war",
+   "group": "war2plus",
+   "n": 115,
+   "mae": 1.7270709335587069,
+   "baseline_mae_prev": 1.8166899130434784,
+   "baseline_mae_league": 2.2039423356731356
+  },
+  {
+   "target_season": 2026,
+   "role": "bat",
+   "metric": "war_full",
+   "group": "regulars",
+   "n": 128,
+   "mae": 1.4785271799290054,
+   "baseline_mae_prev": 1.7377411730958052,
+   "baseline_mae_league": 1.4985906923625332
+  },
+  {
+   "target_season": 2026,
+   "role": "pit",
+   "metric": "war",
+   "group": "all",
+   "n": 1530,
+   "mae": 0.3095267967005977,
+   "baseline_mae_prev": 0.35892893221856215,
+   "baseline_mae_league": 0.3469901761528773
+  },
+  {
+   "target_season": 2026,
+   "role": "pit",
+   "metric": "war",
+   "group": "seasons_1_2",
+   "n": 786,
+   "mae": 0.20423947767528802,
+   "baseline_mae_prev": 0.22377088206106865,
+   "baseline_mae_league": 0.23103336270908773
+  },
+  {
+   "target_season": 2026,
+   "role": "pit",
+   "metric": "war",
+   "group": "seasons_3_5",
+   "n": 744,
+   "mae": 0.42075775470314253,
+   "baseline_mae_prev": 0.5017168723043011,
+   "baseline_mae_league": 0.46949293874268716
+  },
+  {
+   "target_season": 2026,
+   "role": "pit",
+   "metric": "war",
+   "group": "war2plus",
+   "n": 81,
+   "mae": 1.7987658393350607,
+   "baseline_mae_prev": 1.5499415456790124,
+   "baseline_mae_league": 2.3726134594491266
+  },
+  {
+   "target_season": 2026,
+   "role": "pit",
+   "metric": "war_full",
+   "group": "regulars",
+   "n": 62,
+   "mae": 1.076405581201798,
+   "baseline_mae_prev": 1.2361895010770867,
+   "baseline_mae_league": 1.525403372850843
+  }
+ ]
+}

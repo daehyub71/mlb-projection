@@ -1,6 +1,7 @@
 # PLAN.md — mlb-projection
 
 > **상태: v0.3** (2026-11-25) — **SPEC v0.5 WAR 추가**를 반영해 모듈(§2-2 · §2-3 · §2-4)과 마일스톤 M8~M10(§3)을 더했다. 아래는 v0.2.3까지의 기록이다.
+> v0.3.1 (M8): WAR 정제 표는 별도 표 `war_seasons`(`mlbproj/clean/war.py`), 검사는 `validate_war.py`(보고서 따로), 모델 `models/war.py`, 검증 · 봉인 · war.json은 `war_eval.py`, 명령은 `cli_war.py`. `tune-war` 보고는 대상 전원 MAE만 — 주전급 풀타임 비율은 `backtest-war`(같은 명령이 이어서 씀)에 있다. war.json은 `export.write_web`을 쓰지 않는다(선수 상세를 지운다).
 > v0.2.3 (2026-11-25). v0.1(같은 날 사용자 확인) 뒤 SPEC v0.3의 D26·D27을 반영해 패키지(§6)와 리스크(§7)를 고쳤다. v0.2.1은 M3에서 정한 조정 순서(§2-3, SPEC D28)와 M4 확장 모델·채택표·웹 데이터 커밋 보류를 적었다. v0.2.3은 배포 방식을 로컬 빌드 직접 업로드로 바꿨다(SPEC D32). v0.2.2는 내보내기에 과거 오차 80% 범위(SPEC D29, `data/out/bands.csv`·웹 JSON `bands`)를 더했다. 기준 문서는 `docs/SPEC.md` v0.5다. 문서끼리 다르면 SPEC이 기준이다.
 > 결정 P1~P4는 2026-11-23 사용자 답이다. 작업 항목과 진도는 `docs/TASKS.md`에 있다.
 

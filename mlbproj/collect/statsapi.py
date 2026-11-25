@@ -22,8 +22,10 @@ from mlbproj.contracts import (
     ROLES,
     Role,
     raw_people_path,
+    raw_saber_path,
     raw_statsapi_path,
     statsapi_people_url,
+    statsapi_saber_url,
     statsapi_stats_url,
 )
 
@@ -236,7 +238,9 @@ def saber_splits(raw_dir: Path, season: int, role: Role) -> list[dict[str, Any]]
     Raises:
         FileNotFoundError: 원본이 없을 때.
     """
-    raise NotImplementedError
+    doc = read_json(raw_dir, raw_saber_path(season, role))
+    splits: list[dict[str, Any]] = doc["stats"][0]["splits"]
+    return splits
 
 
 def collect_saber(
@@ -247,4 +251,11 @@ def collect_saber(
     `collect_season_stats`와 같은 규칙이다 — 캐시가 있으면 요청하지 않고(force면 다시), 응답은
     `check_stats_body`(형식·totalSplits = 행 수)로 검사한 뒤 저장한다.
     """
-    raise NotImplementedError
+    return fetch_to_raw(
+        getter,
+        raw_dir,
+        raw_saber_path(season, role),
+        statsapi_saber_url(season, role),
+        check=check_stats_body,
+        force=force,
+    )

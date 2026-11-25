@@ -17,6 +17,7 @@ from mlbproj.clean.batting import build_batting
 from mlbproj.clean.fielding import build_fielding
 from mlbproj.clean.pitching import build_pitching
 from mlbproj.clean.players import build_players, people_records
+from mlbproj.cli_war import WAR_COMMANDS, add_war_parsers, run_war_command
 from mlbproj.cohort import build_cohort
 from mlbproj.collect import savant, statsapi
 from mlbproj.collect.http import Fetcher, FetchError
@@ -588,6 +589,7 @@ def build_parser() -> argparse.ArgumentParser:
     refresh.add_argument("--out-dir", type=Path, default=c.OUT_DIR)
     refresh.add_argument("--web-dir", type=Path, default=c.WEB_DATA_DIR)
     refresh.add_argument("--force", action="store_true", help="캐시가 있어도 다시 받는다")
+    add_war_parsers(sub, parse_seasons)  # v0.5 WAR 명령 (cli_war.py)
     return parser
 
 
@@ -696,6 +698,8 @@ def main(argv: list[str] | None = None, *, getter: Getter | None = None) -> int:
         print(f"후보 결과 → {args.out_dir / 'tune_report.csv'}")
         return 0
 
+    if args.command in WAR_COMMANDS:
+        return run_war_command(args, getter)
     if args.command == "final-test":
         return _final_test_command(args)
     if args.command == "export":

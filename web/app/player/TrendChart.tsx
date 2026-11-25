@@ -57,14 +57,27 @@ function finite(v: number | null | undefined): v is number {
  * 시즌 사이 빈 해도 칸을 두어(선이 끊긴다) 축이 실제 시간 간격을 지키게 한다.
  * 마지막 기록 뒤 예측 직전 해(2026)까지도 빈 칸을 둔다 — 2026 미출전 선수의 2025와 2027 예측이 붙어 보이지 않게.
  */
-function buildRows(points: TrendPoint[], targetSeason: number, projection: number, band: number | null | undefined) {
+function buildRows(
+  points: TrendPoint[],
+  targetSeason: number,
+  projection: number,
+  band: number | null | undefined,
+  cap: number | null,
+) {
   const bySeason = new Map(points.map((p) => [p.season, p.value]));
   const seasons = points.map((p) => p.season);
   const rows: Row[] = [];
+  // 축 상한을 넘는 실제 값 — 칸 이름 → 실제 값 (점은 상한에 그리고 실제 값을 적는다)
+  const clipped = new Map<string, number>();
   if (seasons.length > 0) {
     for (let s = Math.min(...seasons); s <= Math.max(targetSeason - 1, ...seasons); s += 1) {
       const v = bySeason.get(s);
-      rows.push({ [X_KEY]: String(s), [ACTUAL]: finite(v) ? v : null, [PROJ]: null, [HIGH]: null, [LOW]: null });
+      let plotted: number | null = finite(v) ? v : null;
+      if (plotted !== null && cap !== null && plotted > cap) {
+        clipped.set(String(s), plotted);
+        plotted = cap;
+      }
+      rows.push({ [X_KEY]: String(s), [ACTUAL]: plotted, [PROJ]: null, [HIGH]: null, [LOW]: null });
     }
   }
   const targetLabel = `${targetSeason} 예측`;
@@ -75,7 +88,7 @@ function buildRows(points: TrendPoint[], targetSeason: number, projection: numbe
     [HIGH]: finite(band) ? projection + band : null,
     [LOW]: finite(band) ? projection - band : null,
   });
-  return { rows, targetLabel };
+  return { rows, targetLabel, clipped };
 }
 
 function yDomain(rows: Row[], league: number | undefined): [number, number] {
@@ -110,6 +123,33 @@ function describe(
   return text;
 }
 
+/** ERA 세로축 상한 = 리그 평균 × 이 값 (2026-11-25 사용자 결정 — 0.1이닝 ERA 108 같은 시즌이 축을 늘리지 않게) */
+export const ERA_AXIS_FACTOR = 3;
+
+/** 축 상한에 걸린 시즌 위에 실제 값을 적는다 ("↑ 108.00") */
+function ClippedMarks({ clipped, metric }: { clipped: Map<string, number>; metric: BandMetric }) {
+  const { data, xKey, xScale, yScale } = useChart();
+  return (
+    <>
+      {data
+        .filter((d) => clipped.has(String(d[xKey])))
+        .map((d) => (
+          <text
+            key={String(d[xKey])}
+            x={xPixel(d, xKey, xScale)}
+            y={yScale(d[ACTUAL] as number) - 10}
+            textAnchor="middle"
+            fill={ACTUAL_COLOR}
+            fontSize={12}
+            pointerEvents="none"
+          >
+            {`↑ ${fmtMetric(metric, clipped.get(String(d[xKey])) ?? null)}`}
+          </text>
+        ))}
+    </>
+  );
+}
+
 /** 마지막 실제 시즌에서 2027 예측 점까지 점선 (DESIGN §4 v0.2 규칙) */
 function ProjectionLink({ fromLabel, toLabel }: { fromLabel: string | null; toLabel: string }) {
   const { data, xKey, xScale, yScale } = useChart();
@@ -137,9 +177,10 @@ function ProjectionLink({ fromLabel, toLabel }: { fromLabel: string | null; toLa
 
 export function TrendChart({ metric, points, targetSeason, projection, band, league }: TrendChartProps) {
   const label = METRIC_LABEL[metric];
-  const { rows, targetLabel } = useMemo(
-    () => buildRows(points, targetSeason, projection, band),
-    [points, targetSeason, projection, band],
+  const cap = metric === "era" && finite(league) ? league * ERA_AXIS_FACTOR : null;
+  const { rows, targetLabel, clipped } = useMemo(
+    () => buildRows(points, targetSeason, projection, band, cap),
+    [points, targetSeason, projection, band, cap],
   );
   // 마크 정의는 차트마다 새로 만든다 (Astryx: 한 정의를 여러 Chart에 다시 쓰지 않는다)
   const series = useMemo(
@@ -173,7 +214,7 @@ export function TrendChart({ metric, points, targetSeason, projection, band, lea
         ) : (
           known.map((v) => (
             <Text key={v.key} type="supporting" hasTabularNumbers>
-              {v.label} {fmtMetric(metric, v.value as number)}
+              {v.label} {fmtMetric(metric, v.key === ACTUAL ? (clipped.get(String(xValue)) ?? (v.value as number)) : (v.value as number))}
               {v.key === PROJ && finite(band) ? ` ${fmtBand(metric, band)}` : ""}
             </Text>
           ))
@@ -203,6 +244,7 @@ export function TrendChart({ metric, points, targetSeason, projection, band, lea
       tooltip={{ render: renderTooltip }}
     >
       <ProjectionLink fromLabel={fromLabel} toLabel={targetLabel} />
+      {clipped.size > 0 && <ClippedMarks clipped={clipped} metric={metric} />}
     </Chart>
   );
 }

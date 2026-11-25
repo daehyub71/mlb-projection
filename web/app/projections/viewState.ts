@@ -1,5 +1,5 @@
 // 예측표 보기 상태 ↔ 주소 해시 (DESIGN §1-2) — 선수 상세에서 뒤로 가면 탭·검색·필터·정렬·쪽이 그대로 돌아온다.
-// 해시는 기본값과 다른 것만 적는다: "#role=pit&q=ohtani&all=1&career=1-2&page=3&sort=hr-desc"
+// 해시는 기본값과 다른 것만 적는다: "#role=pit&q=ohtani&all=1&rp=1&career=1-2&page=3&sort=hr-desc" (rp=1: 투수 100이닝 필터 끔)
 // 순수 함수만 둔다. 주소를 읽고 쓰는 일은 ProjectionsHome이 한다.
 import type { CareerGroup, Role } from "@/src/data/types";
 import {
@@ -18,6 +18,8 @@ export interface ViewState {
   query: string;
   /** "2026 출전 선수만" (DS3 — 켠 채 시작) */
   prevOnly: boolean;
+  /** 투수 탭 "예상 100이닝 이상" (켠 채 시작, 2026-11-25 사용자 결정) */
+  startersOnly: boolean;
   career: CareerFilter;
   /** 넓은 화면은 몇 쪽, 좁은 화면은 몇 묶음(50명씩)까지 보였는가 — 1부터 */
   page: number;
@@ -30,6 +32,7 @@ export const DEFAULT_VIEW: ViewState = {
   role: "bat",
   query: "",
   prevOnly: true,
+  startersOnly: true,
   career: "all",
   page: 1,
   batSort: DEFAULT_BAT_SORT,
@@ -37,7 +40,7 @@ export const DEFAULT_VIEW: ViewState = {
 };
 
 const CAREER_CODE: Record<CareerGroup, string> = { seasons_1_2: "1-2", seasons_3_5: "3-5" };
-const VIEW_KEYS = ["role", "q", "all", "career", "page", "sort", "psort"] as const;
+const VIEW_KEYS = ["role", "q", "all", "rp", "career", "page", "sort", "psort"] as const;
 
 function encodeSort(sort: readonly SortEntry[]): string {
   const s = sort[0];
@@ -57,6 +60,7 @@ export function encodeView(view: ViewState): string {
   if (view.role !== DEFAULT_VIEW.role) params.set("role", view.role);
   if (view.query !== "") params.set("q", view.query);
   if (!view.prevOnly) params.set("all", "1");
+  if (!view.startersOnly) params.set("rp", "1");
   if (view.career !== "all") params.set("career", CAREER_CODE[view.career]);
   if (view.page > 1) params.set("page", String(view.page));
   const bat = encodeSort(view.batSort);
@@ -85,6 +89,7 @@ export function decodeView(hash: string): ViewState | null {
     role: params.get("role") === "pit" ? "pit" : "bat",
     query: params.get("q") ?? "",
     prevOnly: params.get("all") !== "1",
+    startersOnly: params.get("rp") !== "1",
     career: career ?? "all",
     page: page >= 1 ? page : 1,
     batSort: decodeSort(params.get("sort"), BAT_SORT_KEYS) ?? DEFAULT_BAT_SORT,

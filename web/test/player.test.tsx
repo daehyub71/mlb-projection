@@ -721,6 +721,27 @@ describe("시즌별 추이 차트 (D26)", () => {
   });
 });
 
+describe("ERA 축 상한 (2026-11-25 사용자 결정)", () => {
+  it("표본이 아주 작은 시즌의 ERA는 축을 늘리지 않고 위쪽 끝에 실제 값을 적는다", async () => {
+    const base = SAMPLE_PIT.pit!;
+    const first = base.history[0]!;
+    const outlier: PlayerDetail = {
+      ...SAMPLE_PIT,
+      pit: { ...base, history: [{ ...first, season: 2024, ip: 0.3333, era: 108 }, ...base.history.slice(1)] },
+    };
+    await openPlayer(outlier);
+    const chart = screen.getByRole("img", { name: /ERA/ });
+    const texts = Array.from(chart.querySelectorAll("text")).map((t) => clean(t.textContent));
+    expect(texts.some((t) => t.includes("↑ 108.00")), `차트 글자: ${texts.join(" | ")}`).toBe(true);
+    // 축 눈금은 리그 평균(4.15)의 3배 언저리까지만 — 108까지 늘어나지 않는다
+    const ticks = texts.filter((t) => /^\d+\.\d\d$/.test(t)).map(Number);
+    expect(ticks.length).toBeGreaterThan(0);
+    expect(Math.max(...ticks)).toBeLessThan(20);
+    // 낭독 설명에는 실제 값이 그대로 남는다
+    expect(describedText(chart)).toContain("108.00");
+  });
+});
+
 describe("최근 5시즌 표 (D14)", () => {
   it("타자 열과 값, 최근 5시즌만 오래된 순으로", async () => {
     await openPlayer(BATTER);

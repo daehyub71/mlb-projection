@@ -138,6 +138,14 @@ export function toPitViews(table: PitTable): PitView[] {
   });
 }
 
+/** 투수 탭 기본 필터 '예상 100이닝 이상' — 불펜 소이닝 투수가 ERA 순위 위를 차지하지 않게 (2026-11-25 사용자 결정) */
+export const PIT_MIN_IP = 100;
+
+/** 예상 이닝이 PIT_MIN_IP 이상인 투수만 (on이 false면 그대로) */
+export function filterStarters<T extends { ip: number }>(rows: readonly T[], on: boolean): T[] {
+  return on ? rows.filter((r) => r.ip >= PIT_MIN_IP) : [...rows];
+}
+
 export interface RowFilter {
   query: string;
   prevOnly: boolean;

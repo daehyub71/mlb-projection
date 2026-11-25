@@ -35,6 +35,8 @@ import { Hero } from "./Hero";
 import { BatList, PitList } from "./MobileList";
 import {
   filterRows,
+  filterStarters,
+  PIT_MIN_IP,
   nextSort,
   pageCount,
   sortRows,
@@ -153,7 +155,7 @@ export function ProjectionsHome() {
   // 같은 해시는 한 번만 푼다 — 정렬 배열이 그릴 때마다 새로 생겨 표 정렬을 다시 하지 않게
   const arrived = useMemo(() => decodeView(arrivedHash), [arrivedHash]);
   const view: ViewState = touched ?? arrived ?? DEFAULT_VIEW;
-  const { role, query, prevOnly, career, page, batSort, pitSort } = view;
+  const { role, query, prevOnly, startersOnly, career, page, batSort, pitSort } = view;
   const [pitRequested, setPitRequested] = useState(false);
   const [attempts, setAttempts] = useState<Record<Role, number>>({ bat: 0, pit: 0 });
   const isNarrow = useMediaQuery(NARROW_QUERY);
@@ -180,8 +182,8 @@ export function ProjectionsHome() {
     [batViews, query, prevOnly, career, batSort],
   );
   const pitVisible = useMemo(
-    () => sortRows(filterRows(pitViews, { query, prevOnly, career }), pitSort),
-    [pitViews, query, prevOnly, career, pitSort],
+    () => sortRows(filterRows(filterStarters(pitViews, startersOnly), { query, prevOnly, career }), pitSort),
+    [pitViews, startersOnly, query, prevOnly, career, pitSort],
   );
 
   const batSortPlugin = useTableSortable<BatView, BatSortKey>({
@@ -217,7 +219,7 @@ export function ProjectionsHome() {
   const hiddenByPrev =
     prevOnly && visible.length === 0 ? filterRows(allViews, { ...filter, prevOnly: false }).length : 0;
 
-  const clearFilters = () => update({ query: "", prevOnly: true, career: "all", page: 1 });
+  const clearFilters = () => update({ query: "", prevOnly: true, startersOnly: true, career: "all", page: 1 });
 
   const goToPage = (next: number) => {
     update({ page: next });
@@ -350,6 +352,13 @@ export function ProjectionsHome() {
                         value={prevOnly}
                         onChange={(checked) => update({ prevOnly: checked, page: 1 })}
                       />
+                      {role === "pit" && (
+                        <Switch
+                          label={`예상 ${PIT_MIN_IP}이닝 이상`}
+                          value={startersOnly}
+                          onChange={(checked) => update({ startersOnly: checked, page: 1 })}
+                        />
+                      )}
                       {/* 사용 시즌 그룹은 넓은 화면만 (SA-1), 좁은 화면은 정렬 선택 (SA-3) */}
                       <VStack className="hidden md:flex">
                         <Selector

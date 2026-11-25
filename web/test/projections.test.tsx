@@ -148,7 +148,8 @@ const PIT_SPECS: PitSpec[] = [
 ];
 const PIT = pitTable(PIT_SPECS.map(pitRow));
 const pitSpec = (id: number): PitSpec => PIT_SPECS.find((s) => s.id === id)!;
-const PIT_DEFAULT = [202, 201, 204, 203]; // 2026 출전만, ERA 낮은 순
+const PIT_DEFAULT = [202, 201, 204]; // 2026 출전만 + 예상 100이닝 이상(203은 41.3이닝), ERA 낮은 순
+const PIT_ALL_IP = [202, 201, 204, 203]; // '예상 100이닝 이상'을 끄면
 
 /** 한 쪽(50행)을 넘는 큰 타자 표 — 10번째마다 2026 미출전, 사용 시즌은 2와 5를 번갈아 */
 function bigBatters(count: number): BatTable {
@@ -339,6 +340,13 @@ function isSelected(el: HTMLElement): boolean {
     (current !== null && current !== "false") ||
     (el instanceof HTMLInputElement && el.checked)
   );
+}
+
+function startersToggle(): HTMLElement {
+  const name = /100이닝/;
+  const found = [...screen.queryAllByRole("switch", { name }), ...screen.queryAllByRole("checkbox", { name })];
+  expect(found.length, '"예상 100이닝 이상" 토글').toBeGreaterThan(0);
+  return found[0]!;
 }
 
 function prevToggle(): HTMLElement {
@@ -636,7 +644,7 @@ describe("투수 탭 (F13)", () => {
     await findTable();
     fireEvent.click(roleTab("투수"));
     await waitFor(() => expect(rowIds(getTable())).toEqual(PIT_DEFAULT), { timeout: 3000 });
-    const table = getTable();
+    let table = getTable();
     const expected = [/^선수/, /^나이/, /^사용 기록/, /^2027 ERA/, /^2027 K[−-]BB%/, /^IP\*/, /^2026 ERA/];
     const texts = headers(table).map((h) => norm(h.textContent));
     expect(texts).toHaveLength(expected.length);
@@ -652,7 +660,10 @@ describe("투수 탭 (F13)", () => {
     expect(cellText(table, 201, /^IP\*/)).toBe(fmtIp(s.ip)); // 172.1
     expect(cellText(table, 201, /^2026 ERA/)).toBe(fmtEra(2.45));
 
-    // 1~2시즌 그룹의 범위
+    // 1~2시즌 그룹의 범위 — 203은 41.3이닝이라 '예상 100이닝 이상'을 끄면 보인다
+    fireEvent.click(startersToggle());
+    await waitFor(() => expect(rowIds(getTable())).toEqual(PIT_ALL_IP));
+    table = getTable();
     expect(cellText(table, 203, /^사용 기록/)).toMatch(/2시즌\s*·\s*95\.2\s*이닝/);
     expect(cellText(table, 203, /^2027 ERA/)).toContain(fmtBand("era", 1.49));
     expect(cellText(table, 203, /^2027 K[−-]BB%/)).toContain(fmtBand("k_bb_pct", 5.9));
@@ -673,10 +684,24 @@ describe("투수 탭 (F13)", () => {
     expectSortedBy(getTable(), /^2027 K[−-]BB%/, (id) => pitSpec(id).kbb);
 
     fireEvent.click(prevToggle());
+    fireEvent.click(startersToggle());
     await waitFor(() => expect(rowIds(getTable())).toContain(205));
     expect(rowOf(getTable(), 205)).toHaveTextContent("현역 아님");
     expect(cellText(getTable(), 205, /^2026 ERA/)).toBe(DASH);
     expect(norm(rowOf(getTable(), 205).textContent)).not.toMatch(/null|undefined|NaN/);
+  });
+
+  it("투수 탭은 '예상 100이닝 이상'을 켠 채 시작하고(불펜이 위를 차지하지 않게), 끄면 전원 — 주소 해시에 남는다", async () => {
+    stubData({ [BAT_URL]: BAT, [PIT_URL]: PIT });
+    renderHome();
+    await findTable();
+    expect(screen.queryAllByRole("switch", { name: /100이닝/ })).toHaveLength(0); // 타자 탭에는 없다
+    fireEvent.click(roleTab("투수"));
+    await waitFor(() => expect(rowIds(getTable())).toEqual(PIT_DEFAULT), { timeout: 3000 });
+    expect(startersToggle()).toBeChecked();
+    fireEvent.click(startersToggle());
+    await waitFor(() => expect(rowIds(getTable())).toEqual(PIT_ALL_IP));
+    expect(window.location.hash).toMatch(/(^#|&)rp=1(&|$)/);
   });
 
   it("투수 표를 받지 못하면 투수 탭에 오류를 보이고, 타자 탭은 그대로다", async () => {
@@ -979,12 +1004,13 @@ describe("뒤로 가기 — 보기 상태를 주소 해시에 담는다 (DESIGN 
   });
 
   it("해시로 돌아오면 투수 탭·출전 필터·정렬을 되살린다", async () => {
-    arriveAt("/#role=pit&all=1&psort=kbb-desc");
+    arriveAt("/#role=pit&all=1&rp=1&psort=kbb-desc"); // rp=1: '예상 100이닝 이상' 끔
     const fetchMock = stubData({ [BAT_URL]: BAT, [PIT_URL]: PIT });
     renderHome();
     await waitFor(() => expect(rowIds(getTable())).toContain(205), { timeout: 3000 });
     expect(isSelected(roleTab("투수"))).toBe(true);
     expect(isOn(prevToggle())).toBe(false);
+    expect(isOn(startersToggle())).toBe(false);
     expect(headerOf(getTable(), /^2027 K[−-]BB%/).getAttribute("aria-sort")).toBe("descending");
     expectSortedBy(getTable(), /^2027 K[−-]BB%/, (id) => pitSpec(id).kbb);
     expect(callsTo(fetchMock, "/data/pitchers.json")).toBe(1);

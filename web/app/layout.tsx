@@ -25,7 +25,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body>
+      {/* 페이지 바탕은 테마 토큰으로 — 브라우저 기본 다크 캔버스에 기대지 않는다 (N10) */}
+      <body className="bg-body text-primary">
         <Providers>{children}</Providers>
       </body>
     </html>

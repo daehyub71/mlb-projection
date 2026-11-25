@@ -305,7 +305,8 @@ export function ProjectionsHome() {
                   tableAnchor={TABLE_ANCHOR}
                   counts={{
                     batters: bat.status === "ok" ? bat.data.rows.length : null,
-                    pitchers: pit.status === "ok" ? pit.data.rows.length : null,
+                    // 투수 표는 지연 로딩이라 수는 meta.counts에서 (SA-1)
+                    pitchers: bat.status === "ok" ? bat.data.meta.counts.pit : pit.status === "ok" ? pit.data.rows.length : null,
                     inputSeasons: bat.status === "ok" ? bat.data.meta.input_seasons : null,
                   }}
                 />

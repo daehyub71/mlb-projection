@@ -14,7 +14,7 @@ import { fmtCount } from "@/src/format";
 export interface HeroCounts {
   /** 예측 대상 타자 수 — 받은 타자 표의 행 수 */
   batters: number | null;
-  /** 투수 수 — 투수 표는 처음 투수 탭을 누를 때 받으므로 그 전에는 null (칩을 숨긴다) */
+  /** 투수 수 — meta.counts.pit (투수 표를 받기 전에도 보인다). 모르면 null (칩을 숨긴다) */
   pitchers: number | null;
   /** 입력 시즌 (meta.input_seasons) */
   inputSeasons: readonly number[] | null;

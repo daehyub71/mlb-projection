@@ -26,6 +26,7 @@ export interface Meta {
   input_seasons: number[];
   sources: Source[];
   disclaimer: string;
+  counts: { bat: number; pit: number }; // 예측 대상 수 (첫 화면 칩)
 }
 
 export interface PlayerSummary {
@@ -271,6 +272,7 @@ export const SCHEMA_KEYS = {
     input_seasons: true,
     sources: true,
     disclaimer: true,
+    counts: true,
   } satisfies Keys<Meta>,
   PlayerSummary: {
     player_id: true,

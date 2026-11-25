@@ -6,5 +6,6 @@
 @import "tailwindcss/preflight.css" layer(base);
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
+@import "@astryxdesign/charts/charts.css"; /* 차트 범례·표식 (SPEC D26) — 빠지면 범례 색이 안 나온다 */
 @import "@astryxdesign/core/tailwind-theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);

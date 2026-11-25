@@ -32,3 +32,7 @@ export const CAREER_LABEL = { seasons_1_2: "1~2시즌", seasons_3_5: "3~5시즌"
 export function careerGroup(nSeasons: number): "seasons_1_2" | "seasons_3_5" {
   return nSeasons <= 2 ? "seasons_1_2" : "seasons_3_5";
 }
+
+/** 2026 최종 검증을 다시 돌린 이유 — 사람이 읽는 설명 (DESIGN SA-4 합의 문구, SPEC D31·E25). 기록 파일의 사유는 아래에 그대로 둔다 */
+export const RERUN_STORY =
+  "첫 시험 뒤 2027 예측표를 만들다가 결함을 찾았습니다. 표본이 아주 적은 타자의 Statcast 기록을 그대로 써서, 1타석 선수가 OPS .963으로 예측되던 문제입니다. 표본이 적을수록 리그 평균 쪽으로 당기도록 고친 뒤 2026 시험을 한 번 더 돌렸습니다. 결함은 2026 결과가 아니라 2027 예측표에서 드러났고, 설정(가중치·채택 지표)은 바꾸지 않았습니다.";

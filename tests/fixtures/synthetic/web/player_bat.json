@@ -23,7 +23,11 @@
     "url": "https://baseballsavant.mlb.com"
    }
   ],
-  "disclaimer": "재미로 보는 예측입니다."
+  "disclaimer": "재미로 보는 예측입니다.",
+  "counts": {
+   "bat": 1144,
+   "pit": 1490
+  }
  },
  "player": {
   "player_id": 1,

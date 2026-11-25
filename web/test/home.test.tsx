@@ -147,23 +147,21 @@ describe("첫 화면 히어로 (SA-1, DS5)", () => {
     expect(screen.getAllByText(textMatching(/최근 5시즌 기록으로 계산한/)).length).toBeGreaterThan(0);
   }, 20000);
 
-  it("대상 수 칩은 불러온 표의 행 수 — 타자 1,144명, 입력 2021~2025; 투수는 투수 표를 받은 뒤 1,490명", async () => {
+  it("대상 수 칩 — 타자 1,144명·투수 1,490명(meta.counts, 첫 화면부터), 입력 2021~2025", async () => {
+    const fetchMock = stubData({ [BAT_URL]: BATTERS, [PIT_URL]: PITCHERS });
     renderHome();
     await findTable();
+    expect(BATTERS.meta.counts).toEqual({ bat: 1144, pit: 1490 });
     expect(
-      screen.getAllByText(textMatching(new RegExp(`타자\\s*${fmtCount(BATTERS.rows.length)}\\s*명`))).length,
+      screen.getAllByText(textMatching(new RegExp(`타자\\s*${fmtCount(BATTERS.meta.counts.bat)}\\s*명`))).length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText(textMatching(/입력\s*2021\s*~\s*2025/)).length).toBeGreaterThan(0);
-
-    // 투수 표는 처음 투수 탭을 누를 때 받는다 (projections.test.tsx) — 받은 뒤 투수 칩이 실제 수를 보인다
-    fireEvent.click(roleTab("투수"));
-    await waitFor(
-      () =>
-        expect(
-          screen.getAllByText(textMatching(new RegExp(`투수\\s*${fmtCount(PITCHERS.rows.length)}\\s*명`))).length,
-        ).toBeGreaterThan(0),
-      { timeout: 5000 },
-    );
+    // 투수 표는 처음 투수 탭을 누를 때 받지만(N6), 투수 칩은 meta.counts로 첫 화면부터 보인다 (SA-1)
+    expect(
+      screen.getAllByText(textMatching(new RegExp(`투수\\s*${fmtCount(BATTERS.meta.counts.pit)}\\s*명`))).length,
+    ).toBeGreaterThan(0);
+    const urls = fetchMock.mock.calls.map(([input]) => String(input));
+    expect(urls.some((u) => u.endsWith("/pitchers.json"))).toBe(false);
   }, 20000);
 
   it("단추: '예측표 보기'는 표로 가는 앵커, '얼마나 맞았나'는 /validation/", async () => {

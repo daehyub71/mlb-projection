@@ -28,7 +28,8 @@
   (스키마 ValidationReport.final_test 모양), 없으면 None.
 - meta: schema_version = `WEB_SCHEMA_VERSION`, raw_collected_at = `raw_collected_at(raw_dir)`,
   generated_at = raw_collected_at(같은 원본이면 같은 바이트 — N1), params_version·params_sha256,
-  target_season = Y, input_seasons = [Y−5 … Y−1], sources = `WEB_SOURCES`({name, url}), disclaimer = `WEB_DISCLAIMER`.
+  target_season = Y, input_seasons = [Y−5 … Y−1], sources = `WEB_SOURCES`({name, url}), disclaimer = `WEB_DISCLAIMER`,
+  counts = 역할 → 예측 표 행 수(예측 대상 수).
 
 원본 수집 시각 (`raw_collected_at`): 원본 매니페스트(`collect.raw.load_manifest`) 항목의 받은 시각 중
 가장 늦은 값, UTC "YYYY-MM-DDTHH:MM:SSZ". 매니페스트가 비었으면 ValueError.
@@ -639,6 +640,8 @@ def build_export_input(
         "input_seasons": list(range(target - WINDOW, target)),
         "sources": [{"name": name, "url": url} for name, url in WEB_SOURCES],
         "disclaimer": WEB_DISCLAIMER,
+        # 예측 대상 수 — 첫 화면 칩이 투수 표를 받기 전에도 쓴다 (SA-1, N6 지연 로딩)
+        "counts": {role: len(projections[role]) for role in ROLES},
     }
     return ExportInput(
         tables=tables,

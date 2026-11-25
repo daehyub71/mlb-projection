@@ -189,6 +189,7 @@ META: dict[str, Any] = {
     "input_seasons": [2022, 2023, 2024, 2025, 2026],
     "sources": [{"name": name, "url": url} for name, url in c.WEB_SOURCES],
     "disclaimer": c.WEB_DISCLAIMER,
+    "counts": {"bat": 2, "pit": 2},
 }
 
 # 행 순서는 일부러 섞었다 (출력은 player_id·season 오름차순이어야 한다)

@@ -1150,6 +1150,7 @@ EXPECTED_META = {
         {"name": "Baseball Savant", "url": "https://baseballsavant.mlb.com"},
     ],
     "disclaimer": c.WEB_DISCLAIMER,
+    "counts": {"bat": 2, "pit": 2},  # _projections_2027()의 행 수
 }
 
 

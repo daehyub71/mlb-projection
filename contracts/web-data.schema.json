@@ -16,7 +16,8 @@
         "target_season",
         "input_seasons",
         "sources",
-        "disclaimer"
+        "disclaimer",
+        "counts"
       ],
       "properties": {
         "schema_version": {
@@ -73,6 +74,25 @@
         "disclaimer": {
           "type": "string",
           "minLength": 1
+        },
+        "counts": {
+          "description": "number of projected players per role (hero chips before the pitcher table loads)",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bat",
+            "pit"
+          ],
+          "properties": {
+            "bat": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "pit": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
         }
       }
     },

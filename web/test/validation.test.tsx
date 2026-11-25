@@ -561,3 +561,11 @@ describe("검증 화면 — 2026 최종 검증 전 (final_test null, 합성 샘�
     expect(rowsWith(bands, ["OPS", fmtBand("ops", 0.097)])).toHaveLength(1);
   });
 });
+
+describe("다시 돌린 이유 상자 — 사람이 읽는 설명 + 기록된 사유 (메인 통합)", () => {
+  it("설명 문구가 앞에, 기록 파일의 사유는 '기록된 사유:'로 그대로 남는다", async () => {
+    const { RERUN_STORY } = await import("@/src/site");
+    expect(RERUN_STORY).toContain("1타석 선수가 OPS .963");
+    expect(RERUN_STORY).not.toMatch(/SPEC|D31|E25/);
+  });
+});

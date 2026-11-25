@@ -34,7 +34,7 @@ import type {
 } from "@/src/data/types";
 import { useJson } from "@/src/data/useJson";
 import { DASH, fmtBand, fmtCount, fmtMae } from "@/src/format";
-import { CAREER_LABEL } from "@/src/site";
+import { CAREER_LABEL, RERUN_STORY } from "@/src/site";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
 
@@ -322,9 +322,11 @@ function FinalTestSection({ report, holdout }: { report: ValidationReport; holdo
         <Card variant="muted">
           <VStack gap={2}>
             <Heading level={3}>{`${season} 시험을 ${countWord(reruns + 1)} 번 돌린 이유`}</Heading>
+            {/* 사람이 읽는 설명(SA-4 합의 문구) 뒤에 기록 파일의 사유를 그대로 둔다 — 숨기지 않는다 */}
+            {reruns === 1 && firstRun !== null && <Text as="p">{RERUN_STORY}</Text>}
             {ft.reruns.map((r) => (
-              <Text key={r.ran_at} as="p" color="secondary">
-                {r.reason}
+              <Text key={r.ran_at} as="p" type="supporting" color="secondary">
+                {`기록된 사유: ${r.reason}`}
               </Text>
             ))}
             {firstRun !== null && (
@@ -407,6 +409,7 @@ function BandSection({ bands }: { bands: BandRow[] }) {
         data={data}
         columns={BAND_COLUMNS}
         idKey="id"
+        aria-labelledby="bands"
         emptyState={<EmptyState title="± 범위 자료가 없습니다" isCompact />}
       />
     </VStack>
@@ -512,6 +515,7 @@ function DetailSection({ rows }: { rows: EvalRow[] }) {
         data={data}
         columns={DETAIL_COLUMNS}
         idKey="id"
+        aria-labelledby="detail"
         emptyState={<EmptyState title="이 조합의 검증 결과가 없습니다" isCompact />}
       />
       <Text as="p" type="supporting" color="secondary">
